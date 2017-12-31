@@ -26,4 +26,3 @@ classic <- read.csv(url('https://osf.io/upw49/download'))
 online <- read.csv(url('https://osf.io/wjcgk/download'))
 
 # no-cursor reach data is not uploaded yet (not sure about the format)
-
