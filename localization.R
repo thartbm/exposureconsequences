@@ -175,7 +175,9 @@ aspligned <- function(df) {
     al.idx <- which(df$participant == pp.no & df$rotated_b == 0)
     X <- df$handangle_deg[al.idx]
     Y <- df$taperror_deg[al.idx]
-    AL.spl <- smooth.spline(x=X,y=Y,spar=0.99, keep.data=FALSE)
+    # spar determines smoothness:
+    # if set too smooth, some effects disappear
+    AL.spl <- smooth.spline(x=X,y=Y,spar=0.90, keep.data=FALSE)
     
     # subtract predicted errors from both aligned and rotated data, using the fitted spline
     pp.idx <- which(df$participant == pp.no)
@@ -208,7 +210,9 @@ getLocalizationPoints <- function(subdf, points=c(15,25,35,45,55,65,75), removeO
       sampleX <- X[idx.idx]
       sampleY <- Y[idx.idx]
       
-      spl <- smooth.spline(X[-idx.idx],Y[-idx.idx], spar=.99, keep.data=FALSE) # spar=.95
+      # spar determines smoothness:
+      # if set too smooth, some effects disappear
+      spl <- smooth.spline(X[-idx.idx],Y[-idx.idx], spar=.90, keep.data=FALSE) # spar=.95
       
       sampleP <- predict(spl, x=sampleX)
       deviations <- c(deviations, sampleP$y - sampleY)
