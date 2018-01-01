@@ -21,3 +21,15 @@ installRequire.Packages <- function(packages) {
 # localization data can be downloaded from OSF:
 groupURLs <- c('exposure'='https://osf.io/47fwu/download', 'classic'='https://osf.io/89t7j/download')
 
+# 
+getReachAftereffects <- function(group) {
+  
+  df <- read.csv(url(groupURLs[group]),stringsAsFactors=FALSE)
+  
+  df <- aggregate(endpoint_angle ~ participant + rotated + target, data=exposure, FUN=median)
+  
+  RAE <- aggregate(endpoint_angle ~ participant + target, data=df, FUN=diff)
+  
+  return(RAE)
+  
+}
