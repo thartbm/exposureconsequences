@@ -26,10 +26,11 @@ getReachAftereffects <- function(group) {
   
   df <- read.csv(url(groupURLs[group]),stringsAsFactors=FALSE)
   
-  df <- aggregate(endpoint_angle ~ participant + rotated + target, data=exposure, FUN=median)
+  df <- aggregate(endpoint_angle ~ participant + rotated + target, data=df, FUN=median)
   
   RAE <- aggregate(endpoint_angle ~ participant + target, data=df, FUN=diff)
   
   return(RAE)
   
 }
+
