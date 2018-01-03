@@ -53,6 +53,6 @@ plotReachAftereffects <- function() {
   axis(1,at=points)
   axis(2,at=c(0,5,10,15))
   
-  legend(10,15,c('exposure','classic'),col=c(rgb(1,0,0),rgb(0,0,1)),bty='n')
+  legend(10,15,c('exposure','classic'),col=c(rgb(1,0,0),rgb(0,0,1)),lty=c(1,1),bty='n')
   
 }
