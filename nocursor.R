@@ -16,8 +16,6 @@ getReachAftereffects <- function(group) {
   
   raw.df <- load.DownloadDataframe(url=groupURLs[group],filename=sprintf('%s_nocursor.csv',group))
   
-  # raw.df <- read.csv(url(groupURLs[group]),stringsAsFactors=FALSE)
-  
   avg.df <- aggregate(endpoint_angle ~ participant + rotated + target, data=raw.df, FUN=mean)
   
   RAE <- aggregate(endpoint_angle ~ participant + target, data=avg.df, FUN=diff)

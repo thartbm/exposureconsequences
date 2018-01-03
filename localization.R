@@ -119,7 +119,7 @@ localizationLMEsSatterthwaite <- function() {
 
 getANOVAlocalization <- function(group) {
   
-  df <- read.csv(groupURLs[group],stringsAsFactors=FALSE)
+  df <- load.DownloadDataframe(url=groupURLs[group],filename=sprintf('%s_localization.csv',group))
   
   df <- aspligned(df)
   
