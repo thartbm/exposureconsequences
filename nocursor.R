@@ -7,6 +7,9 @@ source('shared.R')
 # not yet sure if we'll use Chi-square, or Satterthwaite estimates of F/p-values:
 # installRequire.Packages(c('nlme', 'car', 'lme4', 'lmerTest'))
 
+required.packages = c('nlme','car')
+installRequire.Packages(required.packages)
+
 # localization data can be downloaded from OSF:
 groupURLs <- c('exposure'='https://osf.io/47fwu/download', 'classic'='https://osf.io/89t7j/download')
 
@@ -56,3 +59,20 @@ plotReachAftereffects <- function() {
   legend(10,15,c('exposure','classic'),col=c(rgb(1,0,0),rgb(0,0,1)),lty=c(1,1),bty='n')
   
 }
+
+getPeakConfidenceInterval <- function(RAE) {
+  
+  RAE <- xtabs(endpoint_angle~.,RAE)
+  
+  bootstrapGaussianPeak(data=RAE,boostraps=1000,mu=47.5,sigma=30,scale=10,offset=4)
+  
+}
+
+getGaussianPeak <- function() {
+  
+  gcoeffs <- nls(y~(1/(sigma*sqrt(2*pi)))*exp(-0.5*(((x-mu)/sigma))^2),data=list(x=c(15,25,35,45,55,65,75),y=colMeans(exposure_array)),start=list(mu=45,sigma=10)) 
+  
+  getGaussianFit()
+  
+}
+
