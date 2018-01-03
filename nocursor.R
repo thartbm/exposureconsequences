@@ -14,7 +14,9 @@ groupURLs <- c('exposure'='https://osf.io/47fwu/download', 'classic'='https://os
 # and calcuates the reach aftereffects from them
 getReachAftereffects <- function(group) {
   
-  raw.df <- read.csv(url(groupURLs[group]),stringsAsFactors=FALSE)
+  raw.df <- load.DownloadDataframe(url=groupURLs[group],filename=sprintf('%s_nocursor.csv',group))
+  
+  # raw.df <- read.csv(url(groupURLs[group]),stringsAsFactors=FALSE)
   
   avg.df <- aggregate(endpoint_angle ~ participant + rotated + target, data=raw.df, FUN=mean)
   

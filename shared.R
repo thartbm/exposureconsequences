@@ -16,6 +16,23 @@ installRequire.Packages <- function(packages) {
   
 }
 
+load.DownloadDataframe <- function(url,filename) {
+  
+  if (file.exists(filename)) {
+    
+    df <- read.csv(filename, stringsAsFactors=FALSE)
+    
+  } else {
+    
+    df <- read.csv(url(url),stringsAsFactors=FALSE)
+    
+    write.csv(df,filename,row.names=FALSE,quote=FALSE)
+    
+  }
+  
+  return(df)
+  
+}
 
 t.interval = function(data, variance = var(data, na.rm=TRUE), conf.level = 0.95) {
   
