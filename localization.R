@@ -1,32 +1,20 @@
+
+source('shared.R')
+
 # first make sure we have all necessary packages installed and loaded:
-
-installRequire.Packages <- function(packages) {
-  
-  installed.list <- rownames(installed.packages())
-  
-  for (pkg in packages) {
-    
-    if (!pkg %in% installed.list) {
-      install.packages(pkg,dep=TRUE)
-    }
-    
-    require(pkg, character.only=TRUE)
-    
-  }
-  
-}
-
 # not yet sure if we'll use Chi-square, or Satterthwaite estimates of F/p-values:
 installRequire.Packages(c('nlme', 'car', 'lme4', 'lmerTest'))
 
 # localization data can be downloaded from OSF:
-
 groupURLs <- c('exposure'='https://osf.io/9qfhp/download', 'classic'='https://osf.io/upw49/download', 'online'='https://osf.io/wjcgk/download')
 
 # no-cursor reach data is not uploaded yet (not sure about the format)
 
 localizationLMEsChiSq <- function() {
   
+  default.contrasts <- options('contrasts')
+  options(contrasts=c('contr.sum','contr.poly'))
+
   exposure <- getANOVAlocalization('exposure')
   classic <- getANOVAlocalization('classic')
   
@@ -76,10 +64,14 @@ localizationLMEsChiSq <- function() {
   classic_hand_model <- lme(taperror_deg ~ handangle_deg + passive_b, data=classic, random = ~1|participant, na.action=na.exclude)
   print(Anova(classic_hand_model, type=3))
   
-
+  options('contrasts' <- default.contrasts)
+  
 }
 
 localizationLMEsSatterthwaite <- function() {
+  
+  default.contrasts <- options('contrasts')
+  options(contrasts=c('contr.sum','contr.poly'))
   
   exposure <- getANOVAlocalization('exposure')
   classic <- getANOVAlocalization('classic')
@@ -120,6 +112,8 @@ localizationLMEsSatterthwaite <- function() {
   print(anova(exposure_hand_model_lmer,ddf='Satterthwaite',type=3))
   classic_hand_model_lmer <- lmer(taperror_deg ~ handangle_deg + passive_b - (1|participant), data=classic, na.action=na.exclude)
   print(anova(classic_hand_model_lmer,ddf='Satterthwaite',type=3))
+  
+  options('contrasts' <- default.contrasts)
   
 }
 

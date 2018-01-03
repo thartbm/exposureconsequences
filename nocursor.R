@@ -1,19 +1,5 @@
 # first make sure we have all necessary packages installed and loaded:
-installRequire.Packages <- function(packages) {
-  
-  installed.list <- rownames(installed.packages())
-  
-  for (pkg in packages) {
-    
-    if (!pkg %in% installed.list) {
-      install.packages(pkg,dep=TRUE)
-    }
-    
-    require(pkg, character.only=TRUE)
-    
-  }
-  
-}
+# installRequire.Packages(c())
 
 # not yet sure if we'll use Chi-square, or Satterthwaite estimates of F/p-values:
 # installRequire.Packages(c('nlme', 'car', 'lme4', 'lmerTest'))
@@ -21,16 +7,26 @@ installRequire.Packages <- function(packages) {
 # localization data can be downloaded from OSF:
 groupURLs <- c('exposure'='https://osf.io/47fwu/download', 'classic'='https://osf.io/89t7j/download')
 
-# 
+# for every group, this loads the no-cursor reach directions in all relevant tasks,
+# and calcuates the reach aftereffects from them
 getReachAftereffects <- function(group) {
   
-  df <- read.csv(url(groupURLs[group]),stringsAsFactors=FALSE)
+  raw.df <- read.csv(url(groupURLs[group]),stringsAsFactors=FALSE)
   
-  df <- aggregate(endpoint_angle ~ participant + rotated + target, data=df, FUN=median)
+  avg.df <- aggregate(endpoint_angle ~ participant + rotated + target, data=raw.df, FUN=mean)
   
-  RAE <- aggregate(endpoint_angle ~ participant + target, data=df, FUN=diff)
+  RAE <- aggregate(endpoint_angle ~ participant + target, data=avg.df, FUN=diff)
   
   return(RAE)
   
 }
 
+# plot both groups reach aftereffects in one figure
+plotReachAftereffects <- function() {
+  
+  exposure <- getReachAftereffects('exposure')
+  classic  <- getReachAftereffects('classic')
+  
+  
+  
+}
