@@ -62,23 +62,52 @@ BS.interval = function(data, conf.level = .95, bootstraps = 1000) {
 bootstrapGaussianPeak <- function(data,bootstraps=1000,mu=47.5,sigma=30,scale=10,offset=4) {
   
   # parallel for-loop?
-  # kernels <- max(1, ceil((total kernels / 2) - 1)) # very friendly for the rest of the system
+  installRequire.Packages(c('foreach','doParallel'))
   
-  mus <- c()
+  cores=detectCores()
+  # very friendly for the rest of the system
+  usecores <- max(1, ceiling((cores[1] / 2) - 1))
+  cl <- makeCluster(usecores)
+  registerDoParallel(cl)
   
   x <- as.numeric(names(colMeans(data)))
   
-  for (iteration in c(1:bootstraps)) {
+  mus <- foreach (iteration=1:bootstraps, .combine=rbind, .export=c('getGaussianFit','GaussianErrors','parGaussian')) %dopar% {
     
     y <- colMeans(data[sample(row.names(data),size=nrow(data),replace=TRUE),])
     
-    mus <- c(mus,as.numeric(getGaussianFit(x,y,mu=47.5,sigma=30,scale=10,offset=4)$par['mu']))
+    as.numeric(getGaussianFit(x,y,mu=47.5,sigma=30,scale=10,offset=4)$par['mu'])
     
   }
   
-  return(quantile(mus,probs=c(.025,.50,.975)))
+  stopCluster(cl)
+  
+  return(quantile(mus,probs=c(.025,.05,.10,.50,.90,.95,.975)))
   
 }
+
+# read this vignette:
+# https://cran.r-project.org/web/packages/doParallel/vignettes/gettingstartedParallel.pdf
+# 
+# use this code from SO:
+# 
+# library(foreach)
+# library(doParallel)
+# 
+# #setup parallel backend to use many processors
+# cores=detectCores()
+# cl <- makeCluster(cores[1]-1) #not to overload your computer
+# registerDoParallel(cl)
+# 
+# finalMatrix <- foreach(i=1:150000, .combine=cbind) %dopar% {
+#   tempMatrix = functionThatDoesSomething() #calling a function
+#   #do other things if you want
+#   
+#   tempMatrix #Equivalent to finalMatrix = cbind(finalMatrix, tempMatrix)
+# }
+# #stop cluster
+# stopCluster(cl)
+
 
 getGaussianFit <- function(x,y,mu=47.5,sigma=30,scale=10,offset=4) {
   

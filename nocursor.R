@@ -64,7 +64,7 @@ getPeakConfidenceInterval <- function(RAE) {
   
   RAE <- xtabs(endpoint_angle~.,RAE)
   
-  bootstrapGaussianPeak(data=RAE,boostraps=1000,mu=47.5,sigma=30,scale=10,offset=4)
+  bootstrapGaussianPeak(data=RAE,bootstraps=1000,mu=47.5,sigma=30,scale=10,offset=4)
   
 }
 
