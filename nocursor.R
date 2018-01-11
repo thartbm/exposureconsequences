@@ -120,7 +120,8 @@ plotReachAftereffects <- function(validate=FALSE) {
   legend(10,15,c('exposure','classic'),col=c(rgb(1,0,0),rgb(0,0,1)),lty=c(1,1),bty='n')
   
 }
-# comment
+
+
 getPeakConfidenceInterval <- function(group,validate=FALSE,part='initial') {
   
   RAE <- getReachAftereffects(group, part=part)
