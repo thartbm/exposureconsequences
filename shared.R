@@ -1,10 +1,10 @@
 # some functions shared by the analyses of the two types of data
 
 # localization data can be downloaded from OSF:
-localizationURLs <- c('exposure'='https://osf.io/9s6au/?action=download', 'classic'='https://osf.io/8hm7f/?action=download')
+nocursorURLs <- c('exposure'='https://osf.io/9s6au/?action=download', 'classic'='https://osf.io/8hm7f/?action=download')
 
 # no-cursor data can be downloaded from OSF:
-nocursorURLs <- c('exposure'='https://osf.io/9qfhp/?action=download', 'classic'='https://osf.io/upw49/?action=download', 'online'='https://osf.io/wjcgk/download')
+localizationURLs <- c('exposure'='https://osf.io/9qfhp/?action=download', 'classic'='https://osf.io/upw49/?action=download', 'online'='https://osf.io/wjcgk/download')
 
 
 
@@ -146,7 +146,7 @@ parGaussian <- function(par,x) {
 
 getANOVAlocalization <- function(group) {
   
-  df <- load.DownloadDataframe(url=localizationURLs[group],filename=sprintf('%s_localization.csv',group))
+  df <- load.DownloadDataframe(url=localizationURLs[group],filename=sprintf('localization_%s.csv',group))
   
   df <- aspligned(df)
   
@@ -193,15 +193,16 @@ aspligned <- function(df) {
   for (pp.no in c(1:length(participants))) {
     
     # fit aligned data with a smooth spline:
-    al.idx <- which(df$participant == pp.no & df$rotated_b == 0)
+    al.idx <- which(df$participant == participants[pp.no] & df$rotated == 0)
     X <- df$handangle_deg[al.idx]
     Y <- df$taperror_deg[al.idx]
     # spar determines smoothness:
     # if set too smooth, some effects disappear
+    # print(length(X))
     AL.spl <- smooth.spline(x=X,y=Y,spar=0.90, keep.data=FALSE)
     
     # subtract predicted errors from both aligned and rotated data, using the fitted spline
-    pp.idx <- which(df$participant == pp.no)
+    pp.idx <- which(df$participant == participants[pp.no])
     predicted_errors <- predict(AL.spl, x=df$handangle_deg[pp.idx])
     df$taperror_deg[pp.idx] <- df$taperror_deg[pp.idx] - predicted_errors$y
     
