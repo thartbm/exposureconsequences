@@ -10,63 +10,8 @@ source('shared.R')
 required.packages = c('nlme','car')
 installRequire.Packages(required.packages)
 
-# localization data can be downloaded from OSF:
-groupURLs <- c('exposure'='https://osf.io/9s6au/?action=download', 'classic'='https://osf.io/8hm7f/?action=download')
-
-# for every group, this loads the no-cursor reach directions in all relevant tasks,
-# and calcuates the reach aftereffects from them
-getReachAftereffects <- function(group, part='all', clean=TRUE) {
-  
-  raw.df <- load.DownloadDataframe(url=groupURLs[group],filename=sprintf('nocursor_%s.csv',group))
-  
-  if (clean) {
-    clean.df <- removeOutliers(raw.df) 
-  }
-  
-  if (part == 'initial') {
-    raw.df <- rbind(raw.df[which(raw.df$rotated == 0),], raw.df[which(raw.df$rotated == 1 & raw.df$repetition == 0),])
-  }
-  if (part == 'remainder') {
-    raw.df <- rbind(raw.df[which(raw.df$rotated == 0),], raw.df[which(raw.df$rotated == 1 & raw.df$repetition > 0),])
-  }
-  
-  avg.df <- aggregate(endpoint_angle ~ participant + rotated + target, data=raw.df, FUN=mean)
-  
-  RAE <- aggregate(endpoint_angle ~ participant + target, data=avg.df, FUN=diff)
-  
-  return(RAE)
-  
-}
-
-
-removeOutliers <- function(df) {
-  
-  OKidx <- c()
-  targets <- unique(df$target)
-  
-  for (rotated in c(0,1)) {
-    
-    for (target in targets) {
-      
-      subidx <- which(df$target == target & df$rotated == rotated)
-      angles <- df$endpoint_angle[subidx]
-      OKidx <- c(OKidx, which(abs(angles - mean(angles)) < (2 * sd(angles))))
-      
-    }
-    
-  }
-  
-  Nobs <- nrow(df)
-  Nkept <- length(OKidx)
-  cat(sprintf('removed %d outliers, kept %0.1f%%\n', Nobs-Nkept, (100 * (Nkept/Nobs))))
-  
-  df <- df[OKidx,]
-  
-  df <- aggregate(endpoint_angle ~ participant + rotated + repetition + target, data=df, FUN=mean)
-  
-  return(df)
-  
-}
+# nocursor data can be downloaded from OSF:
+# groupURLs <- c('exposure'='https://osf.io/9s6au/?action=download', 'classic'='https://osf.io/8hm7f/?action=download')
 
 
 # plot both groups reach aftereffects in one figure
@@ -142,7 +87,7 @@ validateReachAftereffects <- function(group, method='45') {
   
   # method can be: '45', 'all_aov', 'all_ttest', 'all_any5deg'
   
-  raw.df <- load.DownloadDataframe(url=groupURLs[group],filename=sprintf('%s_nocursor.csv',group))
+  raw.df <- load.DownloadDataframe(url=nocursorURLs[group],filename=sprintf('%s_nocursor.csv',group))
   participant <- unique(raw.df$participant)
   
   if (method == '45') {

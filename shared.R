@@ -1,5 +1,13 @@
 # some functions shared by the analyses of the two types of data
 
+# localization data can be downloaded from OSF:
+localizationURLs <- c('exposure'='https://osf.io/9s6au/?action=download', 'classic'='https://osf.io/8hm7f/?action=download')
+
+# no-cursor data can be downloaded from OSF:
+nocursorURLs <- c('exposure'='https://osf.io/9qfhp/?action=download', 'classic'='https://osf.io/upw49/?action=download', 'online'='https://osf.io/wjcgk/download')
+
+
+
 installRequire.Packages <- function(packages) {
   
   installed.list <- rownames(installed.packages())
@@ -132,3 +140,198 @@ parGaussian <- function(par,x) {
   return(y)
   
 }
+
+
+# handling localization data -----
+
+getANOVAlocalization <- function(group) {
+  
+  df <- load.DownloadDataframe(url=localizationURLs[group],filename=sprintf('%s_localization.csv',group))
+  
+  df <- aspligned(df)
+  
+  groupdf <- NA
+  
+  participants <- unique(df$participant)
+  
+  for (pp.no in c(1:length(participants))) {
+    
+    pp.id <- participants[pp.no]
+    
+    for (rotated in c(0,1)) {
+      
+      for (passive in c(0,1)) {
+        
+        subdf <- df[which(df$participant == pp.id & df$rotated_b == rotated & df$passive_b == passive),]
+        
+        locdf <- getLocalizationPoints(subdf, points=c(15,25,35,45,55,65,75), removeOutliers=TRUE)
+        
+        if (any(is.na(locdf$taperror_deg))) {
+          cat(sprintf('WARNING: NAs in %s, pp:%d, %s/%s\n',group,pp.id,c('aligned','rotated')[rotated+1],c('active','passive')[passive+1]))
+        }
+        
+        if (is.data.frame(groupdf)) {
+          groupdf <- rbind(groupdf, locdf)
+        } else {
+          groupdf <- locdf
+        }
+        
+      }
+      
+    }
+    
+  }
+  
+  return(groupdf)
+  
+}
+
+aspligned <- function(df) {
+  
+  participants <- unique(df$participant)
+  
+  for (pp.no in c(1:length(participants))) {
+    
+    # fit aligned data with a smooth spline:
+    al.idx <- which(df$participant == pp.no & df$rotated_b == 0)
+    X <- df$handangle_deg[al.idx]
+    Y <- df$taperror_deg[al.idx]
+    # spar determines smoothness:
+    # if set too smooth, some effects disappear
+    AL.spl <- smooth.spline(x=X,y=Y,spar=0.90, keep.data=FALSE)
+    
+    # subtract predicted errors from both aligned and rotated data, using the fitted spline
+    pp.idx <- which(df$participant == pp.no)
+    predicted_errors <- predict(AL.spl, x=df$handangle_deg[pp.idx])
+    df$taperror_deg[pp.idx] <- df$taperror_deg[pp.idx] - predicted_errors$y
+    
+  }
+  
+  return(df)
+  
+}
+
+getLocalizationPoints <- function(subdf, points=c(15,25,35,45,55,65,75), removeOutliers=FALSE) {
+  
+  X <- subdf$handangle_deg
+  Y <- subdf$taperror_deg
+  
+  # remove data points out of range:
+  idx <- which(X > 0 & X < 90)
+  X <- X[idx]
+  Y <- Y[idx]
+  
+  # see if samples are reasonably close to what a smoothed spline on the rest of the data would predict:
+  if (removeOutliers) {
+    
+    deviations <- c()
+    
+    for (idx.idx in c(1:length(X))) {
+      
+      sampleX <- X[idx.idx]
+      sampleY <- Y[idx.idx]
+      
+      # spar determines smoothness:
+      # if set too smooth, some effects disappear
+      spl <- smooth.spline(X[-idx.idx],Y[-idx.idx], spar=.90, keep.data=FALSE) # spar=.95
+      
+      sampleP <- predict(spl, x=sampleX)
+      deviations <- c(deviations, sampleP$y - sampleY)
+      
+    }
+    
+    idx <- which(abs(deviations - mean(deviations)) < (3 * sd(deviations)))
+    
+    X <- X[idx]
+    Y <- Y[idx]
+    
+  }
+  
+  # cubic spline object, based on the data:
+  spl <- smooth.spline(X, Y, spar=0.65, keep.data=FALSE) # spar=0.65
+  
+  # predict (interpolate) at given coordinates:
+  spl.pr <- predict(spl,points)
+  # spl.pr$y now has the estimated values of Y (the localization error) at the points of interest
+  
+  group <- rep(subdf$group[1],length(points))
+  online_b <- rep(subdf$online_b[1],length(points))
+  participant <- rep(subdf$participant[1],length(points))
+  rotated_b <- rep(subdf$rotated_b[1],length(points))
+  passive_b <- rep(subdf$passive_b[1],length(points))
+  handangle_deg <- points
+  taperror_deg <- round(spl.pr$y, digits=5)
+  
+  # since splines do well at interpolating, but not extrapolating
+  # everything outside of the range of the data should be set to NAs:
+  Xrange <- range(X)
+  taperror_deg[which(points < Xrange[1])] <- NA
+  taperror_deg[which(points > Xrange[2])] <- NA
+  
+  return(data.frame(group, online_b, participant, rotated_b, passive_b, handangle_deg, taperror_deg))
+  
+}
+
+# handle no-cursor data ------
+
+# for every group, this loads the no-cursor reach directions in all relevant tasks,
+# and calcuates the reach aftereffects from them
+getReachAftereffects <- function(group, part='all', clean=TRUE) {
+  
+  raw.df <- load.DownloadDataframe(url=nocursorURLs[group],filename=sprintf('nocursor_%s.csv',group))
+  
+  if (clean) {
+    clean.df <- removeOutliers(raw.df) 
+  }
+  
+  if (part == 'initial') {
+    raw.df <- rbind(raw.df[which(raw.df$rotated == 0),], raw.df[which(raw.df$rotated == 1 & raw.df$repetition == 0),])
+  }
+  if (part == 'remainder') {
+    raw.df <- rbind(raw.df[which(raw.df$rotated == 0),], raw.df[which(raw.df$rotated == 1 & raw.df$repetition > 0),])
+  }
+  
+  avg.df <- aggregate(endpoint_angle ~ participant + rotated + target, data=raw.df, FUN=mean)
+  
+  RAE <- aggregate(endpoint_angle ~ participant + target, data=avg.df, FUN=diff)
+  
+  return(RAE)
+  
+}
+
+
+
+removeOutliers <- function(df, stds=2) {
+  
+  OKidx <- c()
+  targets <- unique(df$target)
+  participants <- unique(df$participant)
+  
+  for (participant in participants) {
+    
+    for (rotated in c(0,1)) {
+      
+      for (target in targets) {
+        
+        subidx <- which(df$participant == participant & df$target == target & df$rotated == rotated)
+        angles <- df$endpoint_angle[subidx]
+        OKidx <- c(OKidx, which(abs(angles - mean(angles)) < (stds * sd(angles))))
+        
+      }
+      
+    }
+    
+  }
+  
+  Nobs <- nrow(df)
+  Nkept <- length(OKidx)
+  cat(sprintf('removed %d outliers, kept %0.1f%%\n', Nobs-Nkept, (100 * (Nkept/Nobs))))
+  
+  df <- df[OKidx,]
+  
+  df <- aggregate(endpoint_angle ~ participant + rotated + repetition + target, data=df, FUN=mean)
+  
+  return(df)
+  
+}
+
