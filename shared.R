@@ -167,7 +167,7 @@ getANOVAlocalization <- function(group) {
         locdf <- getLocalizationPoints(subdf, points=c(15,25,35,45,55,65,75), removeOutliers=TRUE)
         
         if (any(is.na(locdf$taperror_deg))) {
-          cat(sprintf('WARNING: NAs in %s, pp:%d, %s/%s\n',group,pp.id,c('aligned','rotated')[rotated+1],c('active','passive')[passive+1]))
+          cat(sprintf('WARNING: NAs in %s, pp:%s, %s/%s\n',group,pp.id,c('aligned','rotated')[rotated+1],c('active','passive')[passive+1]))
         }
         
         if (is.data.frame(groupdf)) {
@@ -269,7 +269,10 @@ getLocalizationPoints <- function(subdf, points=c(15,25,35,45,55,65,75), removeO
   taperror_deg[which(points < Xrange[1])] <- NA
   taperror_deg[which(points > Xrange[2])] <- NA
   
-  return(data.frame(group, online_b, participant, rotated_b, passive_b, handangle_deg, taperror_deg))
+  locpointdata <- data.frame(group, online_b, participant, rotated_b, passive_b, handangle_deg, taperror_deg)
+  locpointdata$participant <- as.character(locpointdata$participant)
+  
+  return(locpointdata)
   
 }
 
