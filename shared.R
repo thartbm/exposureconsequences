@@ -7,7 +7,6 @@ nocursorURLs <- c('exposure'='https://osf.io/9s6au/?action=download', 'classic'=
 localizationURLs <- c('exposure'='https://osf.io/pqsdc/?action=download', 'classic'='https://osf.io/upw49/?action=download', 'online'='https://osf.io/wjcgk/download')
 
 
-
 installRequire.Packages <- function(packages) {
   
   installed.list <- rownames(installed.packages())
