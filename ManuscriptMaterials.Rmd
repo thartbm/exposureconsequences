@@ -1,0 +1,69 @@
+---
+title: "Exposure Consequences - Statistics and Figures"
+output:
+  pdf_document: default
+  html_notebook: default
+---
+
+# Overview
+
+Here I collect the 'right' statistics and figures for the exposure consequences project.
+
+As I think of it right now, we will have these
+
+Figures:
+
+1. Setup & Task
+2. Reach Aftereffects
+3. Localization
+4. Correlation 
+
+Maybe not the 4th one.
+
+There will also be a *Table* with tasks, and their order and number of trials in both the classic and exposure version of the task.
+
+Tables:
+
+1. Task order
+
+## Source scripts
+
+All the scripts doing the statistics and figures are in separate R files, but here we will only see / do the ones that we think should go to the manuscript.
+
+First we load those other scripts:
+
+```{r}
+source('shared.R') # functions used everywhere
+source('nocursor.R') # functions for no-cursor reach data
+source('localization.R') # functions for localization data
+source('relateLocalizationNoCursors.R') # functions that correlate the two kinds of data
+```
+
+## Topics
+
+In the manuscript we'll first show that there are motor changes after exposure training (with the no-cursor data) and then compare that with the classic. Second is the localization: a) localization shifts after exposure b) the shifts are the same/different from those after classic c) the effects are different across the workspace d) this pattern is indistinguishable / different from that after classic. A third topic might be if localization shifts can predict no-cursor changes. Here we'll also follow this order:
+
+1. Reach aftereffects
+2. Localization
+3. Correlations
+
+
+# Reach Aftereffects
+
+Here is a plot, probably Figure 2:
+
+```{r fig.width=10, fig.height=4}
+plotReachAftereffects()
+```
+
+Messages of the figure:
+
+- Panel A: there are substantial and persisting reach aftereffects
+- Panel B: that are somewhat lower than those in classic (but not that much? but only for some targets?)
+
+These claims require analyses.
+
+First, we show that no-cursor reaches change direction after exposure training:
+
+
+

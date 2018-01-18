@@ -104,16 +104,16 @@ plotReachAftereffects <- function() {
   
   plot(-1000,-1000, main='reach aftereffects', xlab='target angle [deg]', ylab='reach endpoint deviation [deg]', xlim=c(10,80), ylim=c(0,15), axes=F)
   
-  polygon(X,claY, border=NA,col=rgb(0.75, 0,    0,   .2))
+  polygon(X,claY, border=NA,col=rgb(1,    0,    0,   .2))
   polygon(X,expY, border=NA,col=rgb(0,    0,    .75, .2))
   
-  lines(points,classicAVG$endpoint_angle,col=rgb(.75,0,0))
+  lines(points,classicAVG$endpoint_angle,col=rgb(1.0,0,0))
   lines(points,exposureAVG$endpoint_angle,col=rgb(0,0,.75))
 
   axis(1,at=points)
   axis(2,at=c(0,5,10,15))
   
-  legend(10,15,c('exposure','classic'),col=c(rgb(0,0,.75),rgb(.75,0,0)),lty=c(1,1),bty='n')
+  legend(10,15,c('exposure','classic'),col=c(rgb(0,0,.75),rgb(1,0,0)),lty=c(1,1),bty='n')
   
 }
 
