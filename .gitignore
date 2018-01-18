@@ -1,0 +1,11 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+nocursor_exposure.csv
+nocursor_classic.csv
+localization_exposure.csv
+localization_classic.csv
+localization_online.csv
+Manuscript.nb.html
+Manuscript.pdf

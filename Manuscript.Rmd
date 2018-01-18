@@ -1,0 +1,34 @@
+---
+title: "Exposure Consequences - Statistics and Figures"
+output:
+  pdf_document: default
+  html_notebook: default
+---
+Here I collect the 'right' statistics and figures for the exposure consequences project.
+
+All the scripts doing the statistics and figures are in separate R files, but here we will only see / do the ones that we think should go to the manuscript.
+
+First we load those other scripts:
+
+```{r}
+source('shared.R')
+source('nocursor.R')
+source('localization.R')
+source('relateLocalizationNoCursors.R')
+```
+
+# Reach Aftereffects
+
+Here is a plot:
+
+```{r fig.width=10, fig.height=4}
+plotReachAftereffects()
+```
+
+Messages of the figure:
+
+Panel A: there are substantial and persisting reach aftereffects
+Panel B: that are somewhat lower than those in classic (but not that much? but only for some targets?)
+
+
+
