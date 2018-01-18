@@ -226,3 +226,22 @@ plotReachAftereffectDistributions <- function() {
   
   
 }
+
+assessNoCursorChange <- function() {
+  
+  nocursor_exposure <- getReachAftereffects('exposure',part='initial', difference=FALSE)
+  
+  default.contrasts <- options('contrasts')
+  options(contrasts=c('contr.sum','contr.poly'))
+  
+  cat('\nLME with session and target as fixed effects, and participant as random effect:\n\n')
+  exp_nocursor_omnibus_model <- lme(endpoint_angle ~ rotated * target, data=nocursor_exposure, random = ~1|participant, na.action=na.exclude)
+  print(Anova(exp_nocursor_omnibus_model, type=3))
+  
+  cat('\nLME with session as fixed effect, and participant and target as random effects:\n\n')
+  exp_nocursor_omnibus_model <- lme(endpoint_angle ~ rotated, data=nocursor_exposure, random = ~1|participant/target, na.action=na.exclude)
+  print(Anova(exp_nocursor_omnibus_model, type=3))
+  
+  options('contrasts' <- default.contrasts)
+  
+}
