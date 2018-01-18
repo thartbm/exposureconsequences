@@ -279,14 +279,17 @@ getLocalizationPoints <- function(subdf, points=c(15,25,35,45,55,65,75), removeO
 
 # for every group, this loads the no-cursor reach directions in all relevant tasks,
 # and calcuates the reach aftereffects from them
-getReachAftereffects <- function(group, part='all', clean=TRUE) {
+getReachAftereffects <- function(group, part='all', clean=TRUE, difference=TRUE) {
   
+  # load pre-processed data for the required group (no default)
   raw.df <- load.DownloadDataframe(url=nocursorURLs[group],filename=sprintf('nocursor_%s.csv',group))
   
+  # remove outliers if requested (default: yes)
   if (clean) {
     clean.df <- removeOutliers(raw.df) 
   }
   
+  # select part of the data if requested (default: use all of it)
   if (part == 'initial') {
     raw.df <- rbind(raw.df[which(raw.df$rotated == 0),], raw.df[which(raw.df$rotated == 1 & raw.df$repetition == 0),])
   }
@@ -294,11 +297,16 @@ getReachAftereffects <- function(group, part='all', clean=TRUE) {
     raw.df <- rbind(raw.df[which(raw.df$rotated == 0),], raw.df[which(raw.df$rotated == 1 & raw.df$repetition > 0),])
   }
   
+  # average across the task iterations and target repetitions
   avg.df <- aggregate(endpoint_angle ~ participant + rotated + target, data=raw.df, FUN=mean)
   
-  RAE <- aggregate(endpoint_angle ~ participant + target, data=avg.df, FUN=diff)
+  # get the difference if requested (default: yes)
+  if (difference) {
+    avg.df <- aggregate(endpoint_angle ~ participant + target, data=avg.df, FUN=diff)
+  }
   
-  return(RAE)
+  # return te result:
+  return(avg.df)
   
 }
 
