@@ -1,17 +1,18 @@
 ---
 title: "Exposure Consequences - Statistics and Figures"
 output:
+  word_document: default
   pdf_document: default
-  html_notebook: default
   html_document:
     df_print: paged
+  html_notebook: default
 ---
 
 # Overview
 
 Here I collect the 'right' statistics and figures for the exposure consequences project.
 
-As I think of it right now, we will have these
+Here are the planned figures and tables:
 
 Figures:
 
@@ -20,9 +21,7 @@ Figures:
 3. Localization
 4. Correlation 
 
-Maybe not the 4th one.
-
-There will also be a *Table* with tasks, and their order and number of trials in both the classic and exposure version of the task.
+(Maybe not the 4th one.)
 
 Tables:
 
@@ -67,8 +66,27 @@ These claims require analyses.
 
 First, we show that no-cursor reaches change direction after exposure training:
 
-```{r}
-assessNoCursorChange()
+```{r include=TRUE}
+exposureNoCursorChange()
 ```
+
+So this shows that whether or not the feedback was rotated mattered for the reach deviations in the exposure training group, i.e.: there are reach aftereffects.
+
+The second analysis is to show that the reach aftereffects aren't all that different for first and later iterations of the rotated no-cursor tasks. (The baseline is always all aligned iterations of the task.)
+
+```{r}
+exposureAftereffectsPersistent()
+```
+
+So there is no effect of iteration here, which means the reach aftereffects are the same for the first iteration and the average across the other four iterations. We now also have enough power to see an effect of target angle (the generalization curve is not flat), but more importantly the effect of iteration is also not dependent on target.
+
+Finally, we want to see if there is a difference between teh reach aftereffects observed after exposure training and those after classic training.
+
+```{r}
+exposureClassicReachAftereffects()
+```
+
+I'd have expected there to be some difference between the two training types, perhaps only in interaction with target, but that's not the case apparently.
+
 
 

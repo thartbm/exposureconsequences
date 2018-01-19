@@ -2,8 +2,10 @@
 source('shared.R')
 
 # first make sure we have all necessary packages installed and loaded:
-# not yet sure if we'll use Chi-square, or Satterthwaite estimates of F/p-values:
-installRequire.Packages(c('nlme', 'car', 'lme4', 'lmerTest'))
+# for now we'll use Chi-square (not Satterthwaite estimates of F/p-values):
+installRequire.Packages(c('nlme', 'car'))
+
+# , 'lme4', 'lmerTest'
 
 # localization data can be downloaded from OSF:
 # groupURLs <- c('exposure'='https://osf.io/9qfhp/download', 'classic'='https://osf.io/upw49/download', 'online'='https://osf.io/wjcgk/download')

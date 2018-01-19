@@ -176,7 +176,7 @@ $(document).ready(function () {
 <div id="overview" class="section level1">
 <h1>Overview</h1>
 <p>Here I collect the ‘right’ statistics and figures for the exposure consequences project.</p>
-<p>As I think of it right now, we will have these</p>
+<p>Here are the planned figures and tables:</p>
 <p>Figures:</p>
 <ol style="list-style-type: decimal">
 <li>Setup &amp; Task</li>
@@ -184,8 +184,7 @@ $(document).ready(function () {
 <li>Localization</li>
 <li>Correlation</li>
 </ol>
-<p>Maybe not the 4th one.</p>
-<p>There will also be a <em>Table</em> with tasks, and their order and number of trials in both the classic and exposure version of the task.</p>
+<p>(Maybe not the 4th one.)</p>
 <p>Tables:</p>
 <ol style="list-style-type: decimal">
 <li>Task order</li>
@@ -196,10 +195,16 @@ $(document).ready(function () {
 <p>First we load those other scripts:</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc291cmNlKCdzaGFyZWQuUicpICMgZnVuY3Rpb25zIHVzZWQgZXZlcnl3aGVyZVxuc291cmNlKCdub2N1cnNvci5SJykgIyBmdW5jdGlvbnMgZm9yIG5vLWN1cnNvciByZWFjaCBkYXRhXG5zb3VyY2UoJ2xvY2FsaXphdGlvbi5SJykgIyBmdW5jdGlvbnMgZm9yIGxvY2FsaXphdGlvbiBkYXRhXG5zb3VyY2UoJ3JlbGF0ZUxvY2FsaXphdGlvbk5vQ3Vyc29ycy5SJykgIyBmdW5jdGlvbnMgdGhhdCBjb3JyZWxhdGUgdGhlIHR3byBraW5kcyBvZiBkYXRhXG5gYGAifQ== -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc291cmNlKCdzaGFyZWQuUicpICMgZnVuY3Rpb25zIHVzZWQgZXZlcnl3aGVyZVxuc291cmNlKCdub2N1cnNvci5SJykgIyBmdW5jdGlvbnMgZm9yIG5vLWN1cnNvciByZWFjaCBkYXRhXG5gYGAifQ== -->
 <pre class="r"><code>source('shared.R') # functions used everywhere
-source('nocursor.R') # functions for no-cursor reach data
-source('localization.R') # functions for localization data
+source('nocursor.R') # functions for no-cursor reach data</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiTG9hZGluZyByZXF1aXJlZCBwYWNrYWdlOiBubG1lXG5Mb2FkaW5nIHJlcXVpcmVkIHBhY2thZ2U6IGNhclxuIn0= -->
+<pre><code>Loading required package: nlme
+Loading required package: car</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc291cmNlKCdsb2NhbGl6YXRpb24uUicpICMgZnVuY3Rpb25zIGZvciBsb2NhbGl6YXRpb24gZGF0YVxuc291cmNlKCdyZWxhdGVMb2NhbGl6YXRpb25Ob0N1cnNvcnMuUicpICMgZnVuY3Rpb25zIHRoYXQgY29ycmVsYXRlIHRoZSB0d28ga2luZHMgb2YgZGF0YVxuYGBgIn0= -->
+<pre class="r"><code>source('localization.R') # functions for localization data
 source('relateLocalizationNoCursors.R') # functions that correlate the two kinds of data</code></pre>
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
@@ -242,10 +247,10 @@ removed 133 outliers, kept 96.6%</code></pre>
 <p>First, we show that no-cursor reaches change direction after exposure training:</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYXNzZXNzTm9DdXJzb3JDaGFuZ2UoKVxuYGBgIn0= -->
-<pre class="r"><code>assessNoCursorChange()</code></pre>
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZXhwb3N1cmVOb0N1cnNvckNoYW5nZSgpXG5gYGAifQ== -->
+<pre class="r"><code>exposureNoCursorChange()</code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoicmVtb3ZlZCAxMzMgb3V0bGllcnMsIGtlcHQgOTYuNiVcblxuTE1FIHdpdGggc2Vzc2lvbiBhbmQgdGFyZ2V0IGFzIGZpeGVkIGVmZmVjdHMsIGFuZCBwYXJ0aWNpcGFudCBhcyByYW5kb20gZWZmZWN0OlxuXG5BbmFseXNpcyBvZiBEZXZpYW5jZSBUYWJsZSAoVHlwZSBJSUkgdGVzdHMpXG5cblJlc3BvbnNlOiBlbmRwb2ludF9hbmdsZVxuICAgICAgICAgICAgICAgIENoaXNxIERmIFByKD5DaGlzcSkgICBcbihJbnRlcmNlcHQpICAgIDEuNDAzNiAgMSAgIDAuMjM2MTE0ICAgXG5yb3RhdGVkICAgICAgICAzLjA2OTMgIDEgICAwLjA3OTc4NSAuIFxudGFyZ2V0ICAgICAgICAgOS45NDQyICAxICAgMC4wMDE2MTQgKipcbnJvdGF0ZWQ6dGFyZ2V0IDMuODE5NCAgMSAgIDAuMDUwNjYyIC4gXG4tLS1cblNpZ25pZi4gY29kZXM6ICAwIOKAmCoqKuKAmSAwLjAwMSDigJgqKuKAmSAwLjAxIOKAmCrigJkgMC4wNSDigJgu4oCZIDAuMSDigJgg4oCZIDFcblxuTE1FIHdpdGggc2Vzc2lvbiBhcyBmaXhlZCBlZmZlY3QsIGFuZCBwYXJ0aWNpcGFudCBhbmQgdGFyZ2V0IGFzIHJhbmRvbSBlZmZlY3RzOlxuXG5BbmFseXNpcyBvZiBEZXZpYW5jZSBUYWJsZSAoVHlwZSBJSUkgdGVzdHMpXG5cblJlc3BvbnNlOiBlbmRwb2ludF9hbmdsZVxuICAgICAgICAgICAgICAgQ2hpc3EgRGYgUHIoPkNoaXNxKSAgICBcbihJbnRlcmNlcHQpICAgMC40NTg3ICAxICAgICAwLjQ5ODIgICAgXG5yb3RhdGVkICAgICAxMTUuNzYzNSAgMSAgICAgPDJlLTE2ICoqKlxuLS0tXG5TaWduaWYuIGNvZGVzOiAgMCDigJgqKirigJkgMC4wMDEg4oCYKirigJkgMC4wMSDigJgq4oCZIDAuMDUg4oCYLuKAmSAwLjEg4oCYIOKAmSAxXG4ifQ== -->
+<!-- rnb-output-begin eyJkYXRhIjoicmVtb3ZlZCAxMzMgb3V0bGllcnMsIGtlcHQgOTYuNiVcblxuTE1FIHdpdGggc2Vzc2lvbiBhbmQgdGFyZ2V0IGFzIGZpeGVkIGVmZmVjdHMsIGFuZCBwYXJ0aWNpcGFudCBhcyByYW5kb20gZWZmZWN0OlxuXG5BbmFseXNpcyBvZiBEZXZpYW5jZSBUYWJsZSAoVHlwZSBJSUkgdGVzdHMpXG5cblJlc3BvbnNlOiBlbmRwb2ludF9hbmdsZVxuICAgICAgICAgICAgICAgICBDaGlzcSBEZiBQcig+Q2hpc3EpICAgIFxuKEludGVyY2VwdCkgICAgIDEuMzczMyAgMSAgICAgMC4yNDEzICAgIFxucm90YXRlZCAgICAgICAgNzQuNTY4MSAgMSAgICAgPDJlLTE2ICoqKlxudGFyZ2V0ICAgICAgICAgIDguMTQwNiAgNiAgICAgMC4yMjgwICAgIFxucm90YXRlZDp0YXJnZXQgIDcuMTE0OSAgNiAgICAgMC4zMTA0ICAgIFxuLS0tXG5TaWduaWYuIGNvZGVzOiAgMCDigJgqKirigJkgMC4wMDEg4oCYKirigJkgMC4wMSDigJgq4oCZIDAuMDUg4oCYLuKAmSAwLjEg4oCYIOKAmSAxXG4ifQ== -->
 <pre><code>removed 133 outliers, kept 96.6%
 
 LME with session and target as fixed effects, and participant as random effect:
@@ -253,31 +258,73 @@ LME with session and target as fixed effects, and participant as random effect:
 Analysis of Deviance Table (Type III tests)
 
 Response: endpoint_angle
-                Chisq Df Pr(&gt;Chisq)   
-(Intercept)    1.4036  1   0.236114   
-rotated        3.0693  1   0.079785 . 
-target         9.9442  1   0.001614 **
-rotated:target 3.8194  1   0.050662 . 
----
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-
-LME with session as fixed effect, and participant and target as random effects:
-
-Analysis of Deviance Table (Type III tests)
-
-Response: endpoint_angle
-               Chisq Df Pr(&gt;Chisq)    
-(Intercept)   0.4587  1     0.4982    
-rotated     115.7635  1     &lt;2e-16 ***
+                 Chisq Df Pr(&gt;Chisq)    
+(Intercept)     1.3733  1     0.2413    
+rotated        74.5681  1     &lt;2e-16 ***
+target          8.1406  6     0.2280    
+rotated:target  7.1149  6     0.3104    
 ---
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1</code></pre>
 <!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
+<p>So this shows that whether or not the feedback was rotated mattered for the reach deviations in the exposure training group, i.e.: there are reach aftereffects.</p>
+<p>The second analysis is to show that the reach aftereffects aren’t all that different for first and later iterations of the rotated no-cursor tasks. (The baseline is always all aligned iterations of the task.)</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZXhwb3N1cmVBZnRlcmVmZmVjdHNQZXJzaXN0ZW50KClcbmBgYCJ9 -->
+<pre class="r"><code>exposureAftereffectsPersistent()</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoicmVtb3ZlZCAxMzMgb3V0bGllcnMsIGtlcHQgOTYuNiVcbnJlbW92ZWQgMTMzIG91dGxpZXJzLCBrZXB0IDk2LjYlXG5cbkxNRSB3aXRoIHNlc3Npb24gYW5kIHRhcmdldCBhcyBmaXhlZCBlZmZlY3RzLCBhbmQgcGFydGljaXBhbnQgYXMgcmFuZG9tIGVmZmVjdDpcblxuQW5hbHlzaXMgb2YgRGV2aWFuY2UgVGFibGUgKFR5cGUgSUlJIHRlc3RzKVxuXG5SZXNwb25zZTogZW5kcG9pbnRfYW5nbGVcbiAgICAgICAgICAgICAgICAgICBDaGlzcSBEZiBQcig+Q2hpc3EpICAgIFxuKEludGVyY2VwdCkgICAgICA2Mi44MTczICAxICAyLjI2OGUtMTUgKioqXG5pdGVyYXRpb24gICAgICAgICAxLjYwNzcgIDEgIDAuMjA0ODE5NyAgICBcbnRhcmdldCAgICAgICAgICAgMjYuNzE5MSAgNiAgMC4wMDAxNjM0ICoqKlxuaXRlcmF0aW9uOnRhcmdldCAgMy40Nzk2ICA2ICAwLjc0NjY4NjMgICAgXG4tLS1cblNpZ25pZi4gY29kZXM6ICAwIOKAmCoqKuKAmSAwLjAwMSDigJgqKuKAmSAwLjAxIOKAmCrigJkgMC4wNSDigJgu4oCZIDAuMSDigJgg4oCZIDFcbiJ9 -->
+<pre><code>removed 133 outliers, kept 96.6%
+removed 133 outliers, kept 96.6%
+
+LME with session and target as fixed effects, and participant as random effect:
+
+Analysis of Deviance Table (Type III tests)
+
+Response: endpoint_angle
+                   Chisq Df Pr(&gt;Chisq)    
+(Intercept)      62.8173  1  2.268e-15 ***
+iteration         1.6077  1  0.2048197    
+target           26.7191  6  0.0001634 ***
+iteration:target  3.4796  6  0.7466863    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>So there is no effect of iteration here, which means the reach aftereffects are the same for the first iteration and the average across the other four iterations. We now also have enough power to see an effect of target angle (the generalization curve is not flat), but more importantly the effect of iteration is also not dependent on target.</p>
+<p>Finally, we want to see if there is a difference between teh reach aftereffects observed after exposure training and those after classic training.</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZXhwb3N1cmVDbGFzc2ljUmVhY2hBZnRlcmVmZmVjdHMoKVxuYGBgIn0= -->
+<pre class="r"><code>exposureClassicReachAftereffects()</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoicmVtb3ZlZCAxMzMgb3V0bGllcnMsIGtlcHQgOTYuNiVcbnJlbW92ZWQgMTMxIG91dGxpZXJzLCBrZXB0IDk2LjclXG5cbkxNRSB3aXRoIHNlc3Npb24gYW5kIHRhcmdldCBhcyBmaXhlZCBlZmZlY3RzLCBhbmQgcGFydGljaXBhbnQgYXMgcmFuZG9tIGVmZmVjdDpcblxuQW5hbHlzaXMgb2YgRGV2aWFuY2UgVGFibGUgKFR5cGUgSUlJIHRlc3RzKVxuXG5SZXNwb25zZTogZW5kcG9pbnRfYW5nbGVcbiAgICAgICAgICAgICAgICAgIENoaXNxIERmIFByKD5DaGlzcSkgICAgXG4oSW50ZXJjZXB0KSAgICAgNTYuMTQ1MCAgMSAgNi43MzJlLTE0ICoqKlxudHJhaW5pbmcgICAgICAgICAxLjI4MjggIDEgICAgIDAuMjU3NCAgICBcbnRhcmdldCAgICAgICAgICA0OC44MjQ1ICA2ICA4LjA4NGUtMDkgKioqXG50cmFpbmluZzp0YXJnZXQgIDUuNDQzNCAgNiAgICAgMC40ODgzICAgIFxuLS0tXG5TaWduaWYuIGNvZGVzOiAgMCDigJgqKirigJkgMC4wMDEg4oCYKirigJkgMC4wMSDigJgq4oCZIDAuMDUg4oCYLuKAmSAwLjEg4oCYIOKAmSAxXG4ifQ== -->
+<pre><code>removed 133 outliers, kept 96.6%
+removed 131 outliers, kept 96.7%
+
+LME with session and target as fixed effects, and participant as random effect:
+
+Analysis of Deviance Table (Type III tests)
+
+Response: endpoint_angle
+                  Chisq Df Pr(&gt;Chisq)    
+(Intercept)     56.1450  1  6.732e-14 ***
+training         1.2828  1     0.2574    
+target          48.8245  6  8.084e-09 ***
+training:target  5.4434  6     0.4883    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>I’d have expected there to be some difference between the two training types, perhaps only in interaction with target, but that’s not the case apparently.</p>
 <!-- rnb-text-end -->
 </div>
 
-<div id="rmd-source-code">LS0tCnRpdGxlOiAiRXhwb3N1cmUgQ29uc2VxdWVuY2VzIC0gU3RhdGlzdGljcyBhbmQgRmlndXJlcyIKb3V0cHV0OgogIHBkZl9kb2N1bWVudDogZGVmYXVsdAogIGh0bWxfbm90ZWJvb2s6IGRlZmF1bHQKICBodG1sX2RvY3VtZW50OgogICAgZGZfcHJpbnQ6IHBhZ2VkCi0tLQoKIyBPdmVydmlldwoKSGVyZSBJIGNvbGxlY3QgdGhlICdyaWdodCcgc3RhdGlzdGljcyBhbmQgZmlndXJlcyBmb3IgdGhlIGV4cG9zdXJlIGNvbnNlcXVlbmNlcyBwcm9qZWN0LgoKQXMgSSB0aGluayBvZiBpdCByaWdodCBub3csIHdlIHdpbGwgaGF2ZSB0aGVzZQoKRmlndXJlczoKCjEuIFNldHVwICYgVGFzawoyLiBSZWFjaCBBZnRlcmVmZmVjdHMKMy4gTG9jYWxpemF0aW9uCjQuIENvcnJlbGF0aW9uIAoKTWF5YmUgbm90IHRoZSA0dGggb25lLgoKVGhlcmUgd2lsbCBhbHNvIGJlIGEgKlRhYmxlKiB3aXRoIHRhc2tzLCBhbmQgdGhlaXIgb3JkZXIgYW5kIG51bWJlciBvZiB0cmlhbHMgaW4gYm90aCB0aGUgY2xhc3NpYyBhbmQgZXhwb3N1cmUgdmVyc2lvbiBvZiB0aGUgdGFzay4KClRhYmxlczoKCjEuIFRhc2sgb3JkZXIKCiMjIFNvdXJjZSBzY3JpcHRzCgpBbGwgdGhlIHNjcmlwdHMgZG9pbmcgdGhlIHN0YXRpc3RpY3MgYW5kIGZpZ3VyZXMgYXJlIGluIHNlcGFyYXRlIFIgZmlsZXMsIGJ1dCBoZXJlIHdlIHdpbGwgb25seSBzZWUgLyBkbyB0aGUgb25lcyB0aGF0IHdlIHRoaW5rIHNob3VsZCBnbyB0byB0aGUgbWFudXNjcmlwdC4KCkZpcnN0IHdlIGxvYWQgdGhvc2Ugb3RoZXIgc2NyaXB0czoKCmBgYHtyfQpzb3VyY2UoJ3NoYXJlZC5SJykgIyBmdW5jdGlvbnMgdXNlZCBldmVyeXdoZXJlCnNvdXJjZSgnbm9jdXJzb3IuUicpICMgZnVuY3Rpb25zIGZvciBuby1jdXJzb3IgcmVhY2ggZGF0YQpzb3VyY2UoJ2xvY2FsaXphdGlvbi5SJykgIyBmdW5jdGlvbnMgZm9yIGxvY2FsaXphdGlvbiBkYXRhCnNvdXJjZSgncmVsYXRlTG9jYWxpemF0aW9uTm9DdXJzb3JzLlInKSAjIGZ1bmN0aW9ucyB0aGF0IGNvcnJlbGF0ZSB0aGUgdHdvIGtpbmRzIG9mIGRhdGEKYGBgCgojIyBUb3BpY3MKCkluIHRoZSBtYW51c2NyaXB0IHdlJ2xsIGZpcnN0IHNob3cgdGhhdCB0aGVyZSBhcmUgbW90b3IgY2hhbmdlcyBhZnRlciBleHBvc3VyZSB0cmFpbmluZyAod2l0aCB0aGUgbm8tY3Vyc29yIGRhdGEpIGFuZCB0aGVuIGNvbXBhcmUgdGhhdCB3aXRoIHRoZSBjbGFzc2ljLiBTZWNvbmQgaXMgdGhlIGxvY2FsaXphdGlvbjogYSkgbG9jYWxpemF0aW9uIHNoaWZ0cyBhZnRlciBleHBvc3VyZSBiKSB0aGUgc2hpZnRzIGFyZSB0aGUgc2FtZS9kaWZmZXJlbnQgZnJvbSB0aG9zZSBhZnRlciBjbGFzc2ljIGMpIHRoZSBlZmZlY3RzIGFyZSBkaWZmZXJlbnQgYWNyb3NzIHRoZSB3b3Jrc3BhY2UgZCkgdGhpcyBwYXR0ZXJuIGlzIGluZGlzdGluZ3Vpc2hhYmxlIC8gZGlmZmVyZW50IGZyb20gdGhhdCBhZnRlciBjbGFzc2ljLiBBIHRoaXJkIHRvcGljIG1pZ2h0IGJlIGlmIGxvY2FsaXphdGlvbiBzaGlmdHMgY2FuIHByZWRpY3Qgbm8tY3Vyc29yIGNoYW5nZXMuIEhlcmUgd2UnbGwgYWxzbyBmb2xsb3cgdGhpcyBvcmRlcjoKCjEuIFJlYWNoIGFmdGVyZWZmZWN0cwoyLiBMb2NhbGl6YXRpb24KMy4gQ29ycmVsYXRpb25zCgoKIyBSZWFjaCBBZnRlcmVmZmVjdHMKCkhlcmUgaXMgYSBwbG90LCBwcm9iYWJseSBGaWd1cmUgMjoKCmBgYHtyIGZpZy53aWR0aD0xMCwgZmlnLmhlaWdodD00fQpwbG90UmVhY2hBZnRlcmVmZmVjdHMoKQpgYGAKCk1lc3NhZ2VzIG9mIHRoZSBmaWd1cmU6CgotIFBhbmVsIEE6IHRoZXJlIGFyZSBzdWJzdGFudGlhbCBhbmQgcGVyc2lzdGluZyByZWFjaCBhZnRlcmVmZmVjdHMKLSBQYW5lbCBCOiB0aGF0IGFyZSBzb21ld2hhdCBsb3dlciB0aGFuIHRob3NlIGluIGNsYXNzaWMgKGJ1dCBub3QgdGhhdCBtdWNoPyBidXQgb25seSBmb3Igc29tZSB0YXJnZXRzPykKClRoZXNlIGNsYWltcyByZXF1aXJlIGFuYWx5c2VzLgoKRmlyc3QsIHdlIHNob3cgdGhhdCBuby1jdXJzb3IgcmVhY2hlcyBjaGFuZ2UgZGlyZWN0aW9uIGFmdGVyIGV4cG9zdXJlIHRyYWluaW5nOgoKYGBge3J9CmFzc2Vzc05vQ3Vyc29yQ2hhbmdlKCkKYGBgCgoK</div>
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiRXhwb3N1cmUgQ29uc2VxdWVuY2VzIC0gU3RhdGlzdGljcyBhbmQgRmlndXJlcyIKb3V0cHV0OgogIHdvcmRfZG9jdW1lbnQ6IGRlZmF1bHQKICBwZGZfZG9jdW1lbnQ6IGRlZmF1bHQKICBodG1sX2RvY3VtZW50OgogICAgZGZfcHJpbnQ6IHBhZ2VkCiAgaHRtbF9ub3RlYm9vazogZGVmYXVsdAotLS0KCiMgT3ZlcnZpZXcKCkhlcmUgSSBjb2xsZWN0IHRoZSAncmlnaHQnIHN0YXRpc3RpY3MgYW5kIGZpZ3VyZXMgZm9yIHRoZSBleHBvc3VyZSBjb25zZXF1ZW5jZXMgcHJvamVjdC4KCkhlcmUgYXJlIHRoZSBwbGFubmVkIGZpZ3VyZXMgYW5kIHRhYmxlczoKCkZpZ3VyZXM6CgoxLiBTZXR1cCAmIFRhc2sKMi4gUmVhY2ggQWZ0ZXJlZmZlY3RzCjMuIExvY2FsaXphdGlvbgo0LiBDb3JyZWxhdGlvbiAKCihNYXliZSBub3QgdGhlIDR0aCBvbmUuKQoKVGFibGVzOgoKMS4gVGFzayBvcmRlcgoKIyMgU291cmNlIHNjcmlwdHMKCkFsbCB0aGUgc2NyaXB0cyBkb2luZyB0aGUgc3RhdGlzdGljcyBhbmQgZmlndXJlcyBhcmUgaW4gc2VwYXJhdGUgUiBmaWxlcywgYnV0IGhlcmUgd2Ugd2lsbCBvbmx5IHNlZSAvIGRvIHRoZSBvbmVzIHRoYXQgd2UgdGhpbmsgc2hvdWxkIGdvIHRvIHRoZSBtYW51c2NyaXB0LgoKRmlyc3Qgd2UgbG9hZCB0aG9zZSBvdGhlciBzY3JpcHRzOgoKYGBge3J9CnNvdXJjZSgnc2hhcmVkLlInKSAjIGZ1bmN0aW9ucyB1c2VkIGV2ZXJ5d2hlcmUKc291cmNlKCdub2N1cnNvci5SJykgIyBmdW5jdGlvbnMgZm9yIG5vLWN1cnNvciByZWFjaCBkYXRhCnNvdXJjZSgnbG9jYWxpemF0aW9uLlInKSAjIGZ1bmN0aW9ucyBmb3IgbG9jYWxpemF0aW9uIGRhdGEKc291cmNlKCdyZWxhdGVMb2NhbGl6YXRpb25Ob0N1cnNvcnMuUicpICMgZnVuY3Rpb25zIHRoYXQgY29ycmVsYXRlIHRoZSB0d28ga2luZHMgb2YgZGF0YQpgYGAKCiMjIFRvcGljcwoKSW4gdGhlIG1hbnVzY3JpcHQgd2UnbGwgZmlyc3Qgc2hvdyB0aGF0IHRoZXJlIGFyZSBtb3RvciBjaGFuZ2VzIGFmdGVyIGV4cG9zdXJlIHRyYWluaW5nICh3aXRoIHRoZSBuby1jdXJzb3IgZGF0YSkgYW5kIHRoZW4gY29tcGFyZSB0aGF0IHdpdGggdGhlIGNsYXNzaWMuIFNlY29uZCBpcyB0aGUgbG9jYWxpemF0aW9uOiBhKSBsb2NhbGl6YXRpb24gc2hpZnRzIGFmdGVyIGV4cG9zdXJlIGIpIHRoZSBzaGlmdHMgYXJlIHRoZSBzYW1lL2RpZmZlcmVudCBmcm9tIHRob3NlIGFmdGVyIGNsYXNzaWMgYykgdGhlIGVmZmVjdHMgYXJlIGRpZmZlcmVudCBhY3Jvc3MgdGhlIHdvcmtzcGFjZSBkKSB0aGlzIHBhdHRlcm4gaXMgaW5kaXN0aW5ndWlzaGFibGUgLyBkaWZmZXJlbnQgZnJvbSB0aGF0IGFmdGVyIGNsYXNzaWMuIEEgdGhpcmQgdG9waWMgbWlnaHQgYmUgaWYgbG9jYWxpemF0aW9uIHNoaWZ0cyBjYW4gcHJlZGljdCBuby1jdXJzb3IgY2hhbmdlcy4gSGVyZSB3ZSdsbCBhbHNvIGZvbGxvdyB0aGlzIG9yZGVyOgoKMS4gUmVhY2ggYWZ0ZXJlZmZlY3RzCjIuIExvY2FsaXphdGlvbgozLiBDb3JyZWxhdGlvbnMKCgojIFJlYWNoIEFmdGVyZWZmZWN0cwoKSGVyZSBpcyBhIHBsb3QsIHByb2JhYmx5IEZpZ3VyZSAyOgoKYGBge3IgZmlnLndpZHRoPTEwLCBmaWcuaGVpZ2h0PTR9CnBsb3RSZWFjaEFmdGVyZWZmZWN0cygpCmBgYAoKTWVzc2FnZXMgb2YgdGhlIGZpZ3VyZToKCi0gUGFuZWwgQTogdGhlcmUgYXJlIHN1YnN0YW50aWFsIGFuZCBwZXJzaXN0aW5nIHJlYWNoIGFmdGVyZWZmZWN0cwotIFBhbmVsIEI6IHRoYXQgYXJlIHNvbWV3aGF0IGxvd2VyIHRoYW4gdGhvc2UgaW4gY2xhc3NpYyAoYnV0IG5vdCB0aGF0IG11Y2g/IGJ1dCBvbmx5IGZvciBzb21lIHRhcmdldHM/KQoKVGhlc2UgY2xhaW1zIHJlcXVpcmUgYW5hbHlzZXMuCgpGaXJzdCwgd2Ugc2hvdyB0aGF0IG5vLWN1cnNvciByZWFjaGVzIGNoYW5nZSBkaXJlY3Rpb24gYWZ0ZXIgZXhwb3N1cmUgdHJhaW5pbmc6CgpgYGB7ciBpbmNsdWRlPVRSVUV9CmV4cG9zdXJlTm9DdXJzb3JDaGFuZ2UoKQpgYGAKClNvIHRoaXMgc2hvd3MgdGhhdCB3aGV0aGVyIG9yIG5vdCB0aGUgZmVlZGJhY2sgd2FzIHJvdGF0ZWQgbWF0dGVyZWQgZm9yIHRoZSByZWFjaCBkZXZpYXRpb25zIGluIHRoZSBleHBvc3VyZSB0cmFpbmluZyBncm91cCwgaS5lLjogdGhlcmUgYXJlIHJlYWNoIGFmdGVyZWZmZWN0cy4KClRoZSBzZWNvbmQgYW5hbHlzaXMgaXMgdG8gc2hvdyB0aGF0IHRoZSByZWFjaCBhZnRlcmVmZmVjdHMgYXJlbid0IGFsbCB0aGF0IGRpZmZlcmVudCBmb3IgZmlyc3QgYW5kIGxhdGVyIGl0ZXJhdGlvbnMgb2YgdGhlIHJvdGF0ZWQgbm8tY3Vyc29yIHRhc2tzLiAoVGhlIGJhc2VsaW5lIGlzIGFsd2F5cyBhbGwgYWxpZ25lZCBpdGVyYXRpb25zIG9mIHRoZSB0YXNrLikKCmBgYHtyfQpleHBvc3VyZUFmdGVyZWZmZWN0c1BlcnNpc3RlbnQoKQpgYGAKClNvIHRoZXJlIGlzIG5vIGVmZmVjdCBvZiBpdGVyYXRpb24gaGVyZSwgd2hpY2ggbWVhbnMgdGhlIHJlYWNoIGFmdGVyZWZmZWN0cyBhcmUgdGhlIHNhbWUgZm9yIHRoZSBmaXJzdCBpdGVyYXRpb24gYW5kIHRoZSBhdmVyYWdlIGFjcm9zcyB0aGUgb3RoZXIgZm91ciBpdGVyYXRpb25zLiBXZSBub3cgYWxzbyBoYXZlIGVub3VnaCBwb3dlciB0byBzZWUgYW4gZWZmZWN0IG9mIHRhcmdldCBhbmdsZSAodGhlIGdlbmVyYWxpemF0aW9uIGN1cnZlIGlzIG5vdCBmbGF0KSwgYnV0IG1vcmUgaW1wb3J0YW50bHkgdGhlIGVmZmVjdCBvZiBpdGVyYXRpb24gaXMgYWxzbyBub3QgZGVwZW5kZW50IG9uIHRhcmdldC4KCkZpbmFsbHksIHdlIHdhbnQgdG8gc2VlIGlmIHRoZXJlIGlzIGEgZGlmZmVyZW5jZSBiZXR3ZWVuIHRlaCByZWFjaCBhZnRlcmVmZmVjdHMgb2JzZXJ2ZWQgYWZ0ZXIgZXhwb3N1cmUgdHJhaW5pbmcgYW5kIHRob3NlIGFmdGVyIGNsYXNzaWMgdHJhaW5pbmcuCgpgYGB7cn0KZXhwb3N1cmVDbGFzc2ljUmVhY2hBZnRlcmVmZmVjdHMoKQpgYGAKCkknZCBoYXZlIGV4cGVjdGVkIHRoZXJlIHRvIGJlIHNvbWUgZGlmZmVyZW5jZSBiZXR3ZWVuIHRoZSB0d28gdHJhaW5pbmcgdHlwZXMsIHBlcmhhcHMgb25seSBpbiBpbnRlcmFjdGlvbiB3aXRoIHRhcmdldCwgYnV0IHRoYXQncyBub3QgdGhlIGNhc2UgYXBwYXJlbnRseS4KCgoK</div>
 
 
 

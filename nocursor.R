@@ -227,20 +227,79 @@ plotReachAftereffectDistributions <- function() {
   
 }
 
-assessNoCursorChange <- function() {
-  
-  nocursor_exposure <- getReachAftereffects('exposure',part='initial', difference=FALSE)
+exposureNoCursorChange <- function() {
   
   default.contrasts <- options('contrasts')
   options(contrasts=c('contr.sum','contr.poly'))
   
-  cat('\nLME with session and target as fixed effects, and participant as random effect:\n\n')
-  exp_nocursor_omnibus_model <- lme(endpoint_angle ~ rotated * target, data=nocursor_exposure, random = ~1|participant, na.action=na.exclude)
-  print(Anova(exp_nocursor_omnibus_model, type=3))
+  nc.exp <- getReachAftereffects('exposure', part='initial', difference=FALSE)
   
-  cat('\nLME with session as fixed effect, and participant and target as random effects:\n\n')
-  exp_nocursor_omnibus_model <- lme(endpoint_angle ~ rotated, data=nocursor_exposure, random = ~1|participant/target, na.action=na.exclude)
-  print(Anova(exp_nocursor_omnibus_model, type=3))
+  nc.exp$participant <- factor(nc.exp$participant)
+  nc.exp$rotated <- factor(nc.exp$rotated)
+  nc.exp$target <- factor(nc.exp$target)
+  
+  attach(nc.exp)
+  
+  cat('\nLME with session and target as fixed effects, and participant as random effect:\n\n')
+  print(Anova(lme(endpoint_angle ~ rotated * target, random = ~1|participant, na.action=na.exclude), type=3))
+  
+  detach(nc.exp)
+
+  options('contrasts' <- default.contrasts)
+  
+}
+
+exposureAftereffectsPersistent <- function() {
+  
+  default.contrasts <- options('contrasts')
+  options(contrasts=c('contr.sum','contr.poly'))
+  
+  exp1 <- getReachAftereffects('exposure', part='initial', difference=TRUE)
+  exp2 <- getReachAftereffects('exposure', part='remainder', difference=TRUE)
+  
+  exp1$iteration <- 1
+  exp2$iteration <- 2
+  
+  exp <- rbind(exp1, exp2)
+  
+  exp$participant <- factor(exp$participant)
+  exp$iteration <- factor(exp$iteration)
+  exp$target <- factor(exp$target)
+  
+  attach(exp)
+  
+  cat('\nLME with session and target as fixed effects, and participant as random effect:\n\n')
+  print(Anova(lme(endpoint_angle ~ iteration * target, random = ~1|participant, na.action=na.exclude), type=3))
+  
+  detach(exp)
+  
+  options('contrasts' <- default.contrasts)
+  
+}
+
+exposureClassicReachAftereffects <- function() {
+  
+  default.contrasts <- options('contrasts')
+  options(contrasts=c('contr.sum','contr.poly'))
+  
+  exp <- getReachAftereffects('exposure', part='initial', difference=TRUE)
+  cla <- getReachAftereffects('classic', part='initial', difference=TRUE)
+  
+  exp$training <- 1
+  cla$training <- 2
+  
+  RAE <- rbind(exp, cla)
+  
+  RAE$participant <- factor(RAE$participant)
+  RAE$training <- factor(RAE$training)
+  RAE$target <- factor(RAE$target)
+  
+  attach(RAE)
+  
+  cat('\nLME with session and target as fixed effects, and participant as random effect:\n\n')
+  print(Anova(lme(endpoint_angle ~ training * target, random = ~1|participant, na.action=na.exclude), type=3))
+  
+  detach(RAE)
   
   options('contrasts' <- default.contrasts)
   
