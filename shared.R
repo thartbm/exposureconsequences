@@ -6,6 +6,21 @@ nocursorURLs <- c('exposure'='https://osf.io/9s6au/?action=download', 'classic'=
 # no-cursor data can be downloaded from OSF:
 localizationURLs <- c('exposure'='https://osf.io/pqsdc/?action=download', 'classic'='https://osf.io/upw49/?action=download', 'online'='https://osf.io/wjcgk/download')
 
+# we'll control the color in figures centrally from here:
+colorset <- list()
+
+colorset[['expActS']] <- '#005de4ff'
+colorset[['expActT']] <- '#005de42f'
+colorset[['expPasS']] <- '#2ab2f2ff'
+colorset[['expPasT']] <- '#2ab2f22f'
+colorset[['claActS']] <- '#ff0000ff'
+colorset[['claActT']] <- '#ff00002f'
+colorset[['claPasS']] <- '#ff8200ff'
+colorset[['claPasT']] <- '#ff82002f'
+
+colorset[['extra1S']] <- '#c400c4ff'
+colorset[['extra1T']] <- '#c400c42f'
+
 
 installRequire.Packages <- function(packages) {
   
@@ -143,7 +158,49 @@ parGaussian <- function(par,x) {
 
 # handling localization data -----
 
-getANOVAlocalization <- function(group) {
+# getANOVAlocalization <- function(group) {
+#   
+#   df <- load.DownloadDataframe(url=localizationURLs[group],filename=sprintf('localization_%s.csv',group))
+#   
+#   df <- aspligned(df)
+#   
+#   groupdf <- NA
+#   
+#   participants <- unique(df$participant)
+#   
+#   for (pp.no in c(1:length(participants))) {
+#     
+#     pp.id <- participants[pp.no]
+#     
+#     for (rotated in c(0,1)) {
+#       
+#       for (passive in c(0,1)) {
+#         
+#         subdf <- df[which(df$participant == pp.id & df$rotated_b == rotated & df$passive_b == passive),]
+#         
+#         locdf <- getLocalizationPoints(subdf, points=c(15,25,35,45,55,65,75), removeOutliers=TRUE)
+#         
+#         if (any(is.na(locdf$taperror_deg))) {
+#           cat(sprintf('WARNING: NAs in %s, pp:%s, %s/%s\n',group,pp.id,c('aligned','rotated')[rotated+1],c('active','passive')[passive+1]))
+#         }
+#         
+#         if (is.data.frame(groupdf)) {
+#           groupdf <- rbind(groupdf, locdf)
+#         } else {
+#           groupdf <- locdf
+#         }
+#         
+#       }
+#       
+#     }
+#     
+#   }
+#   
+#   return(groupdf)
+#   
+# }
+
+getPointLocalization <- function(group, difference=TRUE, points=c(15,25,35,45,55,65,75), movementtype='both', verbose=TRUE) {
   
   df <- load.DownloadDataframe(url=localizationURLs[group],filename=sprintf('localization_%s.csv',group))
   
@@ -163,10 +220,12 @@ getANOVAlocalization <- function(group) {
         
         subdf <- df[which(df$participant == pp.id & df$rotated_b == rotated & df$passive_b == passive),]
         
-        locdf <- getLocalizationPoints(subdf, points=c(15,25,35,45,55,65,75), removeOutliers=TRUE)
+        locdf <- getLocalizationPoints(subdf, points=points, removeOutliers=TRUE)
         
         if (any(is.na(locdf$taperror_deg))) {
-          cat(sprintf('WARNING: NAs in %s, pp:%s, %s/%s\n',group,pp.id,c('aligned','rotated')[rotated+1],c('active','passive')[passive+1]))
+          if (verbose) {
+            cat(sprintf('WARNING: NAs in %s, pp:%s, %s/%s\n',group,pp.id,c('aligned','rotated')[rotated+1],c('active','passive')[passive+1]))
+          }
         }
         
         if (is.data.frame(groupdf)) {
@@ -180,6 +239,29 @@ getANOVAlocalization <- function(group) {
     }
     
   }
+  
+  # get the dataframe in a useful shape:
+  groupdf <- aggregate(taperror_deg ~ group + participant + passive_b + handangle_deg + rotated_b, data=groupdf, FUN=mean, drop=FALSE)
+  
+  # get rotated - aligned difference, if required:
+  if (difference) {
+    groupdf <- aggregate(taperror_deg ~ group + participant + passive_b + handangle_deg, data=groupdf, FUN=diff, drop=FALSE)
+    groupdf$taperror_deg <- as.numeric(groupdf$taperror_deg)
+  }
+  
+
+  # select only one movement type, if required:
+  if (movementtype == 'active') {
+    groupdf <- groupdf[which(groupdf$passive_b == 0),]
+    groupdf <- groupdf[,-which(names(groupdf) == c("passive_b"))]
+  }
+  if (movementtype == 'passive') {
+    groupdf <- groupdf[which(groupdf$passive_b == 1),]
+    groupdf <- groupdf[,-which(names(groupdf) == c("passive_b"))]
+  }
+  
+  # now drop NAs? NO!
+  # groupdf <- groupdf[which(!is.na(groupdf$taperror_deg)),]
   
   return(groupdf)
   
@@ -265,6 +347,7 @@ getLocalizationPoints <- function(subdf, points=c(15,25,35,45,55,65,75), removeO
   # since splines do well at interpolating, but not extrapolating
   # everything outside of the range of the data should be set to NAs:
   Xrange <- range(X)
+  
   taperror_deg[which(points < Xrange[1])] <- NA
   taperror_deg[which(points > Xrange[2])] <- NA
   

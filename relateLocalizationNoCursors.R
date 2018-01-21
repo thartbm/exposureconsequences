@@ -9,7 +9,7 @@ correlateNoCursorsLocalization <- function() {
   # get all data, for classic and exposure, we need localization and reach aftereffects
   
   # LOCALIZATION SHIFT for exposure
-  local.exp <- getANOVAlocalization(group='exposure')
+  local.exp <- getPointLocalization(group='exposure', difference=FALSE, verbose=FALSE)
   # active
   loc.exp.act.ro <- aggregate(taperror_deg ~ participant + handangle_deg, data=local.exp[local.exp$rotated_b == 1 & local.exp$passive_b == 0,], FUN=mean, drop=FALSE)
   loc.exp.act.al <- aggregate(taperror_deg ~ participant + handangle_deg, data=local.exp[local.exp$rotated_b == 0 & local.exp$passive_b == 0,], FUN=mean, drop=FALSE)
@@ -30,7 +30,7 @@ correlateNoCursorsLocalization <- function() {
   exposure$passive_localization_shift <- local.exp.pas$taperror_deg
   
   # LOCALIZATION SHIFT for classic
-  local.cla <- getANOVAlocalization(group='classic')
+  local.cla <- getPointLocalization(group='classic', difference=FALSE, verbose=FALSE)
   # active
   loc.cla.act.ro <- aggregate(taperror_deg ~ participant + handangle_deg, data=local.cla[local.cla$rotated_b == 1 & local.cla$passive_b == 0,], FUN=mean, drop=FALSE)
   loc.cla.act.al <- aggregate(taperror_deg ~ participant + handangle_deg, data=local.cla[local.cla$rotated_b == 0 & local.cla$passive_b == 0,], FUN=mean, drop=FALSE)
@@ -45,8 +45,7 @@ correlateNoCursorsLocalization <- function() {
   # REACH AFTEREFFECTS for classic
   nocur.cla <- getReachAftereffects(group='classic', part='all', clean=TRUE) 
   names(nocur.cla)[names(nocur.cla) == 'endpoint_angle'] <- 'RAE'
-  
-  # cbind the dataframes fro classic:
+  # combine the dataframes for classic:
   classic <- nocur.cla[which(nocur.cla$participant %in% local.cla$participant),]
   classic$active_localization_shift <- local.cla.act$taperror_deg
   classic$passive_localization_shift <- local.cla.pas$taperror_deg
@@ -68,82 +67,103 @@ correlateNoCursorsLocalization <- function() {
   
   
   # # NOW do the tests:
-  xlimits <- c(-5.5,25.5)
-  ylimits <- c(-20.5,10.5)
-  xticks <- seq(from=-5,to=25,by=5)
-  yticks <- seq(from=-20,to=10,by=5)
+  xlimits <- rev(c(-20.5,10.5))
+  ylimits <- c(-10.5,20.5)
+  xticks <- seq(from=-20,to=10,by=10)
+  yticks <- rev(seq(from=-10,to=20,by=10))
   
-  par(mfrow=c(2,2),mar=c(5.1,4.1,2.1,1.1))
+  ylab <- 'reach aftereffect [deg]'
+  xlab <- 'localization shift [deg]'
+  
+  
+  par(mfrow=c(1,2))
   
   dataframes = list()
   dataframes[['exposure']] <- exposure
-  dataframes[['classic']] <- classic
+  dataframes[['classic']]  <- classic
+  
+  output <- list()
   
   for (group in c('exposure','classic')) {
+    
+    plot(-1000, -1000, main=group, xlab=xlab, ylab=ylab, asp=1, axes=FALSE, xlim=xlimits, ylim=ylimits)
+    
+    lines(c(0,0),range(yticks),col=rgb(.5,.5,.5,.5))
+    lines(range(xticks),c(0,0),col=rgb(.5,.5,.5,.5))
+    lines(rev(range(xticks)),range(yticks),col=rgb(.5,.5,.5,.5),lty=3)
+    
+    legendlinecolors <- c()
+    
     for (movement in c('active','passive')) {
       df <- dataframes[[group]]
       colname <- sprintf('%s_localization_shift',movement)
-      X <- df$RAE
-      Y <- df[,colname]
+      X <- df[,colname]
+      Y <- df$RAE
       
-      this.cor.test <- cor.test(X, Y)
+      colorID <- sprintf('%s%s%s',substring(group,1,3),toupper(substring(movement,1,1)),substring(movement,2,3))
+      Solid       <- colorset[[sprintf('%sS',colorID)]]
+      Transparent <- colorset[[sprintf('%sT',colorID)]]
       
-      cat(sprintf('%s %s\n',group,movement))
-      print(this.cor.test)
+      legendlinecolors <- c(legendlinecolors,Solid)
       
-      if (group == 'exposure') {
-        colors = c(rgb(.5,.5,.5,.5),rgb(0,0,1))
-      }
-      if (group == 'classic') {
-        colors = c(rgb(.5,.5,.5,.5),rgb(1,0,0))
-      }
-      main <- sprintf('%s %s',group,movement)
-      xlab <- 'reach aftereffect'
-      ylab <- sprintf('%s localization shift',movement)
+      points(X,Y,col=Solid,pch=1,cex=1.2)
       
-      plotCorrelationWithCI(X=X,Y=Y,colors=colors,main=main,xlab=xlab,ylab=ylab,axes=FALSE,xticks=xticks,yticks=yticks,xlim=xlimits,ylim=ylimits)
+      thisoutput <- list()
+      thisoutput[['cortest']] <- cor.test(X,Y)
+      thisoutput[['linearm']] <- summary(lm(Y ~ X))
+      output[[toupper(sprintf('%s %s\n',group,movement))]] <- thisoutput
+      
+      colors = c(Transparent,Solid)
+      
+      plotCorrelationWithCI(X=X,Y=Y,colors=colors)
       
     }
+    
+    legend(-3,-3,c('active','passive'),col=legendlinecolors,lwd=c(2,2),bty='n')
+    
+    if (length(xticks)) {
+      axis(1,at=xticks)
+    }
+    if (length(yticks)) {
+      axis(2,at=yticks)
+    }
+    
   }
+  
+  return(output)
   
 }
 
 plotCorrelationWithCI <- function(X,Y,colors=c('black','red'),main='main title',xlab='x',ylab='y',axes=FALSE,xticks=c(),yticks=c(),xlim=NULL,ylim=NULL) {
   
-  plot(X, Y, col=colors[1], main=main, xlab=xlab, ylab=ylab, asp=1, axes=axes, xlim=xlim, ylim=ylim)
   # fit regression model
-  
-  lines(c(0,0),ylim,col=colors[1])
-  lines(xlim,c(0,0),col=colors[1])
-  
-  
   this.lm <- lm(Y ~ X)
-  # and use that to show a line:
-  abline(this.lm$coefficients, col=colors[2])
   
   # now show the confidence interval
   pointlocs <- seq(min(X),max(X),.1)
   
-  lines(
-    x   = pointlocs,
-    y   = predict( this.lm, 
-                   newdata=data.frame(X=pointlocs), 
-                   interval = "confidence" )[ , "upr" ],
-    col = colors[2],
-    lty = 2)
+  # lines(
+  #   x   = pointlocs,
+  #   y   = predict( this.lm, 
+  #                  newdata=data.frame(X=pointlocs), 
+  #                  interval = "confidence" )[ , "upr" ],
+  #   col = colors[2],
+  #   lty = 2)
+  # 
+  # lines(
+  #   x   = pointlocs,
+  #   y   = predict( this.lm, 
+  #                  newdata=data.frame(X=pointlocs), 
+  #                  interval = "confidence" )[ , "lwr" ],
+  #   col = colors[2],
+  #   lty = 2)
   
-  lines(
-    x   = pointlocs,
-    y   = predict( this.lm, 
-                   newdata=data.frame(X=pointlocs), 
-                   interval = "confidence" )[ , "lwr" ],
-    col = colors[2],
-    lty = 2)
+  y1 = predict( this.lm, newdata=data.frame(X=pointlocs), interval = "confidence" )[ , "upr" ]
+  y2 = predict( this.lm, newdata=data.frame(X=pointlocs), interval = "confidence" )[ , "lwr" ]
   
-  if (length(xticks)) {
-    axis(1,at=xticks)
-  }
-  if (length(yticks)) {
-    axis(2,at=yticks)
-  }
+  polygon(c(pointlocs,rev(pointlocs)),c(y1,rev(y2)), col=colors[1], border=NA)
+  
+  # and use that to show a line:
+  lines(range(X), predict(this.lm, newdata=data.frame(X=range(X))), col=colors[2], lwd=2)
+  
 }

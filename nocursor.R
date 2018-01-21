@@ -91,29 +91,29 @@ plotReachAftereffects <- function() {
   
   plot(-1000,-1000, main='decay of reach aftereffects', xlab='target angle [deg]', ylab='reach endpoint deviation [deg]', xlim=c(10,80), ylim=c(0,15), axes=F)
   
-  polygon(X,expYrem,border=NA,col=rgb(0.25, 0.25, 1,   .2))
-  polygon(X,expY,   border=NA,col=rgb(0,    0,    .75, .2))
+  polygon(X,expYrem,border=NA,col=colorset[['extra1T']])
+  polygon(X,expY,   border=NA,col=colorset[['expActT']])
   
-  lines(points,exposureAVGrem$endpoint_angle,col=rgb(0.25,0.25,1),lty=2)
-  lines(points,exposureAVG$endpoint_angle,col=rgb(0,0,.75))
+  lines(points,exposureAVGrem$endpoint_angle,col=colorset[['extra1S']],lty=2,lwd=2)
+  lines(points,exposureAVG$endpoint_angle,col=colorset[['expActS']],lwd=2)
   
   axis(1,at=points)
   axis(2,at=c(0,5,10,15))
   
-  legend(10,15,c('immediate (iteration 1)','delayed (iterations 2-5)'),col=c(rgb(0,0,0.75),rgb(0.25,0.25,1)),lty=c(1,2),bty='n')
+  legend(10,15,c('immediate (iteration 1)','delayed (iterations 2-5)'),col=c(colorset[['expActS']],colorset[['extra1S']]),lty=c(1,2),lwd=c(2,2),bty='n')
   
   plot(-1000,-1000, main='reach aftereffects', xlab='target angle [deg]', ylab='reach endpoint deviation [deg]', xlim=c(10,80), ylim=c(0,15), axes=F)
   
-  polygon(X,claY, border=NA,col=rgb(1,    0,    0,   .2))
-  polygon(X,expY, border=NA,col=rgb(0,    0,    .75, .2))
+  polygon(X,claY, border=NA,col=colorset[['claActT']])
+  polygon(X,expY, border=NA,col=colorset[['expActT']])
   
-  lines(points,classicAVG$endpoint_angle,col=rgb(1.0,0,0))
-  lines(points,exposureAVG$endpoint_angle,col=rgb(0,0,.75))
+  lines(points,classicAVG$endpoint_angle,col=colorset[['claActS']],lwd=2)
+  lines(points,exposureAVG$endpoint_angle,col=colorset[['expActS']],lwd=2)
 
   axis(1,at=points)
   axis(2,at=c(0,5,10,15))
   
-  legend(10,15,c('exposure','classic'),col=c(rgb(0,0,.75),rgb(1,0,0)),lty=c(1,1),bty='n')
+  legend(10,15,c('exposure','classic'),col=c(colorset[['expActS']],colorset[['claActS']]),lty=c(1,1),lwd=c(2,2),bty='n')
   
 }
 
@@ -277,7 +277,7 @@ exposureAftereffectsPersistent <- function() {
   
 }
 
-exposureClassicReachAftereffects <- function() {
+exposureClassicReachAftereffects <- function(noTarget=FALSE) {
   
   default.contrasts <- options('contrasts')
   options(contrasts=c('contr.sum','contr.poly'))
@@ -296,8 +296,13 @@ exposureClassicReachAftereffects <- function() {
   
   attach(RAE)
   
-  cat('\nLME with session and target as fixed effects, and participant as random effect:\n\n')
-  print(Anova(lme(endpoint_angle ~ training * target, random = ~1|participant, na.action=na.exclude), type=3))
+  if (noTarget) {
+    cat('\nLME with training type as fixed effects (without interacting), and participant and target as random effect:\n\n')
+    print(Anova(lme(endpoint_angle ~ training, random = ~1|participant/target, na.action=na.exclude), type=3))
+  } else {
+    cat('\nLME with training type and target as fixed effects, and participant as random effect:\n\n')
+    print(Anova(lme(endpoint_angle ~ training * target, random = ~1|participant, na.action=na.exclude), type=3))
+  }
   
   detach(RAE)
   
