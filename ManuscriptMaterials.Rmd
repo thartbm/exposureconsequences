@@ -15,7 +15,7 @@ opts_chunk$set(comment='')
 
 # Overview
 
-Here I collect the 'right' statistics and figures for the exposure consequences project.
+This is a collection of statistics and figures for the manuscript on the exposure consequences project.
 
 Here are the planned figures and tables:
 
@@ -69,9 +69,11 @@ In the manuscript we'll first show that there are motor changes after exposure t
 
 Here is a plot, probably Figure 2:
 
-```{r fig.width=10, fig.height=4}
+```{r fig.width=7.5, fig.height=4}
 plotReachAftereffects()
 ```
+
+_For Panel B: We're not really interested in reach aftereffects per se. One focus of this plot/analyses could be the motor changes evoked by the two different types of training. Then it would make more sense to use the initial rotated no-cursor block (I think this is what it does now), as they are directly evoked by the training, and could reflect the motor changes themselves better. Or do we want to focus on the motor changes that are present throughout localization? In that case it makes more sense to use the four later tasks, as they decay stops fairly quickly, so these might be said to better reflect the motor changes that are present throughout the localization tasks. We could also use some average... I can see it many different ways, just want to have a clear strategy here._
 
 Messages of the figure:
 
@@ -129,7 +131,7 @@ To sum up:
 
 Here is a plot, probably figure 3:
 
-```{r fig.width=10, fig.height=4}
+```{r fig.width=7.5, fig.height=4}
 plotLocalization()
 ```
 
@@ -214,6 +216,8 @@ According to all these analyses, the generalization is not appreciably different
 
 In this section we look at how recalibrated proprioception (hand localization) correlates with reach aftereffects.
 
+_I'm not sure if we should use the initial reach aftereffects here, or the four later blocks. Unfortunately, it does matter for the results, but I don't want to choose with hindsight._
+
 This plot shows regression lines with localization shifts as predictor of reach aftereffects:
 
 ```{r fig.width=7.5, fig.height=4}
@@ -222,7 +226,7 @@ correlations <- correlateNoCursorsLocalization()
 
 It looks like for exposure, active localization is the better predictor of reach aftereffects, whereas in classic it is passive localization. But are any of them real?
 
-## Correlations
+## Pearons Correlations
 
 As one possibility, we can look at the correlations. Not just the p-values, but there are confidence intervals for Pearson's $\rho$, which allow to directly see if one correlation is stronger/weaker than another:
 
@@ -232,6 +236,8 @@ for (name in names(correlations)) {
   print(correlations[[name]][['cortest']])
 }
 ```
+
+## Linear regression models
 
 And those linear regression models?
 

@@ -9,16 +9,16 @@ localizationURLs <- c('exposure'='https://osf.io/pqsdc/?action=download', 'class
 # we'll control the color in figures centrally from here:
 colorset <- list()
 
-colorset[['expActS']] <- '#005de4ff'
+colorset[['expActS']] <- '#005de4ff' # blue
 colorset[['expActT']] <- '#005de42f'
-colorset[['expPasS']] <- '#2ab2f2ff'
+colorset[['expPasS']] <- '#2ab2f2ff' # lighter blue
 colorset[['expPasT']] <- '#2ab2f22f'
-colorset[['claActS']] <- '#ff0000ff'
-colorset[['claActT']] <- '#ff00002f'
-colorset[['claPasS']] <- '#ff8200ff'
+colorset[['claActS']] <- '#e51636ff' # "York red"
+colorset[['claActT']] <- '#e516362f'
+colorset[['claPasS']] <- '#ff8200ff' # orange
 colorset[['claPasT']] <- '#ff82002f'
 
-colorset[['extra1S']] <- '#c400c4ff'
+colorset[['extra1S']] <- '#c400c4ff' # purple
 colorset[['extra1T']] <- '#c400c42f'
 
 

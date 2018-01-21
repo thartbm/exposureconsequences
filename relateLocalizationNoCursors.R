@@ -3,7 +3,7 @@ source('shared.R')
 
 
 
-correlateNoCursorsLocalization <- function() {
+correlateNoCursorsLocalization <- function(NCpart='all') {
   
   # first we do all responses, plan to split it by target later
   # get all data, for classic and exposure, we need localization and reach aftereffects
@@ -22,7 +22,7 @@ correlateNoCursorsLocalization <- function() {
   local.exp.pas$taperror_deg <- local.exp.pas$taperror_deg - loc.exp.pas.al$taperror_deg
   
   # REACH AFTEREFFECTS for exposure
-  nocur.exp <- getReachAftereffects(group='exposure', part='all', clean=TRUE) 
+  nocur.exp <- getReachAftereffects(group='exposure', part=NCpart, clean=TRUE) 
   names(nocur.exp)[names(nocur.exp) == 'endpoint_angle'] <- 'RAE'
   # combine data frames for exposure
   exposure <- nocur.exp[which(nocur.exp$participant %in% local.exp.act$participant),]
@@ -43,7 +43,7 @@ correlateNoCursorsLocalization <- function() {
   local.cla.pas$taperror_deg <- local.cla.pas$taperror_deg - loc.cla.pas.al$taperror_deg
   
   # REACH AFTEREFFECTS for classic
-  nocur.cla <- getReachAftereffects(group='classic', part='all', clean=TRUE) 
+  nocur.cla <- getReachAftereffects(group='classic', part=NCpart, clean=TRUE) 
   names(nocur.cla)[names(nocur.cla) == 'endpoint_angle'] <- 'RAE'
   # combine the dataframes for classic:
   classic <- nocur.cla[which(nocur.cla$participant %in% local.cla$participant),]
