@@ -81,7 +81,7 @@ BS.interval = function(data, conf.level = .95, bootstraps = 1000) {
   
 }
 
-bootstrapGaussianPeak <- function(data,bootstraps=1000,mu=47.5,sigma=30,scale=10,offset=4) {
+bootstrapGaussianPeak <- function(data,bootstraps=1000,mu=47.5,sigma=30,scale=10,offset=4,CIs=c(.95)) {
   
   # parallel for-loop?
   installRequire.Packages(c('foreach','doParallel'))
@@ -104,7 +104,12 @@ bootstrapGaussianPeak <- function(data,bootstraps=1000,mu=47.5,sigma=30,scale=10
   
   stopCluster(cl)
   
-  return(quantile(mus,probs=c(.025,.05,.10,.50,.90,.95,.975)))
+  probs <- c(.50)
+  for (CI in CIs) {
+    probs <- c(((1-CI)/2), probs, 1-((1-CI)/2))
+  }
+  # c(.025,.05,.10,.50,.90,.95,.975)
+  return(quantile(mus,probs=probs))
   
 }
 

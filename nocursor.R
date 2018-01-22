@@ -72,35 +72,39 @@ plotReachAftereffects <- function() {
   
   points <- c(15,25,35,45,55,65,75)
   
-  exposure <- getReachAftereffects('exposure',part='initial')
-  classic  <- getReachAftereffects('classic',part='initial')
+  exposure_ini <- getReachAftereffects('exposure',part='initial')
   exposure_rem <- getReachAftereffects('exposure',part='remainder')
+  classic  <- getReachAftereffects('classic',part='all')
+  exposure <- getReachAftereffects('exposure',part='all')
   
-  exposureAVG <- aggregate(endpoint_angle ~ target, data=exposure, FUN=mean)
-  classicAVG <- aggregate(endpoint_angle ~ target, data=classic, FUN=mean)
+  exposureAVGini <- aggregate(endpoint_angle ~ target, data=exposure_ini, FUN=mean)
   exposureAVGrem <- aggregate(endpoint_angle ~ target, data=exposure_rem, FUN=mean)
+  classicAVG <- aggregate(endpoint_angle ~ target, data=classic, FUN=mean)
+  exposureAVG <- aggregate(endpoint_angle ~ target, data=exposure, FUN=mean)
   
-  exposureCI <- matrix(unlist(by(exposure$endpoint_angle, INDICES=c(exposure$target), FUN=t.interval)),nrow=2)
-  classicCI <- matrix(unlist(by(classic$endpoint_angle, INDICES=c(classic$target), FUN=t.interval)),nrow=2)
+  exposureCIini <- matrix(unlist(by(exposure_ini$endpoint_angle, INDICES=c(exposure_ini$target), FUN=t.interval)),nrow=2)
   exposureCIrem <- matrix(unlist(by(exposure_rem$endpoint_angle, INDICES=c(exposure_rem$target), FUN=t.interval)),nrow=2)
+  classicCI <- matrix(unlist(by(classic$endpoint_angle, INDICES=c(classic$target), FUN=t.interval)),nrow=2)
+  exposureCI <- matrix(unlist(by(exposure$endpoint_angle, INDICES=c(exposure$target), FUN=t.interval)),nrow=2)
   
   X <- c(points, rev(points))
-  expY <- c(exposureCI[1,],rev(exposureCI[2,]))
+  expYini <- c(exposureCIini[1,],rev(exposureCIini[2,]))
   expYrem <- c(exposureCIrem[1,],rev(exposureCIrem[2,]))
   claY <- c(classicCI[1,],rev(classicCI[2,]))
+  expY <- c(exposureCI[1,],rev(exposureCI[2,]))
   
   plot(-1000,-1000, main='decay of reach aftereffects', xlab='target angle [deg]', ylab='reach endpoint deviation [deg]', xlim=c(10,80), ylim=c(0,15), axes=F)
   
-  polygon(X,expYrem,border=NA,col=colorset[['extra1T']])
-  polygon(X,expY,   border=NA,col=colorset[['expActT']])
+  polygon(X,expYrem,border=NA,col=colorset[['expActT']])
+  polygon(X,expYini,border=NA,col=colorset[['extra1T']])
   
-  lines(points,exposureAVGrem$endpoint_angle,col=colorset[['extra1S']],lty=2,lwd=2)
-  lines(points,exposureAVG$endpoint_angle,col=colorset[['expActS']],lwd=2)
+  lines(points,exposureAVGrem$endpoint_angle,col=colorset[['expActS']],lty=2,lwd=2)
+  lines(points,exposureAVGini$endpoint_angle,col=colorset[['extra1S']],lwd=2)
   
   axis(1,at=points)
   axis(2,at=c(0,5,10,15))
   
-  legend(10,15,c('immediate (iteration 1)','delayed (iterations 2-5)'),col=c(colorset[['expActS']],colorset[['extra1S']]),lty=c(1,2),lwd=c(2,2),bty='n')
+  legend(10,15,c('immediate (iteration 1)','delayed (iterations 2-5)'),col=c(colorset[['extra1S']],colorset[['expActS']]),lty=c(1,2),lwd=c(2,2),bty='n')
   
   plot(-1000,-1000, main='reach aftereffects', xlab='target angle [deg]', ylab='reach endpoint deviation [deg]', xlim=c(10,80), ylim=c(0,15), axes=F)
   
@@ -117,7 +121,7 @@ plotReachAftereffects <- function() {
   
 }
 
-getPeakConfidenceInterval <- function(group,validate=FALSE,part='initial') {
+getPeakConfidenceInterval <- function(group,validate=FALSE,part='initial',CIs=c(.95)) {
   
   RAE <- getReachAftereffects(group, part=part)
   
@@ -129,7 +133,7 @@ getPeakConfidenceInterval <- function(group,validate=FALSE,part='initial') {
   
   RAE <- xtabs(endpoint_angle~.,RAE)
   
-  bootstrapGaussianPeak(data=RAE,bootstraps=1000,mu=47.5,sigma=30,scale=10,offset=4)
+  bootstrapGaussianPeak(data=RAE,bootstraps=1000,mu=47.5,sigma=30,scale=10,offset=4,CIs=CIs)
   
 }
 
@@ -282,8 +286,8 @@ exposureClassicReachAftereffects <- function(noTarget=FALSE) {
   default.contrasts <- options('contrasts')
   options(contrasts=c('contr.sum','contr.poly'))
   
-  exp <- getReachAftereffects('exposure', part='initial', difference=TRUE)
-  cla <- getReachAftereffects('classic', part='initial', difference=TRUE)
+  exp <- getReachAftereffects('exposure', part='all', difference=TRUE)
+  cla <- getReachAftereffects('classic', part='all', difference=TRUE)
   
   exp$training <- 1
   cla$training <- 2

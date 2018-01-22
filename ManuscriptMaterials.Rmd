@@ -73,7 +73,7 @@ Here is a plot, probably Figure 2:
 plotReachAftereffects()
 ```
 
-_For Panel B: We're not really interested in reach aftereffects per se. One focus of this plot/analyses could be the motor changes evoked by the two different types of training. Then it would make more sense to use the initial rotated no-cursor block (I think this is what it does now), as they are directly evoked by the training, and could reflect the motor changes themselves better. Or do we want to focus on the motor changes that are present throughout localization? In that case it makes more sense to use the four later tasks, as they decay stops fairly quickly, so these might be said to better reflect the motor changes that are present throughout the localization tasks. We could also use some average... I can see it many different ways, just want to have a clear strategy here._
+_For Panel B: Earlier I used the initial block for this plot, but after discussion, we decided to use all data: there's no significant difference between the initial and other blocks, but using all data allows more accurate estimates._
 
 Messages of the figure:
 
@@ -84,7 +84,7 @@ These claims require analyses.
 
 ## Is there an effect of exposure training on reach aftereffects?
 
-First, we show that no-cursor reaches change direction after exposure training:
+First, we show that no-cursor reaches change direction immediately after exposure training (iteration 1):
 
 ```{r include=TRUE}
 exposureNoCursorChange()
@@ -112,14 +112,26 @@ exposureClassicReachAftereffects()
 
 I'd have expected there to be some difference between the two training types, perhaps only in interaction with target, but that's not the case apparently.
 
-Let's minimize the potential explanatory power of the target by removing it from the model:
+The absence of an interaction between training and target could be interpreted to mean that the generalization of reach aftereffects is the same after both kinds of training. Here are the confidence intervals for both:
+
+
+```{r}
+cat('\nCLASSIC\n\n')
+getPeakConfidenceInterval('classic',part='all',CIs=c(.95))
+cat('\nEXPOSURE\n\n')
+getPeakConfidenceInterval('exposure',part='all',CIs=c(.95))
+```
+
+Although the two peaks are not different from each other, the 95% confidence interval for the classically trained group includes the 45 degree target (where the visual feedback was during training), whereas the 95% confidence interval for the exposure training group includes the 75 degree target (where the hand really was during training). So something might be going on -- but the evidence is far from concrete.
+
+Let's go back to seeing if there is any effect from training type on reach aftereffects at all, and minimize the potential explanatory power of target by removing it from the model:
 
 
 ```{r}
 exposureClassicReachAftereffects(noTarget=TRUE)
 ```
 
-This doesn't seem to change anything, so that whether or not we account for any effects of target direction, there is no overall effect of training with volitional movements (classic) or passive movements (exposure) on -- the amplitude of -- reach aftereffects.
+This doesn't seem to change one iota, so that whether or not we account for any effects of target direction, there is no overall effect of training with volitional movements (classic) or passive movements (exposure) on -- the amplitude of -- reach aftereffects.
 
 To sum up:
 
