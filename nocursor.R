@@ -123,6 +123,8 @@ plotReachAftereffects <- function() {
 
 getPeakConfidenceInterval <- function(group,validate=FALSE,part='initial',CIs=c(.95)) {
   
+  cat(sprintf('\n%s\n\n',toupper(group)))
+  
   RAE <- getReachAftereffects(group, part=part)
   
   if (validate) {

@@ -25,15 +25,25 @@ colorset[['extra1T']] <- '#c400c42f'
 installRequire.Packages <- function(packages) {
   
   installed.list <- rownames(installed.packages())
+  missingpackages <- c()
   
   for (pkg in packages) {
     
     if (!pkg %in% installed.list) {
-      install.packages(pkg,dep=TRUE)
+      # we can't force people to install packages, instead, we'll warn them
+      #install.packages(pkg,dep=TRUE)
+      missingpackages <- c(missingpackages, pkg)
     }
     
     require(pkg, character.only=TRUE)
     
+  }
+  
+  if (length(missingpackages) > 0) {
+    cat('\nWARNING, some pacakages are missing:\n')
+    cat(missingpackages)
+    cat('\ncar and nlme are required to reproduce the analyses\n')
+    cat('\nforeach and doParallel speed up a few functions\n')
   }
   
 }
@@ -84,25 +94,57 @@ BS.interval = function(data, conf.level = .95, bootstraps = 1000) {
 bootstrapGaussianPeak <- function(data,bootstraps=1000,mu=47.5,sigma=30,scale=10,offset=4,CIs=c(.95)) {
   
   # parallel for-loop?
-  installRequire.Packages(c('foreach','doParallel'))
+  # installRequire.Packages(c('foreach','doParallel'))
   
-  cores=detectCores()
-  # very friendly for the rest of the system
-  usecores <- max(1, ceiling((cores[1] / 2) - 1))
-  cl <- makeCluster(usecores)
-  registerDoParallel(cl)
-  
-  x <- as.numeric(names(colMeans(data)))
-  
-  mus <- foreach (iteration=1:bootstraps, .combine=rbind, .export=c('getGaussianFit','GaussianErrors','parGaussian')) %dopar% {
-    
-    y <- colMeans(data[sample(row.names(data),size=nrow(data),replace=TRUE),])
-    
-    as.numeric(getGaussianFit(x,y,mu=47.5,sigma=30,scale=10,offset=4)$par['mu'])
-    
+  installed.list <- rownames(installed.packages())
+  packages <- c('foreach','doParallel')
+  allInstalled <- TRUE
+  for (pkg in packages) {
+    if (!pkg %in% installed.list) {
+      allInstalled <- FALSE
+    } else {
+      require(pkg, character.only=TRUE)
+    }
   }
   
-  stopCluster(cl)
+  # these are.... the hand angles / targets?
+  x <- as.numeric(names(colMeans(data)))
+  
+  if (allInstalled) {
+    cores=detectCores()
+    
+    # very friendly for the rest of the system
+    usecores <- max(1, ceiling((cores[1] / 2) - 1))
+    # somewhat friendly for the rest of the system
+    usecores <- max(1, (cores[1] - 1))
+    
+    
+    cl <- makeCluster(usecores)
+    registerDoParallel(cl)
+    
+    mus <- foreach (iteration=1:bootstraps, .combine=rbind, .export=c('getGaussianFit','GaussianErrors','parGaussian')) %dopar% {
+      
+      y <- colMeans(data[sample(row.names(data),size=nrow(data),replace=TRUE),])
+      
+      as.numeric(getGaussianFit(x,y,mu=47.5,sigma=30,scale=10,offset=4)$par['mu'])
+      
+    }
+    
+    stopCluster(cl)
+    
+  } else {
+    
+    mus <- c()
+    
+    for (iteration in c(1:bootstraps)) {
+      
+      y <- colMeans(data[sample(row.names(data),size=nrow(data),replace=TRUE),])
+      
+      mus <- c(mus, as.numeric(getGaussianFit(x,y,mu=47.5,sigma=30,scale=10,offset=4)$par['mu']))
+      
+    }
+    
+  }
   
   probs <- c(.50)
   for (CI in CIs) {

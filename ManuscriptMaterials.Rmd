@@ -1,9 +1,9 @@
 ---
 title: "Exposure Consequences - Statistics and Figures"
 output:
-  pdf_document:
-    number_sections: yes
   html_notebook:
+    number_sections: yes
+  pdf_document:
     number_sections: yes
 ---
 
@@ -116,13 +116,11 @@ The absence of an interaction between training and target could be interpreted t
 
 
 ```{r}
-cat('\nCLASSIC\n\n')
 getPeakConfidenceInterval('classic',part='all',CIs=c(.95))
-cat('\nEXPOSURE\n\n')
 getPeakConfidenceInterval('exposure',part='all',CIs=c(.95))
 ```
 
-Although the two peaks are not different from each other, the 95% confidence interval for the classically trained group includes the 45 degree target (where the visual feedback was during training), whereas the 95% confidence interval for the exposure training group includes the 75 degree target (where the hand really was during training). So something might be going on -- but the evidence is far from concrete.
+Although the two peaks are not different from each other, the 95% confidence interval for the classically trained group includes the 45 degree target (where the visual feedback was during training) but not the 75 degree target, whereas the 95% confidence interval for the exposure training group includes the 75 degree target (where the hand really was during training) but not the 45 degree target. Something might be going on -- but the evidence is far from concrete.
 
 Let's go back to seeing if there is any effect from training type on reach aftereffects at all, and minimize the potential explanatory power of target by removing it from the model:
 
