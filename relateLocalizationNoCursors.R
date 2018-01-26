@@ -134,6 +134,51 @@ correlateNoCursorsLocalization <- function(NCpart='all') {
   
 }
 
+
+multipleRegressionLocalization <- function(group,NCpart='all',expart='all',LRpart='all') {
+  
+  # first we do all responses, plan to split it by target later
+  # get all data, for classic and exposure, we need localization and reach aftereffects
+  
+  # LOCALIZATION SHIFT
+  local <- getPointLocalization(group=group, difference=FALSE, verbose=FALSE, LRpart=LRpart)
+  # active
+  loc.act.ro <- aggregate(taperror_deg ~ participant + handangle_deg, data=local[local$rotated_b == 1 & local$passive_b == 0,], FUN=mean, drop=FALSE)
+  loc.act.al <- aggregate(taperror_deg ~ participant + handangle_deg, data=local[local$rotated_b == 0 & local$passive_b == 0,], FUN=mean, drop=FALSE)
+  local.act <- loc.act.ro
+  local.act$taperror_deg <- local.act$taperror_deg - loc.act.al$taperror_deg
+  # passive
+  loc.pas.ro <- aggregate(taperror_deg ~ participant + handangle_deg, data=local[local$rotated_b == 1 & local$passive_b == 1,], FUN=mean, drop=FALSE)
+  loc.pas.al <- aggregate(taperror_deg ~ participant + handangle_deg, data=local[local$rotated_b == 0 & local$passive_b == 1,], FUN=mean, drop=FALSE)
+  local.pas <- loc.pas.ro
+  local.pas$taperror_deg <- local.pas$taperror_deg - loc.pas.al$taperror_deg
+  
+  # REACH AFTEREFFECTS
+  nocur <- getReachAftereffects(group=group, part=NCpart, clean=TRUE) 
+  names(nocur)[names(nocur) == 'endpoint_angle'] <- 'RAE'
+  # combine data frames
+  df <- nocur[which(nocur$participant %in% local.act$participant),]
+  df$active <- local.act$taperror_deg
+  df$passive <- local.pas$taperror_deg
+  
+
+  # the correlations are polluted by the generalization curve... let's remove that!
+  
+  # and for exposure too
+  df.tmp <- df[which(df$target %in% c(35,45,55,65)),]
+  df <- aggregate(RAE ~ participant, data=df.tmp, FUN=mean, na.rm=TRUE, drop=FALSE)
+  df$active <- aggregate(active ~ participant, data=df.tmp, FUN=mean, na.rm=TRUE, drop=FALSE)$active
+  df$passive <- aggregate(passive ~ participant, data=df.tmp, FUN=mean, na.rm=TRUE, drop=FALSE)$passive
+  
+  cat(sprintf('\n%s\n\n',toupper(group)))
+  
+  fm <- step(lm(RAE ~ active + passive, data=df))
+    
+  print(summary(fm))
+  
+}
+
+
 plotCorrelationWithCI <- function(X,Y,colors=c('black','red'),main='main title',xlab='x',ylab='y',axes=FALSE,xticks=c(),yticks=c(),xlim=NULL,ylim=NULL) {
   
   # fit regression model

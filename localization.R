@@ -163,8 +163,10 @@ plotLocalization <- function() {
   polygon(X,exp.act.Y,border=NA,col=colorset[['expActT']])
   polygon(X,exp.pas.Y,border=NA,col=colorset[['expPasT']])
   
-  lines(points,exp.avg.act$taperror_deg,col=colorset[['expActS']],lty=1,lwd=2)
-  lines(points,exp.avg.pas$taperror_deg,col=colorset[['expPasS']],lty=1,lwd=2)
+  lines(points[1:2],exp.avg.act$taperror_deg[1:2],col=colorset[['expActS']],lty=2,lwd=2)
+  lines(points[2:7],exp.avg.act$taperror_deg[2:7],col=colorset[['expActS']],lty=1,lwd=2)
+  lines(points[1:2],exp.avg.pas$taperror_deg[1:2],col=colorset[['expPasS']],lty=2,lwd=2)
+  lines(points[2:7],exp.avg.pas$taperror_deg[2:7],col=colorset[['expPasS']],lty=1,lwd=2)
   
   axis(1,at=points)
   axis(2,at=c(0,-5,-10,-15))
@@ -182,8 +184,10 @@ plotLocalization <- function() {
   polygon(X,cla.act.Y,border=NA,col=colorset[['claActT']])
   polygon(X,cla.pas.Y,border=NA,col=colorset[['claPasT']])
   
-  lines(points,cla.avg.act$taperror_deg,col=colorset[['claActS']],lty=1,lwd=2)
-  lines(points,cla.avg.pas$taperror_deg,col=colorset[['claPasS']],lty=1,lwd=2)
+  lines(points[1:2],cla.avg.act$taperror_deg[1:2],col=colorset[['claActS']],lty=2,lwd=2)
+  lines(points[2:7],cla.avg.act$taperror_deg[2:7],col=colorset[['claActS']],lty=1,lwd=2)
+  lines(points[1:2],cla.avg.pas$taperror_deg[1:2],col=colorset[['claPasS']],lty=2,lwd=2)
+  lines(points[2:7],cla.avg.pas$taperror_deg[2:7],col=colorset[['claPasS']],lty=1,lwd=2)
   
   axis(1,at=points)
   axis(2,at=c(0,-5,-10,-15))
@@ -193,12 +197,16 @@ plotLocalization <- function() {
   
 }
 
-exposureLocalizationShift <- function() {
+exposureLocalization <- function(remove15=TRUE) {
   
   default.contrasts <- options('contrasts')
   options(contrasts=c('contr.sum','contr.poly'))
   
   exp <- getPointLocalization('exposure', difference=FALSE, verbose=FALSE)
+  
+  if (remove15) {
+    exp <- exp[-which(exp$handangle_deg == 15),]
+  }
   
   exp$participant   <- factor(exp$participant)
   exp$rotated_b    <- factor(exp$rotated_b)
@@ -216,12 +224,16 @@ exposureLocalizationShift <- function() {
   
 }
 
-exposureMovementType <- function(noHandAngle=FALSE) {
+exposureLocalizationShift <- function(noHandAngle=FALSE, remove15=TRUE) {
   
   default.contrasts <- options('contrasts')
   options(contrasts=c('contr.sum','contr.poly'))
   
   exp <- getPointLocalization('exposure', difference=TRUE, verbose=FALSE)
+  
+  if (remove15) {
+    exp <- exp[-which(exp$handangle_deg == 15),]
+  }
   
   exp$participant   <- factor(exp$participant)
   exp$passive_b     <- factor(exp$passive_b)
@@ -244,7 +256,7 @@ exposureMovementType <- function(noHandAngle=FALSE) {
   
 }
 
-exposureClassicLocalization <- function(model='full') {
+groupLocalization <- function(model='full',remove15=TRUE) {
   
   default.contrasts <- options('contrasts')
   options(contrasts=c('contr.sum','contr.poly'))
@@ -254,6 +266,10 @@ exposureClassicLocalization <- function(model='full') {
   
   loc <- rbind(exp, cla)
   
+  if (remove15) {
+    loc <- loc[-which(loc$handangle_deg == 15),]
+  }
+  
   loc$group         <- factor(loc$group)
   loc$participant   <- factor(loc$participant)
   loc$passive_b     <- factor(loc$passive_b)
@@ -261,18 +277,21 @@ exposureClassicLocalization <- function(model='full') {
   
   attach(loc)
   
-  cat('\nLME with group, hand angle and movement type as fixed effects, and participant as random effect:\n')
   if (model == 'full') {
-    cat('\n')
+    cat('\nLME with group, hand angle and movement type as fixed effects, and participant as random effect:\n\n')
     print(Anova(lme(taperror_deg ~ group * passive_b * handangle_deg, random = ~1|participant, na.action=na.exclude), type=3))
   }
   if (model == 'restricted') {
-    cat('(BUT not with all combinations of terms in the model)\n\n')
-    print(Anova(lme(taperror_deg ~ group + group:passive_b + group:handangle_deg, random = ~1|participant, na.action=na.exclude), type=3))
+    cat('\nLME with three terms only, removing some main effects and interactions:\n\n')
+    print(Anova(lme(taperror_deg ~ group + group:passive_b + group:handangle_deg, random = c(~1|passive_b, ~1|handangle_deg, ~1|participant), na.action=na.exclude), type=3))
   }
   if (model == 'handangle') {
-    cat('(BUT not with all combinations of terms in the model)\n\n')
-    print(Anova(lme(taperror_deg ~ group * handangle_deg, random = ~1|participant, na.action=na.exclude), type=3))
+    cat('\nLME with group and hand angle as fixed effects, and participant and movement type as random effects:\n\n')
+    print(Anova(lme(taperror_deg ~ group * handangle_deg, random = ~1|participant/taperror_deg, na.action=na.exclude), type=3))
+  }
+  if (model == 'movementtype') {
+    cat('\nLME with group and movement type as fixed effects and participant and hand angle as random effects:\n\n')
+    print(Anova(lme(taperror_deg ~ group * passive_b, random = ~1|participant/handangle_deg, na.action=na.exclude), type=3))
   }
   
   detach(loc)
@@ -281,12 +300,16 @@ exposureClassicLocalization <- function(model='full') {
   
 }
 
-classicMovementType <- function(factors='both') {
+classicLocalizationShift <- function(factors='both',remove15=TRUE) {
   
   default.contrasts <- options('contrasts')
   options(contrasts=c('contr.sum','contr.poly'))
   
   cla <- getPointLocalization('classic', difference=TRUE, verbose=FALSE)
+  
+  if (remove15) {
+    cla <- cla[-which(cla$handangle_deg == 15),]
+  }
   
   cla$participant   <- factor(cla$participant)
   cla$passive_b     <- factor(cla$passive_b)

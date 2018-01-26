@@ -1,10 +1,14 @@
 ---
 title: "Exposure Consequences - Statistics and Figures"
 output:
-  html_notebook:
-    number_sections: yes
   pdf_document:
     number_sections: yes
+    toc: true
+    toc_depth: 2
+  html_notebook:
+    number_sections: yes
+    toc: true
+    toc_depth: 2
 ---
 
 ```{r setup, cache=FALSE, include=FALSE}
@@ -15,11 +19,11 @@ opts_chunk$set(comment='')
 
 # Overview
 
-This is a collection of statistics and figures for the manuscript on the exposure consequences project.
+This document collects statistics and figures to be used in the manuscript on the exposure consequences project.
 
-Here are the planned figures and tables:
+## Figures
 
-**Figures**:
+These are the planned figures. Figure one will not be included here, and can in fact simply be re-used from the previous manuscript.
 
 1. Setup & Task (goal: visualize the experiment)
     + A: Setup (side view)
@@ -39,17 +43,19 @@ Maybe:
     + A: Exposure, active and passive localization predicting reach aftereffects
     + B: Classic, active and passive localization predicting reach aftereffects
 
-**Tables**:
+## Tables
+
+We expand the table used in the previous manuscript to include this paradigm as well.
 
 1. Task order & trial numbers (goal: clarify task order and show similarity between classic and exposure experiment - so probably after Fig 1)
 
 ## Source scripts
 
-All the scripts doing the statistics and figures are in separate R files, but here we will only see / do the ones that we think should go to the manuscript.
+The scripts doing the statistics and figures are in separate R files. They allow many options, but here we will only see / do the ones that we think should go to the manuscript.
 
 First we load those other scripts:
 
-```{r}
+```{r loadsources}
 source('shared.R') # functions used everywhere
 source('nocursor.R') # functions for no-cursor reach data
 source('localization.R') # functions for localization data
@@ -58,7 +64,7 @@ source('relateLocalizationNoCursors.R') # functions that correlate the two kinds
 
 ## Topics
 
-In the manuscript we'll first show that there are motor changes after exposure training (with the no-cursor data) and then compare that with the classic. Second is the localization: a) localization shifts after exposure b) the shifts are the same/different from those after classic c) the effects are different across the workspace d) this pattern is indistinguishable / different from that after classic. A third topic might be if localization shifts can predict no-cursor changes. Here we'll also follow this order:
+In the manuscript we'll first show that there are motor changes after exposure training (with the no-cursor data) and then compare that with the classic. Second is the localization: a) localization shifts after exposure b) the shifts are the same/different from those after classic c) the effects are different across the workspace d) this pattern is indistinguishable / different from that after classic. A third topic might be if localization shifts can predict no-cursor changes, which we'll call the "correlation"  topic. Here we'll also follow this order:
 
 1. Reach aftereffects
 2. Localization
@@ -69,7 +75,7 @@ In the manuscript we'll first show that there are motor changes after exposure t
 
 Here is a plot, probably Figure 2:
 
-```{r fig.width=7.5, fig.height=4}
+```{r fig2_reachaftereffect, fig.width=7.5, fig.height=4}
 plotReachAftereffects()
 ```
 
@@ -86,7 +92,7 @@ These claims require analyses.
 
 First, we show that no-cursor reaches change direction immediately after exposure training (iteration 1):
 
-```{r include=TRUE}
+```{r RAE_exposure,include=TRUE}
 exposureNoCursorChange()
 ```
 
@@ -96,7 +102,7 @@ So this shows that whether or not the feedback was rotated mattered for the reac
 
 The second analysis is to show that the reach aftereffects aren't all that different for first and later iterations of the rotated no-cursor tasks. (The baseline is always all aligned iterations of the task.)
 
-```{r}
+```{r RAE_exp_iterations}
 exposureAftereffectsPersistent()
 ```
 
@@ -106,7 +112,7 @@ So there is no effect of iteration here, which means the reach aftereffects are 
 
 Finally, we want to see if there is a difference between the reach aftereffects observed after exposure training and those after classic training.
 
-```{r}
+```{r RAE_exp_cla}
 exposureClassicReachAftereffects()
 ```
 
@@ -115,33 +121,24 @@ I'd have expected there to be some difference between the two training types, pe
 The absence of an interaction between training and target could be interpreted to mean that the generalization of reach aftereffects is the same after both kinds of training. Here are the confidence intervals for both:
 
 
-```{r}
+```{r RAE_peaks}
 getPeakConfidenceInterval('classic',part='all',CIs=c(.95))
 getPeakConfidenceInterval('exposure',part='all',CIs=c(.95))
 ```
 
 Although the two peaks are not different from each other, the 95% confidence interval for the classically trained group includes the 45 degree target (where the visual feedback was during training) but not the 75 degree target, whereas the 95% confidence interval for the exposure training group includes the 75 degree target (where the hand really was during training) but not the 45 degree target. Something might be going on -- but the evidence is far from concrete.
 
-Let's go back to seeing if there is any effect from training type on reach aftereffects at all, and minimize the potential explanatory power of target by removing it from the model:
-
-
-```{r}
-exposureClassicReachAftereffects(noTarget=TRUE)
-```
-
-This doesn't seem to change one iota, so that whether or not we account for any effects of target direction, there is no overall effect of training with volitional movements (classic) or passive movements (exposure) on -- the amplitude of -- reach aftereffects.
-
 To sum up:
 
-1. Rotated exposure training evokes substantial shifts in no-cursor reach direction,
-2. these changes persist over time somewhat, and
+1. Rotated exposure training evokes substantial shifts in no-cursor reach direction across the workspace,
+2. these changes persist over time, and
 3. these changes are comparable to the ones we found after classic training.
 
 # Localization
 
 Here is a plot, probably figure 3:
 
-```{r fig.width=7.5, fig.height=4}
+```{r fig3_localization, fig.width=7.5, fig.height=4}
 plotLocalization()
 ```
 
@@ -151,8 +148,8 @@ That looks OK to me. It seems that just like after classic training, there is a 
 
 We first want to see if there is any overall effect of aligned versus rotated training in the exposure group, with movement type and hand angle as fixed effects, and particiant as random effect.
 
-```{r}
-exposureLocalizationShift()
+```{r loc_exp}
+exposureLocalization()
 ```
 
 Wether or not the feedback was rotated makes a difference according to two terms in the model. In other words: exposure training caused localization responses to shift (systematically), as we could already guess by looking at the figure.
@@ -163,64 +160,42 @@ This means we can look at the difference between repsonses after rotated and aft
 
 Let's first see if there is a difference between active and passive localization after exposure training.
 
-```{r}
-exposureMovementType()
+```{r loc_exp_movtype}
+exposureLocalizationShift()
 ```
 
-It says there isn't, but let's make sure by not having hand angle in there as possibly stealing lots of variance.
-
-```{r}
-exposureMovementType(noHandAngle = TRUE)
-```
-
-OK, so that is pretty clear: there is no difference between passive and active localization after exposure training, even with double the number of trials as in classic delayed.
+There is no difference between passive and active localization after exposure training, even with double the number of trials as in classic delayed.
 
 ## Comparing localization after exposure and classic training
 
-Now, let's see how this absence of a difference compares to that the (previously found difference) after classic training. Let's do this with an LME without all possible combinations of factors. We're primarily interested in the possibility that the effect of movement type is there after classic training, but not after exposure (that's our hypothesis). We're also somewhat interested in the effect of hand angle being different between classic and exposure training.
+Let's see what we get in a model with all data (localization differences between rotated and aligned though) from both groups:
 
-```{r}
-exposureClassicLocalization(model='restricted')
+```{r loc_ombnibus}
+groupLocalization(model='full')
 ```
 
-This works: the interaction between group and movement type indicates that the effect of movement is different for the exposure and for the classic groups. Since it wasn't there at all for the exposure group, this means that there should be an effect of movement type in the classic group, which is an easily testable hypothesis. We also see an interaction between group and hand angle, which would mean that the shape of the generalization curve is different for the two groups. This seems to also be visible in the data, but would be worth probing a little further.
+In the exposure group there is no effect of movement type, but we see one here. This could be because the effect of movement type is much larger in the classic group. This would predict an interaction between group and movement type, but this is a trend at best (p=.056). Hence we tested for an effect of movement type in the classic group:
 
-However, we did this with a restricted model that only contained the terms of interest. Let's see if it is still there with a full model:
-
-```{r}
-exposureClassicLocalization(model='full')
+```{r loc_cla}
+classicLocalizationShift(remove15=TRUE)
+classicLocalizationShift(remove15=FALSE)
 ```
 
-Now it is only a trend, so let's follow this up with some deeper probing. In the restricted model there was also an interaction between group and hand angle which has all but vanished in the full model.
+So there is a fairly strong effect of movement type in the classic group. Together with the absence of an effect of movement type in the exposure group and a trend of an interaction between group and movement type, this might indicate a sub-threshold effect of movement type in the exposure group in the same direction as the effect of movement type in the classic group.
 
-## Effect of movement type after classic training
+Also note the absence of an effect of hand angle in the classic group here -- potentially because we excluded the 15 degree target.
 
-We already saw that in the exposure group there was an effect of hand angle, but not of movement type. How is this in the classic group?
+To sum up our findings on localization:
 
-```{r}
-classicMovementType()
-classicMovementType(factors='movementtype')
-```
+1. Rotated exposure training leads to changes in localization responses.
 
-Alright, so there is an effect of movement type here as well as of hand angle. Since the exposure group saw no effect of movement type in either analysis, whereas there is an effect of movement type in the classic group in both analyses, we can be fairly confident that if there is any effect of movement type after exposure training it will be smaller than after classic training. This is what we would expect from exposure training.
+2. In the exposure group, there is no effect of movement type: localization responses with and without efference copies are indistinguishable.
+3. In the classic group, there is an effect of movement type: localization responses informed by efference copies are shifted more than those with only proprioception (as found before).
+4. This predicts an interaction between movement type and group, but that is only a trend, suggesting that either the difference in the classic group is not so large, or that there is a small, sub-threshold difference in the exposure group.
 
-## Hand angle in classic training
+5. The shift in localization is different across the workspace in the exposure group. I.e., there is a generalization _curve_.
+6. This effect is not present in the classic group, so that generalization can be said to be flat; there is no _curve_. **NOTE:** When we do include the 15 degree target, there is an effect of hand angle though.
 
-We're still not too sure about the effect of hand angle though. In the figures the localization shift for the classic groups _appears_ more homogeneous across the workspace as compared to the exposure group, but is that a real effect?
-
-I'm not sure how to focus an analysis on that question, better than already done, except by using a model with only hand angle:
-
-```{r}
-classicMovementType(factors='handangle')
-```
-
-So yes, there is some generalization effect after classic training. We still want to know if it is different from the effect of hand angle in exposure.
-
-```{r}
-exposureClassicLocalization(model='handangle')
-```
-
-According to all these analyses, the generalization is not appreciably different between classic and exposure training.
 
 # Correlation
 
@@ -234,7 +209,7 @@ This plot shows regression lines with localization shifts as predictor of reach 
 correlations <- correlateNoCursorsLocalization()
 ```
 
-It looks like for exposure, active localization is the better predictor of reach aftereffects, whereas in classic it is passive localization. But are any of them real?
+It looks like for exposure, active localization is the better predictor of reach aftereffects, whereas in classic it is passive localization. But are any of them real? The function also returns the correlation tests and linear regressions for all four datasets.
 
 ## Pearons Correlations
 
@@ -251,11 +226,55 @@ for (name in names(correlations)) {
 
 And those linear regression models?
 
-```{r}
+```{r eval=FALSE, include=FALSE}
+# this code won't run or show up in output, just included here if you want to play with it:
 for (name in names(correlations)) {
   cat(name)
   print(correlations[[name]][['linearm']])
 }
 ```
 
-They get the same p-value, so that seems fine.
+[code/results hidden] They get the same p-value, so that seems fine.
+
+## Multiple regression models
+
+We've decided to use all the no-cursor blocks for these regression and correlations, so perhaps we shouldn't include the one below where I only use the initial block. The idea behind using only the initial block is that that initial block matches the time the localization is done -- relative to the last training.
+
+Here I do step-wise multiple regression, allowing active and passive localization shift as predictor of reach aftereffects. If I do this on all the no-cursor block data, the models converge on using the active localization for the exposure group, and passive localization for the classic group.
+
+If we look at only the initial no-cursor block, the story changes. It uses both active and passive to predict reach aftereffects for the exposure group, but converges on using only an intercept term for the classic group. This might mean that in te classic group there is no relationship between reach aftereffects and localization, or this might mean that in the exposure group we have sufficient amount of measurements to detect the relationship, as we have twice the number of localization trials. One way to rule this out is to use only the first half of the localization data from the exposure group.
+
+Here is what the step-wise multiple regressions look like with all available data:
+
+```{r}
+multipleRegressionLocalization(group='exposure',NCpart='initial')
+```
+
+No terms are dropped an the adjusted R squared of the full model is low, but reasonable. _Note that the coefficient for the passive localization is positive._
+
+For classic training, it looks like this:
+
+```{r}
+multipleRegressionLocalization(group='classic',NCpart='initial')
+```
+
+The step-wise multiple regression algorithm thinks an intercept-only model is best. Now is this because localization after classic training has little to no information on reach aftereffects, or is this because we have double the data in the exposure group? We can test this partially by throwing away the second half of the data for the exposure group:
+
+
+```{r}
+multipleRegressionLocalization(group='exposure',NCpart='initial', LRpart='first')
+```
+
+Now the passive localization shifts are thrown out by the algorithm and the active localization shifts don't contribute much either. This means that perhaps previous papers didn't find any relationships between recalibrated proprioception and reach aftereffects because not enough data was collected to overcome the noisiness of the measurements?
+
+It also makes me wonder if reach aftereffects in classic can be better predicted by the online localization responses:
+
+
+```{r}
+multipleRegressionLocalization(group='online',NCpart='initial')
+```
+
+So this doesn't work either. Does this mean that in previous experiments we just didn't have sufficiently good data to find any link between classic reach aftereffects and (2-AFC) proprioceptive recalibration?
+
+Do we still want to see online localization matches proprioception more, as claimed in Izawa et al., 2012? This would imply that it matches the exposure localization and/or reach aftereffects better...
+

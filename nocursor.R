@@ -14,57 +14,57 @@ installRequire.Packages(required.packages)
 # groupURLs <- c('exposure'='https://osf.io/9s6au/?action=download', 'classic'='https://osf.io/8hm7f/?action=download')
 
 
-# plot both groups reach aftereffects in one figure
-OLDplotReachAftereffects <- function(validate=FALSE) {
-  
-  points <- c(15,25,35,45,55,65,75)
-  
-  exposure <- getReachAftereffects('exposure',part='initial')
-  classic  <- getReachAftereffects('classic',part='initial')
-  exposure_rem <- getReachAftereffects('exposure',part='remainder')
-  classic_rem  <- getReachAftereffects('classic',part='remainder')
-  
-  if (validate) {
-    
-    validExp <- validateReachAftereffects('exposure')
-    validExpParticipants <- validExp$participant[which(validExp$RAE == 1)]
-    exposure <- exposure[which(exposure$participant %in% validExpParticipants),]
-
-    validCla <- validateReachAftereffects('classic')
-    validClaParticipants <- validCla$participant[which(validCla$RAE == 1)]
-    classic <- classic[which(classic$participant %in% validClaParticipants),]
-    
-  }
-  
-  exposureAVG <- aggregate(endpoint_angle ~ target, data=exposure, FUN=mean)
-  classicAVG <- aggregate(endpoint_angle ~ target, data=classic, FUN=mean)
-  
-  exposureAVGrem <- aggregate(endpoint_angle ~ target, data=exposure_rem, FUN=mean)
-  classicAVGrem <- aggregate(endpoint_angle ~ target, data=classic_rem, FUN=mean)
-  
-  exposureCI <- matrix(unlist(by(exposure$endpoint_angle, INDICES=c(exposure$target), FUN=t.interval)),nrow=2)
-  classicCI <- matrix(unlist(by(classic$endpoint_angle, INDICES=c(classic$target), FUN=t.interval)),nrow=2)
-  
-  X <- c(points, rev(points))
-  expY <- c(exposureCI[1,],rev(exposureCI[2,]))
-  claY <- c(classicCI[1,],rev(classicCI[2,]))
-  
-  plot(-1000,-1000, main='reach aftereffects', xlab='target angle [deg]', ylab='reach endpoint deviation [deg]', xlim=c(10,80), ylim=c(0,15), axes=F)
-  
-  polygon(X,claY,border=NA,col=rgb(1,0,0,.2))
-  polygon(X,expY,border=NA,col=rgb(0,0,1,.2))
-
-  lines(points,classicAVG$endpoint_angle,col=rgb(1,0,0))
-  lines(points,exposureAVG$endpoint_angle,col=rgb(0,0,1))
-  lines(points,classicAVGrem$endpoint_angle,col=rgb(1,0,0),lty=2)
-  lines(points,exposureAVGrem$endpoint_angle,col=rgb(0,0,1),lty=2)
-
-  axis(1,at=points)
-  axis(2,at=c(0,5,10,15))
-  
-  legend(10,15,c('exposure','classic'),col=c(rgb(0,0,1),rgb(1,0,0)),lty=c(1,1),bty='n')
-  
-}
+# # plot both groups reach aftereffects in one figure
+# OLDplotReachAftereffects <- function(validate=FALSE) {
+#   
+#   points <- c(15,25,35,45,55,65,75)
+#   
+#   exposure <- getReachAftereffects('exposure',part='initial')
+#   classic  <- getReachAftereffects('classic',part='initial')
+#   exposure_rem <- getReachAftereffects('exposure',part='remainder')
+#   classic_rem  <- getReachAftereffects('classic',part='remainder')
+#   
+#   if (validate) {
+#     
+#     validExp <- validateReachAftereffects('exposure')
+#     validExpParticipants <- validExp$participant[which(validExp$RAE == 1)]
+#     exposure <- exposure[which(exposure$participant %in% validExpParticipants),]
+# 
+#     validCla <- validateReachAftereffects('classic')
+#     validClaParticipants <- validCla$participant[which(validCla$RAE == 1)]
+#     classic <- classic[which(classic$participant %in% validClaParticipants),]
+#     
+#   }
+#   
+#   exposureAVG <- aggregate(endpoint_angle ~ target, data=exposure, FUN=mean)
+#   classicAVG <- aggregate(endpoint_angle ~ target, data=classic, FUN=mean)
+#   
+#   exposureAVGrem <- aggregate(endpoint_angle ~ target, data=exposure_rem, FUN=mean)
+#   classicAVGrem <- aggregate(endpoint_angle ~ target, data=classic_rem, FUN=mean)
+#   
+#   exposureCI <- matrix(unlist(by(exposure$endpoint_angle, INDICES=c(exposure$target), FUN=t.interval)),nrow=2)
+#   classicCI <- matrix(unlist(by(classic$endpoint_angle, INDICES=c(classic$target), FUN=t.interval)),nrow=2)
+#   
+#   X <- c(points, rev(points))
+#   expY <- c(exposureCI[1,],rev(exposureCI[2,]))
+#   claY <- c(classicCI[1,],rev(classicCI[2,]))
+#   
+#   plot(-1000,-1000, main='reach aftereffects', xlab='target angle [deg]', ylab='reach endpoint deviation [deg]', xlim=c(10,80), ylim=c(0,15), axes=F)
+#   
+#   polygon(X,claY,border=NA,col=rgb(1,0,0,.2))
+#   polygon(X,expY,border=NA,col=rgb(0,0,1,.2))
+# 
+#   lines(points,classicAVG$endpoint_angle,col=rgb(1,0,0))
+#   lines(points,exposureAVG$endpoint_angle,col=rgb(0,0,1))
+#   lines(points,classicAVGrem$endpoint_angle,col=rgb(1,0,0),lty=2)
+#   lines(points,exposureAVGrem$endpoint_angle,col=rgb(0,0,1),lty=2)
+# 
+#   axis(1,at=points)
+#   axis(2,at=c(0,5,10,15))
+#   
+#   legend(10,15,c('exposure','classic'),col=c(rgb(0,0,1),rgb(1,0,0)),lty=c(1,1),bty='n')
+#   
+# }
 
 plotReachAftereffects <- function() {
   

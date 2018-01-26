@@ -4,7 +4,7 @@
 nocursorURLs <- c('exposure'='https://osf.io/9s6au/?action=download', 'classic'='https://osf.io/8hm7f/?action=download')
 
 # no-cursor data can be downloaded from OSF:
-localizationURLs <- c('exposure'='https://osf.io/pqsdc/?action=download', 'classic'='https://osf.io/upw49/?action=download', 'online'='https://osf.io/wjcgk/download')
+localizationURLs <- c('exposure'='https://osf.io/yqkex/?action=download', 'classic'='https://osf.io/upw49/?action=download', 'online'='https://osf.io/wjcgk/download')
 
 # we'll control the color in figures centrally from here:
 colorset <- list()
@@ -205,53 +205,26 @@ parGaussian <- function(par,x) {
 
 # handling localization data -----
 
-# getANOVAlocalization <- function(group) {
-#   
-#   df <- load.DownloadDataframe(url=localizationURLs[group],filename=sprintf('localization_%s.csv',group))
-#   
-#   df <- aspligned(df)
-#   
-#   groupdf <- NA
-#   
-#   participants <- unique(df$participant)
-#   
-#   for (pp.no in c(1:length(participants))) {
-#     
-#     pp.id <- participants[pp.no]
-#     
-#     for (rotated in c(0,1)) {
-#       
-#       for (passive in c(0,1)) {
-#         
-#         subdf <- df[which(df$participant == pp.id & df$rotated_b == rotated & df$passive_b == passive),]
-#         
-#         locdf <- getLocalizationPoints(subdf, points=c(15,25,35,45,55,65,75), removeOutliers=TRUE)
-#         
-#         if (any(is.na(locdf$taperror_deg))) {
-#           cat(sprintf('WARNING: NAs in %s, pp:%s, %s/%s\n',group,pp.id,c('aligned','rotated')[rotated+1],c('active','passive')[passive+1]))
-#         }
-#         
-#         if (is.data.frame(groupdf)) {
-#           groupdf <- rbind(groupdf, locdf)
-#         } else {
-#           groupdf <- locdf
-#         }
-#         
-#       }
-#       
-#     }
-#     
-#   }
-#   
-#   return(groupdf)
-#   
-# }
-
-getPointLocalization <- function(group, difference=TRUE, points=c(15,25,35,45,55,65,75), movementtype='both', verbose=TRUE) {
+getPointLocalization <- function(group, difference=TRUE, points=c(15,25,35,45,55,65,75), movementtype='both', verbose=TRUE, LRpart='all') {
   
   df <- load.DownloadDataframe(url=localizationURLs[group],filename=sprintf('localization_%s.csv',group))
   
   df <- aspligned(df)
+  
+  
+  # we can select half the localization data... for the exposure group only
+  if (group == 'exposure') {
+    # print(str(groupdf))
+    if (LRpart == 'first') {
+      df <- df[which(df$iteration < 3),]
+    }
+    if (LRpart == 'second') {
+      df <- df[which(df$iteration > 2),]
+    }
+    # print(dim(groupdf))
+  } else {
+    cat('\nWARNING: Partial localization can not be returned for classic/online data.\n\n')
+  }
   
   groupdf <- NA
   
@@ -410,6 +383,10 @@ getLocalizationPoints <- function(subdf, points=c(15,25,35,45,55,65,75), removeO
 # for every group, this loads the no-cursor reach directions in all relevant tasks,
 # and calcuates the reach aftereffects from them
 getReachAftereffects <- function(group, part='all', clean=TRUE, difference=TRUE) {
+  
+  if (group == 'online') {
+    group <- 'classic'
+  }
   
   # load pre-processed data for the required group (no default)
   raw.df <- load.DownloadDataframe(url=nocursorURLs[group],filename=sprintf('nocursor_%s.csv',group))
