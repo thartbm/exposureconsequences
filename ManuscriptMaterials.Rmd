@@ -118,7 +118,7 @@ exposureClassicReachAftereffects()
 
 I'd have expected there to be some difference between the two training types, perhaps only in interaction with target, but that's not the case apparently.
 
-The absence of an interaction between training and target could be interpreted to mean that the generalization of reach aftereffects is the same after both kinds of training. Here are the confidence intervals for both:
+The absence of an interaction between training and target could be interpreted to mean that the generalization of reach aftereffects is the same after both kinds of training. Here are the confidence intervals for the peaks of both:
 
 
 ```{r RAE_peaks}
@@ -149,7 +149,7 @@ That looks OK to me. It seems that just like after classic training, there is a 
 We first want to see if there is any overall effect of aligned versus rotated training in the exposure group, with movement type and hand angle as fixed effects, and particiant as random effect.
 
 ```{r loc_exp}
-exposureLocalization()
+exposureLocalization(remove15=TRUE)
 ```
 
 Wether or not the feedback was rotated makes a difference according to two terms in the model. In other words: exposure training caused localization responses to shift (systematically), as we could already guess by looking at the figure.
@@ -161,7 +161,7 @@ This means we can look at the difference between repsonses after rotated and aft
 Let's first see if there is a difference between active and passive localization after exposure training.
 
 ```{r loc_exp_movtype}
-exposureLocalizationShift()
+exposureLocalizationShift(remove15=TRUE)
 ```
 
 There is no difference between passive and active localization after exposure training, even with double the number of trials as in classic delayed.
@@ -171,14 +171,13 @@ There is no difference between passive and active localization after exposure tr
 Let's see what we get in a model with all data (localization differences between rotated and aligned though) from both groups:
 
 ```{r loc_ombnibus}
-groupLocalization(model='full')
+groupLocalization(model='full',remove15=TRUE)
 ```
 
-In the exposure group there is no effect of movement type, but we see one here. This could be because the effect of movement type is much larger in the classic group. This would predict an interaction between group and movement type, but this is a trend at best (p=.056). Hence we tested for an effect of movement type in the classic group:
+In the exposure group there is no effect of movement type, but we see one here. This could be because the effect of movement type is much larger in the classic group. This would predict an interaction between group and movement type, but this is not even a trend (p=.133). Hence we tested for an effect of movement type in the classic group:
 
 ```{r loc_cla}
 classicLocalizationShift(remove15=TRUE)
-classicLocalizationShift(remove15=FALSE)
 ```
 
 So there is a fairly strong effect of movement type in the classic group. Together with the absence of an effect of movement type in the exposure group and a trend of an interaction between group and movement type, this might indicate a sub-threshold effect of movement type in the exposure group in the same direction as the effect of movement type in the classic group.
@@ -262,6 +261,7 @@ The step-wise multiple regression algorithm thinks an intercept-only model is be
 
 
 ```{r}
+# THIS FAILS NOW... maybe because some participants don't have data in the first half?
 multipleRegressionLocalization(group='exposure',NCpart='initial', LRpart='first')
 ```
 
@@ -274,7 +274,5 @@ It also makes me wonder if reach aftereffects in classic can be better predicted
 multipleRegressionLocalization(group='online',NCpart='initial')
 ```
 
-So this doesn't work either. Does this mean that in previous experiments we just didn't have sufficiently good data to find any link between classic reach aftereffects and (2-AFC) proprioceptive recalibration?
-
-Do we still want to see online localization matches proprioception more, as claimed in Izawa et al., 2012? This would imply that it matches the exposure localization and/or reach aftereffects better...
+So this doesn't work either.
 

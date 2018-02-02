@@ -336,3 +336,47 @@ classicLocalizationShift <- function(factors='both',remove15=TRUE) {
   options('contrasts' <- default.contrasts)
   
 }
+
+boxPlotLocalization <- function() {
+  
+  # par(mfrow=c(4,1),mar=c(2,3,1,1))
+  
+  for (group in c('exposure','classic','online')) {
+    
+    df <- getPointLocalization(group, difference=FALSE, verbose=FALSE)
+    
+    # print(str(df))
+    
+    for (rotated in c(0,1)) {
+      
+      for (passive in c(0,1)) {
+        
+        # subdf <- df[which(df$rotated_b == rotated & df$passive_b == passive),]
+        
+        # boxplot(taperror_deg ~ handangle_deg, data=df, axes=F, bty='n')
+        
+        for (target in c(15,25,35,45,55,65,75)) {
+          
+          subdf <- df[which(df$rotated_b == rotated & df$passive_b == passive & df$handangle_deg == target),]
+          
+          ppno <- subdf$participant
+          taperror <- subdf$taperror_deg
+          
+          idx <- which(abs(taperror - mean(taperror)) > (3 * sd(taperror)))
+          
+          if (length(idx) > 0) {
+            
+            cat(sprintf('%s %s %s %d deg\n', group, c('aligned','rotated')[rotated+1], c('active','passive')[passive+1], target))
+            print(ppno[idx])
+            
+          }
+          
+        }
+        
+      }
+      
+    }
+    
+  }
+  
+}

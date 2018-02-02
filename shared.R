@@ -4,7 +4,7 @@
 nocursorURLs <- c('exposure'='https://osf.io/9s6au/?action=download', 'classic'='https://osf.io/8hm7f/?action=download')
 
 # no-cursor data can be downloaded from OSF:
-localizationURLs <- c('exposure'='https://osf.io/yqkex/?action=download', 'classic'='https://osf.io/upw49/?action=download', 'online'='https://osf.io/wjcgk/download')
+localizationURLs <- c('exposure'='https://osf.io/9f6gu/?action=download', 'classic'='https://osf.io/upw49/?action=download', 'online'='https://osf.io/wjcgk/download')
 
 # we'll control the color in figures centrally from here:
 colorset <- list()
@@ -212,7 +212,6 @@ getPointLocalization <- function(group, difference=TRUE, points=c(15,25,35,45,55
   
   df <- aspligned(df)
   
-  
   # we can select half the localization data... for the exposure group only
   if (group == 'exposure') {
     # print(str(groupdf))
@@ -224,12 +223,44 @@ getPointLocalization <- function(group, difference=TRUE, points=c(15,25,35,45,55
     }
     # print(dim(groupdf))
   } else {
-    cat('\nWARNING: Partial localization can not be returned for classic/online data.\n\n')
+    if (LRpart != 'both') {
+      cat('\nWARNING: Partial localization can not be returned for classic/online data.\n\n')
+      # the full dataset is returned anyway?
+    }
   }
   
   groupdf <- NA
   
+  # only get the movement types we need:
+  movementnumbers <- c(0,1)
+  if (movementtype == 'active') {
+    movementnumbers <- c(0)
+  }
+  if (movementtype == 'passive') {
+    movementnumbers <- c(1)
+  }
+  
   participants <- unique(df$participant)
+  
+  # remove participants with no data
+  removepps <- c()
+  for (pp.no in c(1:length(participants))) {
+    pp.id <- participants[pp.no]
+    for (rotated in c(0,1)) {
+      for (passive in movementnumbers) {
+        subrows <- which(df$participant == pp.id & df$rotated_b == rotated & df$passive_b == passive)
+        # could set this to e.g.: '< 10' to remove participants with very little data?
+        if (length(subrows) == 0) {
+          removepps <- c(removepps, pp.id)
+        }
+      }
+    }
+  }
+  if (length(removepps) > 0) {
+    participants <- participants[-which(participants %in% unique(removepps))]
+    cat('\nremoved these participants:\n')
+    print(unique(removepps))
+  }
   
   for (pp.no in c(1:length(participants))) {
     
@@ -237,9 +268,14 @@ getPointLocalization <- function(group, difference=TRUE, points=c(15,25,35,45,55
     
     for (rotated in c(0,1)) {
       
-      for (passive in c(0,1)) {
+      for (passive in movementnumbers) {
         
         subdf <- df[which(df$participant == pp.id & df$rotated_b == rotated & df$passive_b == passive),]
+        
+        if (nrow(subdf) == 0) {
+          # participant has no data in sub-condition
+          next()
+        }
         
         locdf <- getLocalizationPoints(subdf, points=points, removeOutliers=TRUE)
         
@@ -270,7 +306,8 @@ getPointLocalization <- function(group, difference=TRUE, points=c(15,25,35,45,55
     groupdf$taperror_deg <- as.numeric(groupdf$taperror_deg)
   }
   
-
+  
+  
   # select only one movement type, if required:
   if (movementtype == 'active') {
     groupdf <- groupdf[which(groupdf$passive_b == 0),]
@@ -281,8 +318,7 @@ getPointLocalization <- function(group, difference=TRUE, points=c(15,25,35,45,55
     groupdf <- groupdf[,-which(names(groupdf) == c("passive_b"))]
   }
   
-  # now drop NAs? NO!
-  # groupdf <- groupdf[which(!is.na(groupdf$taperror_deg)),]
+  
   
   return(groupdf)
   
@@ -336,14 +372,15 @@ getLocalizationPoints <- function(subdf, points=c(15,25,35,45,55,65,75), removeO
       
       # spar determines smoothness:
       # if set too smooth, some effects disappear
-      spl <- smooth.spline(X[-idx.idx],Y[-idx.idx], spar=.90, keep.data=FALSE) # spar=.95
+      spl <- smooth.spline(X[-idx.idx],Y[-idx.idx], spar=.90, keep.data=FALSE) # spar=.90
       
       sampleP <- predict(spl, x=sampleX)
       deviations <- c(deviations, sampleP$y - sampleY)
       
     }
     
-    idx <- which(abs(deviations - mean(deviations)) < (3 * sd(deviations)))
+    # instead of the mean, we compare each value to its predicted value
+    idx <- which(abs(deviations) < (3 * sqrt(sum(deviations^2))))
     
     X <- X[idx]
     Y <- Y[idx]
