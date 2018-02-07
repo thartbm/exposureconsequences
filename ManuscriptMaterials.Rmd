@@ -210,11 +210,11 @@ To sum up our findings on localization:
 Decided to add analyses to get the confidence intervals for the peaks of the localization generalization curves:
 
 ```{r localization_peaks}
-getPeakLocConfidenceInterval(group='classic',CIs=c(.95), movementtype='both', LRpart='all')
-getPeakLocConfidenceInterval(group='exposure',CIs=c(.95), movementtype='both', LRpart='all')
+getPeakLocConfidenceInterval(group='classic',CIs=c(.95), movementtype='active', LRpart='all')
+getPeakLocConfidenceInterval(group='exposure',CIs=c(.95), movementtype='active', LRpart='all')
 ```
 
-These results are strange: the median peak for the exposure localization is around 42 degrees. If we look at the plot, it is much higher though, somewhere between 55 and 65 probably. This doesn't change much if I only look at the passive or at the active localization data. The peak for classic makes sense though.
+These results mimic those of the reach aftereffects: the median values are different, but they each fall in the other confidence interval. If we want to look at this better, we need to get better estimates of these curves in every participants, by having a wider range of points and more data per point, but probably also larger rotations.
 
 # Correlation
 
@@ -234,7 +234,7 @@ It looks like for exposure, active localization is the better predictor of reach
 
 As one possibility, we can look at the correlations. Not just the p-values, but there are confidence intervals for Pearson's $\rho$, which allow to directly see if one correlation is stronger/weaker than another:
 
-```{r}
+```{r pearson_rhos}
 for (name in names(correlations)) {
   cat(name)
   print(correlations[[name]][['cortest']])
@@ -245,7 +245,7 @@ for (name in names(correlations)) {
 
 And those linear regression models?
 
-```{r eval=FALSE, include=FALSE}
+```{r linreg, eval=FALSE, include=FALSE}
 # this code won't run or show up in output, just included here if you want to play with it:
 for (name in names(correlations)) {
   cat(name)
@@ -265,7 +265,7 @@ If we look at only the initial no-cursor block, the story changes. It uses both 
 
 Here is what the step-wise multiple regressions look like with all available data:
 
-```{r}
+```{r step_exposure}
 multipleRegressionLocalization(group='exposure',NCpart='initial')
 ```
 
@@ -273,15 +273,14 @@ No terms are dropped an the adjusted R squared of the full model is low, but rea
 
 For classic training, it looks like this:
 
-```{r}
+```{r step_classic}
 multipleRegressionLocalization(group='classic',NCpart='initial')
 ```
 
 The step-wise multiple regression algorithm thinks an intercept-only model is best. Now is this because localization after classic training has little to no information on reach aftereffects, or is this because we have double the data in the exposure group? We can test this partially by throwing away the second half of the data for the exposure group:
 
 
-```{r}
-# THIS FAILS NOW... maybe because some participants don't have data in the first half?
+```{r step_exposure_firsthalf}
 multipleRegressionLocalization(group='exposure',NCpart='initial', LRpart='first')
 ```
 
@@ -290,7 +289,7 @@ Now the passive localization shifts are thrown out by the algorithm and the acti
 It also makes me wonder if reach aftereffects in classic can be better predicted by the online localization responses:
 
 
-```{r}
+```{r step_online}
 multipleRegressionLocalization(group='online',NCpart='initial')
 ```
 

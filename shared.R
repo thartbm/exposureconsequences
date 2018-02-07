@@ -115,10 +115,8 @@ bootstrapGaussianPeak <- function(data,bootstraps=1000,mu=47.5,sigma=30,scale=10
     
     # very friendly for the rest of the system
     usecores <- max(1, ceiling((cores[1] / 2) - 1))
-    # somewhat friendly for the rest of the system
+    # somewhat unfriendly for the rest of the system
     usecores <- max(1, (cores[1] - 1))
-    
-    # unwarreted comment
     
     cl <- makeCluster(usecores)
     registerDoParallel(cl)
