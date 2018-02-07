@@ -380,3 +380,15 @@ boxPlotLocalization <- function() {
   }
   
 }
+
+getPeakLocConfidenceInterval <- function(group,part='initial',CIs=c(.95), movementtype='both', LRpart='all') {
+  
+  cat(sprintf('\n%s\n\n',toupper(group)))
+  
+  loc <- getPointLocalization(group, difference=TRUE, points=c(15,25,35,45,55,65,75), movementtype='both', LRpart='all', verbose=FALSE)
+  
+  loc2 <- xtabs(taperror_deg ~ participant + handangle_deg,loc)
+  
+  bootstrapGaussianPeak(data=loc2,bootstraps=1000,mu=47.5,sigma=30,scale=10,offset=4,CIs=CIs)
+  
+}

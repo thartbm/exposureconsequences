@@ -205,6 +205,16 @@ To sum up our findings on localization:
 5. The shift in localization is different across the workspace in the exposure group. I.e., there is a generalization _curve_.
 6. This effect is not present in the classic group, so that generalization can be said to be flat; there is no _curve_. **NOTE:** When we do include the 15 degree target, there is an effect of hand angle though.
 
+## Localization peaks
+
+Decided to add analyses to get the confidence intervals for the peaks of the localization generalization curves:
+
+```{r localization_peaks}
+getPeakLocConfidenceInterval(group='classic',CIs=c(.95), movementtype='both', LRpart='all')
+getPeakLocConfidenceInterval(group='exposure',CIs=c(.95), movementtype='both', LRpart='all')
+```
+
+These results are strange: the median peak for the exposure localization is around 42 degrees. If we look at the plot, it is much higher though, somewhere between 55 and 65 probably. This doesn't change much if I only look at the passive or at the active localization data. The peak for classic makes sense though.
 
 # Correlation
 
@@ -298,7 +308,7 @@ What can we conclude? Here is an initial list of what we might conclude.
 
     2. After classic training (2016 paper) there was an effect of movement type, which indicates that with a training regime that allows updates of predicted sensory consequences, these updates do indeed also affect hand localization.
 
-    3. Within the workspace however, there is no interaction between movement type and training group (but there is a trend if hand angle is used as a random effect, in all analyses the 15 degree data is omitted as Denise said). Perhaps there is a small update of predicted proprioceptive consequences, that we can't parcel out. A more computational approach would be needed to see if this can explain the pattern of results here.
+    3. Within the workspace however, there is no interaction between movement type and training group (but there is a 'trend', p=.09, if hand angle is used as a random effect, in all analyses the 15 degree data is omitted as Denise said). Perhaps there is a small update of predicted proprioceptive consequences, that we can't parcel out. A more computational approach would be needed to see if this can explain the pattern of results here.
 
 3. Recalibrated proprioception can somewhat predict reach aftereffects, but only after **exposure** training and for _active localization_. This indicates that in some circumstances, recalibrated proprioception might drive motor changes. However, it is possible that the active component of the localization is crucial here. Perhaps exposure training leads to some updates in predicted sensory consequences after all -- be they visual or proprioceptive. These would also factor into the reach aftereffects.
 
