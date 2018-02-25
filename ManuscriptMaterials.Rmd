@@ -216,6 +216,14 @@ getPeakLocConfidenceInterval(group='exposure',CIs=c(.95), movementtype='active',
 
 These results mimic those of the reach aftereffects: the median values are different, but they each fall in the other confidence interval. If we want to look at this better, we need to get better estimates of these curves in every participants, by having a wider range of points and more data per point, but probably also larger rotations.
 
+## Cumulative Function
+
+Potentially, the wide confidence intervals can be explained by two things: 1) large variation across participants, and 2) incomplete sampling over the function: large swaths of the normal function (not distribution!) are sometimes not sampled at all. Here are some ideas for solutions.
+
+The first problem -- large differences between participants -- could be dealt with by estimating the function with each participant. This way only conditions within groups can be compared, but that still leaves comparisons between active and passive localization, although comparing reach aftereffects between groups would still not be possible. We can do a Fisher exact test to see if the proportion people with larger shifts in active than in passive localization is higher than 50% in each group. Prediction: should not be different from chance in exposure training, but should be different from chance in classic training.
+
+The second problem -- incomplete sampling of the curve -- could be dealt with by fitting a cumulative function instead of a normal function. We could assume the training-induced change is 0 at -90 and at 180 degrees, then at every actually estimated point, we take the sum of everything before it, and then scale so that values are between 0 and 1 (divide by the value at 180). (We could also put the extremes at not quite 0, so that at -90 we're at -1 degrees changes and at 180, we add 1 degree to the last measured point / bin, this should leave some wiggle room for a better fit.) At that point a cumulative function can be fit, and we take the 50% point as the centre of the normal function. I'm not totally sure if this works, but it's worth a try.
+
 # Correlation
 
 In this section we look at how recalibrated proprioception (hand localization) correlates with reach aftereffects.
