@@ -21,6 +21,7 @@ colorset[['claPasT']] <- '#ff82002f'
 colorset[['extra1S']] <- '#c400c4ff' # purple
 colorset[['extra1T']] <- '#c400c42f'
 
+library('ez')
 
 installRequire.Packages <- function(packages) {
   
@@ -489,3 +490,148 @@ removeOutliers <- function(df, stds=2) {
   
 }
 
+psychometricGeneralization <- function(df, makefigure=FALSE, response='RAE') {
+  
+  # does everything use the same dependent variables?
+  
+  if (makefigure) {
+    par(mfrow=c(4,6))
+  }
+  
+  participant <- unique(df$participant)
+  peak <- c()
+  width <- c()
+  
+  for (pp.id in participant) {
+    
+    # get data fro participant:
+    Pdf <- df[which(df$participant == pp.id),]
+    
+    # get dependent variable (endpoint/tap angle):
+    if (response == 'RAE') {
+      DV <- Pdf$endpoint_angle
+    }
+    if (response == 'loc') {
+      # NA.idx <- which(is.na(Pdf$taperror_deg))
+      # print(length(NA.idx))
+      Pdf <- Pdf[which(!is.na(Pdf$taperror_deg)),]
+      # print(str(Pdf))
+      DV <- -1 * Pdf$taperror_deg
+    }
+    
+    DV <- DV - min(DV)
+    # offset <- 0.02 * diff(range(DV))
+    # DV <- (0.96*DV) + offset
+    DV <- cumsum(DV)
+    DV <- c(0.01, ((DV/max(DV))*0.97)+0.015, 0.99)
+    # print(DV)
+    # get independent variable (target/hand location):
+    
+    if (response == 'RAE') {
+      IV <- Pdf$target
+    }
+    if (response == 'loc') {
+      IV <- Pdf$handangle_deg
+    }
+    
+    # scale to range
+    IV <- c(-30,IV,120)
+    if (makefigure) {
+      plot(IV,DV,main=sprintf('%s',pp.id),xlab='target angle',ylab='cumulative probability',axes=F)
+    }
+    
+    # fit pnorm to data:
+    # pnorm(X,mean=45,sd=15)
+    params <- optim(par=c('mu'=45, 'sigma'=15), fn=pnormMSE, method='Nelder-Mead', Q=IV, Y=DV)
+    
+    #print(params$par)
+    
+    peak <- c(peak, params$par['mu'])
+    width <- c(width, params$par['sigma'])
+    
+    if (makefigure) {
+      X <- seq(-30,120)
+      lines(X,pnorm(q=X,mean=params$par['mu'],sd=params$par['sigma']),col='red')
+      pp.peak <- params$par['mu']
+      lines(c(-30,pp.peak,pp.peak),c(.5,.5,0),lty=2,col='blue')
+      
+      axis(side=1,at=c(15,45,75))
+      axis(side=2,at=c(0,.25,.5,.75,1))
+      
+      text(x=pp.peak,y=0.975,sprintf('%0.1f',pp.peak))
+    }
+    
+  }
+  
+  return(data.frame(participant,peak,width))
+  
+}
+
+pnormMSE <- function(par, Q, Y) {
+  
+  return(mean((pnorm(q=Q, mean=par['mu'], sd=par['sigma']) - Y)^2))
+  
+}
+
+getCDFpeaks <- function(group='classic', response='RAE', movementtype='active', makefigure=FALSE) {
+  
+  df <- NA
+  if (response == 'RAE') {
+    df <- getReachAftereffects(group, part='all')
+  }
+  if (response == 'loc') {
+    df <- getPointLocalization(group=group, movementtype=movementtype, verbose=F)
+  }
+  if (!is.data.frame(df)) {
+    cat('ERROR: don\'t know what data to load. Fix RESPONSE argument?\n')
+    return()
+  }
+  
+  newdf <- psychometricGeneralization(df, makefigure=makefigure, response=response)
+  
+  return(newdf)
+  
+}
+
+doCDFpeakANOVA <- function(test='training') {
+  
+  peaks <- NA
+  
+  if (test == 'training') {
+    groups <- c('classic','exposure')
+  }
+  if (test == 'loctime') {
+    groups <- c('classic','online')
+  }
+  
+  for (group in groups) {
+    
+    for (movementtype in c('active','passive')) {
+      
+      thisPeakDF <- getCDFpeaks(group=group,response='loc',movementtype=movementtype,makefigure=TRUE)
+      thisPeakDF$group <- group
+      thisPeakDF$movementtype <- movementtype
+      
+      if (is.data.frame(peaks)) {
+        peaks <- rbind(peaks, thisPeakDF)
+      } else {
+        peaks <- thisPeakDF
+      }
+      
+    }
+    
+  }
+  
+  cols <- c('participant','group','movementtype')
+  peaks[cols] <- lapply(peaks[cols], factor)
+  
+  if (test == 'training') {
+    print(ezANOVA(data=peaks, wid=participant, dv=peak, within=movementtype, between=group, type=3))
+    print(ezANOVA(data=peaks, wid=participant, dv=width, within=movementtype, between=group, type=3))
+  }
+  if (test == 'loctime') {
+    print(ezANOVA(data=peaks, wid=participant, dv=peak, within=c(movementtype, group), type=3))
+    print(ezANOVA(data=peaks, wid=participant, dv=width, within=c(movementtype, group), type=3))
+  }
+  
+}
