@@ -233,7 +233,7 @@ plotReachAftereffectDistributions <- function() {
   
 }
 
-exposureNoCursorChange <- function() {
+exposureNoCursorChange <- function(printChange=FALSE) {
   
   default.contrasts <- options('contrasts')
   options(contrasts=c('contr.sum','contr.poly'))
@@ -252,6 +252,26 @@ exposureNoCursorChange <- function() {
   detach(nc.exp)
 
   options('contrasts' <- default.contrasts)
+  
+  if (printChange) {
+    
+    nc.exp <- getReachAftereffects('exposure', part='initial', difference=TRUE)
+    
+    nc.exp <- aggregate(endpoint_angle ~ target, data=nc.exp, FUN=mean)
+    
+    cat(sprintf('\nEXPOSURE\nmax reach aftereffects: %0.1f (at: %d deg)\n',max(nc.exp$endpoint_angle), nc.exp$target[which(nc.exp$endpoint_angle == max(nc.exp$endpoint_angle))]))
+    cat(sprintf('avg reach aftereffects: %0.1f (all targets)\n',mean(nc.exp$endpoint_angle, na.rm=TRUE)))
+    cat(sprintf('avg reach aftereffects: %0.1f (targets above 15 degrees)\n',mean(nc.exp$endpoint_angle[which(nc.exp$target > 15)], na.rm=TRUE)))
+    
+    nc.cla <- getReachAftereffects('classic', part='initial', difference=TRUE)
+    
+    nc.cla <- aggregate(endpoint_angle ~ target, data=nc.cla, FUN=mean)
+    
+    cat(sprintf('\nCLASSIC\nmax reach aftereffects: %0.1f (at: %d deg)\n',max(nc.cla$endpoint_angle), nc.cla$target[which(nc.cla$endpoint_angle == max(nc.cla$endpoint_angle))]))
+    cat(sprintf('avg reach aftereffects: %0.1f (all targets)\n',mean(nc.cla$endpoint_angle, na.rm=TRUE)))
+    cat(sprintf('avg reach aftereffects: %0.1f (targets above 15 degrees)\n',mean(nc.cla$endpoint_angle[which(nc.cla$target > 15)], na.rm=TRUE)))
+    
+  }
   
 }
 
@@ -283,13 +303,17 @@ exposureAftereffectsPersistent <- function() {
   
 }
 
-exposureClassicReachAftereffects <- function(noTarget=FALSE) {
+exposureClassicReachAftereffects <- function(noTarget=FALSE, remove15=FALSE) {
   
   default.contrasts <- options('contrasts')
   options(contrasts=c('contr.sum','contr.poly'))
   
   exp <- getReachAftereffects('exposure', part='all', difference=TRUE)
   cla <- getReachAftereffects('classic', part='all', difference=TRUE)
+  if (remove15) {
+    exp <- exp[-which(exp$target == 15),]
+    cla <- cla[-which(cla$target == 15),]
+  }
   
   exp$training <- 1
   cla$training <- 2

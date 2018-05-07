@@ -21,6 +21,14 @@ colorset[['claPasT']] <- '#ff82002f'
 colorset[['extra1S']] <- '#c400c4ff' # purple
 colorset[['extra1T']] <- '#c400c42f'
 
+colorset[['onlActS']] <- '#c400c4ff' # purple
+colorset[['onlActT']] <- '#c400c42f'
+# colorset[['onlPasS']] <- '#8266f4ff' # violet
+# colorset[['onlPasT']] <- '#8266ff2f'
+colorset[['onlPasS']] <- '#ff6ec7ff' # pink
+colorset[['onlPasT']] <- '#ff6ec72f'
+
+
 library('ez')
 
 installRequire.Packages <- function(packages) {
@@ -492,10 +500,12 @@ removeOutliers <- function(df, stds=2) {
 
 psychometricGeneralization <- function(df, makefigure=FALSE, response='RAE') {
   
+  # well... psychometric... Ijust use a cumulative normal distribution function
+  
   # does everything use the same dependent variables?
   
   if (makefigure) {
-    par(mfrow=c(4,6))
+    par(mfrow=c(4,6),mar=c(4,4,3,0.5))
   }
   
   participant <- unique(df$participant)
@@ -504,29 +514,23 @@ psychometricGeneralization <- function(df, makefigure=FALSE, response='RAE') {
   
   for (pp.id in participant) {
     
-    # get data fro participant:
-    Pdf <- df[which(df$participant == pp.id),]
-    
-    # get dependent variable (endpoint/tap angle):
+    # let's get the group thing first
+    Gdf <- df[-which(df$participant == pp.id),]
     if (response == 'RAE') {
-      DV <- Pdf$endpoint_angle
+      Gcurve <- aggregate(endpoint_angle ~ target, data=Gdf, FUN=median)
+      Gcurve <- Gcurve$endpoint_angle
     }
     if (response == 'loc') {
-      # NA.idx <- which(is.na(Pdf$taperror_deg))
-      # print(length(NA.idx))
-      Pdf <- Pdf[which(!is.na(Pdf$taperror_deg)),]
-      # print(str(Pdf))
-      DV <- -1 * Pdf$taperror_deg
+      Gcurve <- aggregate(taperror_deg ~ handangle_deg, data=Gdf, FUN=median)
+      Gcurve <- -1 * Gcurve$taperror_deg
     }
     
-    DV <- DV - min(DV)
-    # offset <- 0.02 * diff(range(DV))
-    # DV <- (0.96*DV) + offset
-    DV <- cumsum(DV)
-    DV <- c(0.01, ((DV/max(DV))*0.97)+0.015, 0.99)
-    # print(DV)
-    # get independent variable (target/hand location):
     
+    # get data for participant:
+    Pdf <- df[which(df$participant == pp.id),]
+    # print(Pdf)
+    
+    # get independent variable (target/hand location):
     if (response == 'RAE') {
       IV <- Pdf$target
     }
@@ -534,10 +538,47 @@ psychometricGeneralization <- function(df, makefigure=FALSE, response='RAE') {
       IV <- Pdf$handangle_deg
     }
     
+    
+    
+    # get dependent variable (endpoint/tap angle):
+    if (response == 'RAE') {
+      DV <- Pdf$endpoint_angle
+    }
+    if (response == 'loc') {
+      # Pdf <- Pdf[which(!is.na(Pdf$taperror_deg)),]
+      # print(str(Pdf))
+      DV <- -1 * Pdf$taperror_deg
+    }
+    
+    # memories of a previous, simpler era:
+    # DV <- DV - min(DV)
+    # DV <- cumsum(DV)
+    # DV <- c(0.01, ((DV/max(DV))*0.97)+0.015, 0.99)
+    # unfortunately, it is also wrong
+    
+    # select non-nan points:
+    NN.idx <- which(!is.na(Pdf$taperror_deg))
+    if (length(NN.idx) > 0) {
+      DV <- DV[NN.idx]
+      IV <- IV[NN.idx]
+    }
+    
+    # find an offset to bring the DV on average closer to the group:
+    DV <- DV - mean(DV - Gcurve, na.rm=TRUE)
+    
+    # print(matrix(c(IV,DV), byrow=TRUE, nrow=2))
+    
+    # if (min(DV) < 0) {
+    #   # print(length(which(DV<0)))
+    #   DV <- (DV - min(DV))
+    # }
+    DV <- cumsum(c(0,DV,0))
+    DV <- DV/max(DV)
+    
     # scale to range
-    IV <- c(-30,IV,120)
+    IV <- c(-45,IV,135)
     if (makefigure) {
-      plot(IV,DV,main=sprintf('%s',pp.id),xlab='target angle',ylab='cumulative probability',axes=F)
+      plot(IV,DV,main=sprintf('%s',pp.id),xlab='target angle',ylab='cumulative probability',axes=F,ylim=c(0,1))
     }
     
     # fit pnorm to data:
@@ -550,6 +591,9 @@ psychometricGeneralization <- function(df, makefigure=FALSE, response='RAE') {
     width <- c(width, params$par['sigma'])
     
     if (makefigure) {
+      
+      lines(IV[2:(length(IV)-1)], c(DV[2],diff(DV[2:(length(DV)-1)]))/(2*max(diff(DV[2:(length(DV)-1)]))), col='green')
+      
       X <- seq(-30,120)
       lines(X,pnorm(q=X,mean=params$par['mu'],sd=params$par['sigma']),col='red')
       pp.peak <- params$par['mu']
@@ -558,7 +602,10 @@ psychometricGeneralization <- function(df, makefigure=FALSE, response='RAE') {
       axis(side=1,at=c(15,45,75))
       axis(side=2,at=c(0,.25,.5,.75,1))
       
-      text(x=pp.peak,y=0.975,sprintf('%0.1f',pp.peak))
+      # textlabel <- expression(mu sprintf(': %0.1f\n',pp.peak) sigma sprintf(': %0.1f',params$par['sigma']))
+      text(-15,0.90,bquote(mu * ": " * .(round(pp.peak,1)))) 
+      text(-15,0.75,bquote(sigma * ": " * .(round(params$par['sigma'],1))))
+      # text(x=-15,y=0.90,textlabel)
     }
     
   }
@@ -569,8 +616,12 @@ psychometricGeneralization <- function(df, makefigure=FALSE, response='RAE') {
 
 pnormMSE <- function(par, Q, Y) {
   
+  oldw <- getOption("warn")
+  options(warn = -1)
+  
   return(mean((pnorm(q=Q, mean=par['mu'], sd=par['sigma']) - Y)^2))
   
+  options(warn = oldw)
 }
 
 getCDFpeaks <- function(group='classic', response='RAE', movementtype='active', makefigure=FALSE) {
@@ -580,7 +631,7 @@ getCDFpeaks <- function(group='classic', response='RAE', movementtype='active', 
     df <- getReachAftereffects(group, part='all')
   }
   if (response == 'loc') {
-    df <- getPointLocalization(group=group, movementtype=movementtype, verbose=F)
+    df <- getPointLocalization(group=group, movementtype=movementtype, verbose=F, difference=TRUE)
   }
   if (!is.data.frame(df)) {
     cat('ERROR: don\'t know what data to load. Fix RESPONSE argument?\n')
@@ -593,7 +644,7 @@ getCDFpeaks <- function(group='classic', response='RAE', movementtype='active', 
   
 }
 
-doCDFpeakANOVA <- function(test='training') {
+doLocCDFpeakANOVA <- function(test='training') {
   
   peaks <- NA
   
@@ -633,5 +684,68 @@ doCDFpeakANOVA <- function(test='training') {
     print(ezANOVA(data=peaks, wid=participant, dv=peak, within=c(movementtype, group), type=3))
     print(ezANOVA(data=peaks, wid=participant, dv=width, within=c(movementtype, group), type=3))
   }
+  
+}
+
+doRAElocCDFpeakANOVA <- function() {
+  
+  peaks <- NA
+  
+  groups <- c('classic','exposure')
+
+  for (group in groups) {
+    
+    for (response in c('RAE','loc')) {
+      
+      if (response == 'RAE') {
+        thisPeakDF <- getCDFpeaks(group=group,response=response,movementtype='active',makefigure=FALSE)
+        thisPeakDF$group <- group
+        thisPeakDF$response <- response
+        
+        if (is.data.frame(peaks)) {
+          peaks <- rbind(peaks, thisPeakDF)
+        } else {
+          peaks <- thisPeakDF
+        }
+      }
+      
+      if (response == 'loc') {
+        
+        for (movementtype in c('active','passive')) {
+          
+          thisPeakDF <- getCDFpeaks(group=group,response=response,movementtype=movementtype,makefigure=FALSE)
+          thisPeakDF$group <- group
+          thisPeakDF$response <- sprintf('%s%s',movementtype,response)
+          
+          if (is.data.frame(peaks)) {
+            peaks <- rbind(peaks, thisPeakDF)
+          } else {
+            peaks <- thisPeakDF
+          }
+          
+        }
+        
+      }
+      
+    }
+    
+  }
+  
+  peaks <- peaks[-which(peaks$participant == 'gb'),]
+  
+  cols <- c('participant','group','response')
+  peaks[cols] <- lapply(peaks[cols], factor)
+  
+  peakAOV <- ezANOVA(data=peaks, wid=participant, dv=peak, within=response, between=group, type=3, return_aov=TRUE)
+  print(peakAOV[1:3])
+  widthAOV <- ezANOVA(data=peaks, wid=participant, dv=width, within=response, between=group, type=3, return_aov=TRUE)
+  print(widthAOV[1:3])
+  
+  print(TukeyHSD(ezANOVA(data=peaks, wid=participant, dv=peak, between=c(response, group), type=3, return_aov=TRUE)$aov))
+  print(TukeyHSD(ezANOVA(data=peaks, wid=participant, dv=width, between=c(response, group), type=3, return_aov=TRUE)$aov))
+  
+  print(aggregate(width ~ response + group, data=peaks, FUN=mean))
+  
+  print(aggregate(peak ~ response + group, data=peaks, FUN=mean))
   
 }

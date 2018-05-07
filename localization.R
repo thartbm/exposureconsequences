@@ -124,7 +124,7 @@ localizationLMEsSatterthwaite <- function() {
 
 # PLOTS / FIGURES ------
 
-plotLocalization <- function() {
+plotLocalization <- function(classicOnline=FALSE) {
   
   # get the data to plot:
   exp <- getPointLocalization('exposure', difference=TRUE, verbose=FALSE)
@@ -148,8 +148,24 @@ plotLocalization <- function() {
   cla.pas <- cla[which(cla$passive_b == 1),]
   cla.CI.pas <- matrix(unlist(by(cla.pas$taperror_deg, INDICES=c(cla.pas$handangle_deg), FUN=t.interval)),nrow=2)
 
+  if (classicOnline) {
+    onl <- getPointLocalization('online', difference=TRUE, verbose=FALSE)
+    
+    onl.avg <- aggregate(taperror_deg ~ passive_b + handangle_deg, data=onl, FUN=mean)
+    onl.avg.act <- onl.avg[which(onl.avg$passive_b == 0),]
+    onl.avg.pas <- onl.avg[which(onl.avg$passive_b == 1),]
+    
+    onl.act <- onl[which(onl$passive_b == 0),]
+    onl.CI.act <- matrix(unlist(by(onl.act$taperror_deg, INDICES=c(onl.act$handangle_deg), FUN=t.interval)),nrow=2)
+    onl.pas <- onl[which(onl$passive_b == 1),]
+    onl.CI.pas <- matrix(unlist(by(onl.pas$taperror_deg, INDICES=c(onl.pas$handangle_deg), FUN=t.interval)),nrow=2)
+  }
   
-  par(mfrow=c(1,2))
+  if (classicOnline) {
+    par(mfrow=c(1,3))
+  } else {
+    par(mfrow=c(1,2))
+  }
   points <- c(15,25,35,45,55,65,75)
   
   # panel A: exposure localization (active vs. passive)
@@ -194,6 +210,28 @@ plotLocalization <- function() {
   
   legend(10,-15,c('passive','active'),col=c(colorset[['claPasS']],colorset[['claActS']]),lty=c(1,1),lwd=c(2,2),bty='n')
   
+  if (classicOnline) {
+    
+    plot(-1000,-1000, main='online', xlab='hand angle [deg]', ylab='localization shift [deg]', xlim=c(10,80), ylim=c(0,-15), axes=F)
+    
+    X <- c(points, rev(points))
+    onl.act.Y <- c(onl.CI.act[1,],rev(onl.CI.act[2,]))
+    onl.pas.Y <- c(onl.CI.pas[1,],rev(onl.CI.pas[2,]))
+    
+    polygon(X,onl.act.Y,border=NA,col=colorset[['onlActT']])
+    polygon(X,onl.pas.Y,border=NA,col=colorset[['onlPasT']])
+    
+    lines(points[1:2],onl.avg.act$taperror_deg[1:2],col=colorset[['onlActS']],lty=2,lwd=2)
+    lines(points[2:7],onl.avg.act$taperror_deg[2:7],col=colorset[['onlActS']],lty=1,lwd=2)
+    lines(points[1:2],onl.avg.pas$taperror_deg[1:2],col=colorset[['onlPasS']],lty=2,lwd=2)
+    lines(points[2:7],onl.avg.pas$taperror_deg[2:7],col=colorset[['onlPasS']],lty=1,lwd=2)
+    
+    axis(1,at=points)
+    axis(2,at=c(0,-5,-10,-15))
+    
+    legend(10,-15,c('passive','active'),col=c(colorset[['onlPasS']],colorset[['onlActS']]),lty=c(1,1),lwd=c(2,2),bty='n')
+    
+  }
   
 }
 
