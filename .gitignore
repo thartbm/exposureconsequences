@@ -8,8 +8,8 @@ localization_exposure.csv
 localization_classic.csv
 localization_online.csv
 ManuscriptMaterials.docx
-ManuscriptMaterials.pdf
 ManuscriptMaterials.nb.html
 ManuscriptMaterials.log
-ManuscriptMaterials_am.pdf
 *.svg
+*.html
+*.pdf
