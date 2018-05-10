@@ -83,7 +83,7 @@ LMEmethod <- 'Satterthwaite'
 
 Here is a plot, probably Figure 2:
 
-```{r fig2_reachaftereffect, fig.width=7.5, fig.height=4}
+```{r fig2_reachaftereffect, fig.width=7.5, fig.height=2.5}
 plotReachAftereffects()
 ```
 
@@ -240,7 +240,7 @@ _I'm not sure if we should use the initial reach aftereffects here, or the four 
 
 This plot shows regression lines with localization shifts as predictor of reach aftereffects:
 
-```{r scattergrams, fig.width=7.5, fig.height=4}
+```{r scattergrams, fig.width=7.5, fig.height=2.5}
 correlations <- correlateNoCursorsLocalization()
 ```
 
@@ -328,3 +328,14 @@ What can we conclude? Here is an initial list of what we might conclude.
 3. Recalibrated proprioception can somewhat predict reach aftereffects, but only after **exposure** training and for _active localization_. This indicates that in some circumstances, recalibrated proprioception might drive motor changes. However, it is possible that the active component of the localization is crucial here. Perhaps exposure training leads to some updates in predicted sensory consequences after all -- be they visual or proprioceptive. These would also factor into the reach aftereffects.
 
     1. There is also a trend towards significance for _passive localization_ to predict reach aftereffects after **classic training**. Perhaps active localization is more similar to no-cursor reaches after exposure training, as they both use recalibrated proprioception as well as updated predictions of sensory consequences -- which could mostly be proprioceptive consequences after exposure training. This does not explain the trend towards significance for predicting classic reach aftereffects with passive localization. A step-wise multiple regression favours an intercept model for classic reach aftereffects, hence none of the localization data was deemed informative. The same algorithm arrived at a model using active localization to predict exposure reach aftereffects. The intercept model for classic reach aftereffects could signify that not too much should be read into the trend towards significance in the correlation. On the other hand, the exposure group had twice as much data, so that the estimated recalibration would be more reliable within each participant. Perhaps with higher quality estimates of proprioceptive recalibration those would be able to predict part of the reach aftereffects even after classic training.
+    
+# Figures
+
+Here we simply generate the same figures as above, but now they are saved as SVG files.
+
+```{r create_svgs}
+plotReachAftereffects(generateSVG=TRUE)
+plotLocalization(classicOnline=TRUE, generateSVG=TRUE)
+correlations <- correlateNoCursorsLocalization(generateSVG=TRUE)
+```
+

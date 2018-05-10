@@ -3,7 +3,7 @@ source('shared.R')
 
 
 
-correlateNoCursorsLocalization <- function(NCpart='all') {
+correlateNoCursorsLocalization <- function(NCpart='all', generateSVG=FALSE) {
   
   # first we do all responses, plan to split it by target later
   # get all data, for classic and exposure, we need localization and reach aftereffects
@@ -75,8 +75,16 @@ correlateNoCursorsLocalization <- function(NCpart='all') {
   ylab <- 'reach aftereffect [deg]'
   xlab <- 'localization shift [deg]'
   
+  if (generateSVG) {
+    installed.list <- rownames(installed.packages())
+    if ('svglite' %in% installed.list) {
+      svglite(file='Fig3.svg', width=7.5, height=2.5, system_fonts=list(sans='Arial', mono='Times New Roman'))
+    } else {
+      generateSVG=FALSE
+    }
+  }
   
-  par(mfrow=c(1,2))
+  par(mfrow=c(1,3))
   
   dataframes = list()
   dataframes[['exposure']] <- exposure
@@ -128,6 +136,10 @@ correlateNoCursorsLocalization <- function(NCpart='all') {
       axis(2,at=yticks)
     }
     
+  }
+  
+  if (generateSVG) {
+    dev.off()
   }
   
   return(output)

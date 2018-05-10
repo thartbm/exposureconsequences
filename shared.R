@@ -11,8 +11,8 @@ colorset <- list()
 
 colorset[['expActS']] <- '#005de4ff' # blue
 colorset[['expActT']] <- '#005de42f'
-colorset[['expPasS']] <- '#0fd2f2ff' # lighter blue
-colorset[['expPasT']] <- '#0fd2f22f'
+colorset[['expPasS']] <- '#0fd2e2ff' # lighter blue
+colorset[['expPasT']] <- '#0fd2e22f'
 colorset[['claActS']] <- '#e51636ff' # "York red"
 colorset[['claActT']] <- '#e516362f'
 colorset[['claPasS']] <- '#ff8200ff' # orange
@@ -51,8 +51,10 @@ installRequire.Packages <- function(packages) {
   if (length(missingpackages) > 0) {
     cat('\nWARNING, some pacakages are missing:\n')
     cat(missingpackages)
-    cat('\ncar and nlme are required to reproduce the analyses\n')
+    cat('\nlme4 and lmerTest are required to reproduce the Satterthwaite LME analyses\n')
+    cat('\ncar and nlme are required to reproduce the analyses using Chi-squared apprcimation\n')
     cat('\nforeach and doParallel speed up a few functions\n')
+    cat('\nsvglite is used to produce SVG files with figures\n')
   }
   
 }

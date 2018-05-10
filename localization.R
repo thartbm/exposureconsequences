@@ -124,7 +124,7 @@ localizationLMEsSatterthwaite <- function() {
 
 # PLOTS / FIGURES ------
 
-plotLocalization <- function(classicOnline=FALSE) {
+plotLocalization <- function(classicOnline=FALSE, generateSVG=FALSE) {
   
   # get the data to plot:
   exp <- getPointLocalization('exposure', difference=TRUE, verbose=FALSE)
@@ -161,11 +161,17 @@ plotLocalization <- function(classicOnline=FALSE) {
     onl.CI.pas <- matrix(unlist(by(onl.pas$taperror_deg, INDICES=c(onl.pas$handangle_deg), FUN=t.interval)),nrow=2)
   }
   
-  if (classicOnline) {
-    par(mfrow=c(1,3))
-  } else {
-    par(mfrow=c(1,2))
+  if (generateSVG) {
+    installed.list <- rownames(installed.packages())
+    if ('svglite' %in% installed.list) {
+      svglite(file='Fig2.svg', width=7.5, height=2.5, system_fonts=list(sans='Arial', mono='Times New Roman'))
+    } else {
+      generateSVG=FALSE
+    }
   }
+  
+  par(mfrow=c(1,3))
+  
   points <- c(15,25,35,45,55,65,75)
   
   # panel A: exposure localization (active vs. passive)
@@ -231,6 +237,10 @@ plotLocalization <- function(classicOnline=FALSE) {
     
     legend(10,-15,c('passive','active'),col=c(colorset[['onlPasS']],colorset[['onlActS']]),lty=c(1,1),lwd=c(2,2),bty='n')
     
+  }
+  
+  if (generateSVG) {
+    dev.off()
   }
   
 }

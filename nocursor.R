@@ -7,7 +7,7 @@ source('shared.R')
 # not yet sure if we'll use Chi-square, or Satterthwaite estimates of F/p-values:
 # installRequire.Packages(c('nlme', 'car', 'lme4', 'lmerTest'))
 
-required.packages = c('nlme', 'car', 'lme4', 'lmerTest')
+required.packages = c('nlme', 'car', 'lme4', 'lmerTest', 'svglite')
 installRequire.Packages(required.packages)
 
 # nocursor data can be downloaded from OSF:
@@ -66,9 +66,18 @@ installRequire.Packages(required.packages)
 #   
 # }
 
-plotReachAftereffects <- function() {
+plotReachAftereffects <- function(generateSVG=FALSE) {
   
-  par(mfrow=c(1,2))
+  if (generateSVG) {
+    installed.list <- rownames(installed.packages())
+    if ('svglite' %in% installed.list) {
+      svglite(file='Fig1.svg', width=7.5, height=2.5, system_fonts=list(sans='Arial', mono='Times New Roman'))
+    } else {
+      generateSVG=FALSE
+    }
+  }
+  
+  par(mfrow=c(1,3))
   
   points <- c(15,25,35,45,55,65,75)
   
@@ -96,15 +105,15 @@ plotReachAftereffects <- function() {
   plot(-1000,-1000, main='decay of reach aftereffects', xlab='target angle [deg]', ylab='reach endpoint deviation [deg]', xlim=c(10,80), ylim=c(0,15), axes=F)
   
   polygon(X,expYrem,border=NA,col=colorset[['expActT']])
-  polygon(X,expYini,border=NA,col=colorset[['extra1T']])
+  polygon(X,expYini,border=NA,col=colorset[['expPasT']])
   
   lines(points,exposureAVGrem$endpoint_angle,col=colorset[['expActS']],lty=2,lwd=2)
-  lines(points,exposureAVGini$endpoint_angle,col=colorset[['extra1S']],lwd=2)
+  lines(points,exposureAVGini$endpoint_angle,col=colorset[['expPasS']],lwd=2)
   
   axis(1,at=points)
   axis(2,at=c(0,5,10,15))
   
-  legend(10,15,c('immediate (iteration 1)','delayed (iterations 2-5)'),col=c(colorset[['extra1S']],colorset[['expActS']]),lty=c(1,2),lwd=c(2,2),bty='n')
+  legend(10,15,c('immediate (iteration 1)','delayed (iterations 2-5)'),col=c(colorset[['expPasS']],colorset[['expActS']]),lty=c(1,2),lwd=c(2,2),bty='n')
   
   plot(-1000,-1000, main='reach aftereffects', xlab='target angle [deg]', ylab='reach endpoint deviation [deg]', xlim=c(10,80), ylim=c(0,15), axes=F)
   
@@ -118,6 +127,10 @@ plotReachAftereffects <- function() {
   axis(2,at=c(0,5,10,15))
   
   legend(10,15,c('exposure','classic'),col=c(colorset[['expActS']],colorset[['claActS']]),lty=c(1,1),lwd=c(2,2),bty='n')
+  
+  if (generateSVG) {
+    dev.off()
+  }
   
 }
 
