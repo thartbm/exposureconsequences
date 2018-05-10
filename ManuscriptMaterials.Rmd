@@ -333,7 +333,7 @@ What can we conclude? Here is an initial list of what we might conclude.
 
 Here we simply generate the same figures as above, but now they are saved as SVG files.
 
-```{r create_svgs}
+```{r create_svgs, cache=FALSE, include=FALSE}
 plotReachAftereffects(generateSVG=TRUE)
 plotLocalization(classicOnline=TRUE, generateSVG=TRUE)
 correlations <- correlateNoCursorsLocalization(generateSVG=TRUE)
