@@ -164,7 +164,7 @@ plotLocalization <- function(classicOnline=FALSE, generateSVG=FALSE) {
   if (generateSVG) {
     installed.list <- rownames(installed.packages())
     if ('svglite' %in% installed.list) {
-      svglite(file='Fig2.svg', width=7.5, height=2.5, system_fonts=list(sans='Arial', mono='Times New Roman'))
+      svglite(file='Fig3.svg', width=7.5, height=2.5, system_fonts=list(sans='Arial', mono='Times New Roman'))
     } else {
       generateSVG=FALSE
     }
