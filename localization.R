@@ -235,7 +235,7 @@ plotLocalization <- function(classicOnline=FALSE) {
   
 }
 
-exposureLocalization <- function(remove15=TRUE) {
+exposureLocalization <- function(remove15=TRUE, LMEmethod='chi-squared') {
   
   default.contrasts <- options('contrasts')
   options(contrasts=c('contr.sum','contr.poly'))
@@ -254,7 +254,14 @@ exposureLocalization <- function(remove15=TRUE) {
   attach(exp)
   
   cat('\nLME with session, target and movement type as fixed effects, and participant as random effect:\n\n')
-  print(Anova(lme(taperror_deg ~ rotated_b * passive_b * handangle_deg, random = ~1|participant, na.action=na.exclude), type=3))
+  
+  if (LMEmethod=='chi-squared') {
+    print(Anova(lme(taperror_deg ~ rotated_b * passive_b * handangle_deg, random = ~1|participant, na.action=na.exclude), type=3))
+  }
+  if (LMEmethod=='Satterthwaite') {
+    exp_model_lmer <- lmer(taperror_deg ~ rotated_b * passive_b * handangle_deg - (1|participant), na.action=na.exclude)
+    print(anova(exp_model_lmer,ddf='Satterthwaite',type=3))
+  }
   
   detach(exp)
   
@@ -262,7 +269,7 @@ exposureLocalization <- function(remove15=TRUE) {
   
 }
 
-exposureLocalizationShift <- function(noHandAngle=FALSE, remove15=TRUE) {
+exposureLocalizationShift <- function(noHandAngle=FALSE, remove15=TRUE, LMEmethod='chi-squared') {
   
   default.contrasts <- options('contrasts')
   options(contrasts=c('contr.sum','contr.poly'))
@@ -280,12 +287,29 @@ exposureLocalizationShift <- function(noHandAngle=FALSE, remove15=TRUE) {
   attach(exp)
   
   if (noHandAngle) {
+    
     cat('\nLME with movement type as fixed effects - ignoring hand angle, and participant as random effect:\n\n')
-    print(Anova(lme(taperror_deg ~ passive_b, random = ~1|participant, na.action=na.exclude), type=3))
+    
+    if (LMEmethod=='chi-squared') {
+      print(Anova(lme(taperror_deg ~ passive_b, random = ~1|participant, na.action=na.exclude), type=3))
+    }
+    if (LMEmethod=='Satterthwaite') {
+      exp_model_lmer <- lmer(taperror_deg ~ passive_b - (1|participant), na.action=na.exclude)
+      print(anova(exp_model_lmer,ddf='Satterthwaite',type=3))
+    }
     
   } else {
+    
     cat('\nLME with hand angle and movement type as fixed effects, and participant as random effect:\n\n')
-    print(Anova(lme(taperror_deg ~ passive_b * handangle_deg, random = ~1|participant, na.action=na.exclude), type=3))
+    
+    if (LMEmethod=='chi-squared') {
+      print(Anova(lme(taperror_deg ~ passive_b * handangle_deg, random = ~1|participant, na.action=na.exclude), type=3))
+    }
+    if (LMEmethod=='Satterthwaite') {
+      exp_model_lmer <- lmer(taperror_deg ~ passive_b * handangle_deg - (1|participant), na.action=na.exclude)
+      print(anova(exp_model_lmer,ddf='Satterthwaite',type=3))
+    }
+    
   }
   
   detach(exp)
@@ -294,7 +318,7 @@ exposureLocalizationShift <- function(noHandAngle=FALSE, remove15=TRUE) {
   
 }
 
-groupLocalization <- function(model='full',remove15=TRUE) {
+groupLocalization <- function(model='full', remove15=TRUE, LMEmethod='chi-squared') {
   
   default.contrasts <- options('contrasts')
   options(contrasts=c('contr.sum','contr.poly'))
@@ -317,19 +341,43 @@ groupLocalization <- function(model='full',remove15=TRUE) {
   
   if (model == 'full') {
     cat('\nLME with group, hand angle and movement type as fixed effects, and participant as random effect:\n\n')
-    print(Anova(lme(taperror_deg ~ group * passive_b * handangle_deg, random = ~1|participant, na.action=na.exclude), type=3))
+    if (LMEmethod=='chi-squared') {
+      print(Anova(lme(taperror_deg ~ group * passive_b * handangle_deg, random = ~1|participant, na.action=na.exclude), type=3))
+    }
+    if (LMEmethod=='Satterthwaite') {
+      loc_model_lmer <- lmer(taperror_deg ~ group * passive_b * handangle_deg - (1|participant), na.action=na.exclude)
+      print(anova(loc_model_lmer,ddf='Satterthwaite',type=3))
+    }
   }
   if (model == 'restricted') {
     cat('\nLME with three terms only, removing some main effects and interactions:\n\n')
-    print(Anova(lme(taperror_deg ~ group + group:passive_b + group:handangle_deg, random = c(~1|passive_b, ~1|handangle_deg, ~1|participant), na.action=na.exclude), type=3))
+    if (LMEmethod=='chi-squared') {
+      print(Anova(lme(taperror_deg ~ group + group:passive_b + group:handangle_deg, random = c(~1|passive_b, ~1|handangle_deg, ~1|participant), na.action=na.exclude), type=3))
+    }
+    if (LMEmethod=='Satterthwaite') {
+      loc_model_lmer <- lmer(taperror_deg ~ group + group:passive_b + group:handangle_deg - (1|participant), na.action=na.exclude)
+      print(anova(loc_model_lmer,ddf='Satterthwaite',type=3))
+    }
   }
   if (model == 'handangle') {
     cat('\nLME with group and hand angle as fixed effects, and participant and movement type as random effects:\n\n')
-    print(Anova(lme(taperror_deg ~ group * handangle_deg, random = ~1|participant/taperror_deg, na.action=na.exclude), type=3))
+    if (LMEmethod=='chi-squared') {
+      print(Anova(lme(taperror_deg ~ group * handangle_deg, random = ~1|participant/taperror_deg, na.action=na.exclude), type=3))
+    }
+    if (LMEmethod=='Satterthwaite') {
+      loc_model_lmer <- lmer(taperror_deg ~ group * handangle_deg - (1|participant), na.action=na.exclude)
+      print(anova(loc_model_lmer,ddf='Satterthwaite',type=3))
+    }
   }
   if (model == 'movementtype') {
     cat('\nLME with group and movement type as fixed effects and participant and hand angle as random effects:\n\n')
-    print(Anova(lme(taperror_deg ~ group * passive_b, random = ~1|participant/handangle_deg, na.action=na.exclude), type=3))
+    if (LMEmethod=='chi-squared') {
+      print(Anova(lme(taperror_deg ~ group * passive_b, random = ~1|participant/handangle_deg, na.action=na.exclude), type=3))
+    }
+    if (LMEmethod=='Satterthwaite') {
+      loc_model_lmer <- lmer(taperror_deg ~ group * passive_b - (1|participant), na.action=na.exclude)
+      print(anova(loc_model_lmer,ddf='Satterthwaite',type=3))
+    }
   }
   
   detach(loc)
@@ -338,7 +386,7 @@ groupLocalization <- function(model='full',remove15=TRUE) {
   
 }
 
-classicLocalizationShift <- function(factors='both',remove15=TRUE) {
+classicLocalizationShift <- function(factors='both',remove15=TRUE, LMEmethod='chi-squared') {
   
   default.contrasts <- options('contrasts')
   options(contrasts=c('contr.sum','contr.poly'))
@@ -357,15 +405,33 @@ classicLocalizationShift <- function(factors='both',remove15=TRUE) {
   
   if (factors == 'both')  {
     cat('\nLME with hand angle and movement type as fixed effects, and participant as random effect:\n\n')
+    if (LMEmethod=='chi-squared') {
     print(Anova(lme(taperror_deg ~ passive_b * handangle_deg, random = ~1|participant, na.action=na.exclude), type=3))
+    }
+    if (LMEmethod=='Satterthwaite') {
+      cla_model_lmer <- lmer(taperror_deg ~ passive_b * handangle_deg - (1|participant), na.action=na.exclude)
+      print(anova(cla_model_lmer,ddf='Satterthwaite',type=3))
+    }
   }
   if (factors == 'movementtype') {
     cat('\nLME with movement type as fixed effects - ignoring hand angle, and participant as random effect:\n\n')
+    if (LMEmethod=='chi-squared') {
     print(Anova(lme(taperror_deg ~ passive_b, random = ~1|participant, na.action=na.exclude), type=3))
+    }
+    if (LMEmethod=='Satterthwaite') {
+      cla_model_lmer <- lmer(taperror_deg ~ passive_b - (1|participant), na.action=na.exclude)
+      print(anova(cla_model_lmer,ddf='Satterthwaite',type=3))
+    }
   }
   if (factors == 'handangle') {
     cat('\nLME with movement type as fixed effects - ignoring hand angle, and participant as random effect:\n\n')
+    if (LMEmethod=='chi-squared') {
     print(Anova(lme(taperror_deg ~ handangle_deg, random = ~1|participant, na.action=na.exclude), type=3))
+    }
+    if (LMEmethod=='Satterthwaite') {
+      cla_model_lmer <- lmer(taperror_deg ~ handangle_deg - (1|participant), na.action=na.exclude)
+      print(anova(cla_model_lmer,ddf='Satterthwaite',type=3))
+    }
   }
   
   

@@ -1,14 +1,14 @@
 ---
 title: "Exposure Consequences - Statistics and Figures"
 output:
-  html_document:
-    df_print: paged
-    toc: yes
-    toc_depth: '2'
   pdf_document:
     number_sections: yes
     toc: yes
     toc_depth: 2
+  html_document:
+    df_print: paged
+    toc: yes
+    toc_depth: '2'
 ---
 
 ```{r setup, cache=FALSE, include=FALSE}
@@ -70,6 +70,14 @@ In the manuscript we'll first show that there are motor changes after exposure t
 2. Localization
 3. Correlations
 
+## Analyses
+
+Since in the localization tasks there is missing data at some points (usually at the extremes) we can't use ANOVAs directly on the data. Imputation is going to be very hard because the missing data is systematically missing. Hence, we are using Linear Mixed Effects models as an alternative, but this presents a new problem. Getting the usual F-values and p-values is not so straightforward. Initially we decided to use the $\chi^2$ approach that we get from the `Anova` function from the `car` package. However, a paper from Steven G. Luke (2017, _Evaluating significance in linear mixed-effects models in R_) suggests using Sattertwaite approximation. So all functions running an LME now take an argument that tells them to use the Satterthwaite method, but the default is chi-squared. It turns out that it doesn't matter much, so it's a good sanity check. For consistency across all the analyses, we set the value of that argument is set here:
+
+```{r}
+LMEmethod <- 'Satterthwaite'
+# options: Satterthwaite, chi-squared
+```
 
 # Reach Aftereffects
 
@@ -93,7 +101,7 @@ These claims require analyses.
 First, we show that no-cursor reaches change direction immediately after exposure training (iteration 1):
 
 ```{r RAE_exposure,include=TRUE}
-exposureNoCursorChange()
+exposureNoCursorChange(LMEmethod=LMEmethod)
 ```
 
 So this shows that whether or not the feedback was rotated mattered for the reach deviations in the exposure training group, i.e.: there are reach aftereffects.
@@ -103,7 +111,7 @@ So this shows that whether or not the feedback was rotated mattered for the reac
 The second analysis is to show that the reach aftereffects aren't all that different for first and later iterations of the rotated no-cursor tasks. (The baseline is always all aligned iterations of the task.)
 
 ```{r RAE_exp_iterations}
-exposureAftereffectsPersistent()
+exposureAftereffectsPersistent(LMEmethod=LMEmethod)
 ```
 
 So there is no effect of iteration here, which means the reach aftereffects are the same for the first iteration and the average across the other four iterations. We now also have enough power to see an effect of target angle (the generalization curve is not flat), but more importantly the effect of iteration is also not dependent on target.
@@ -113,7 +121,7 @@ So there is no effect of iteration here, which means the reach aftereffects are 
 Finally, we want to see if there is a difference between the reach aftereffects observed after exposure training and those after classic training.
 
 ```{r RAE_exp_cla}
-exposureClassicReachAftereffects()
+exposureClassicReachAftereffects(LMEmethod=LMEmethod)
 ```
 
 I'd have expected there to be some difference between the two training types, perhaps only in interaction with target, but that's not the case apparently.
@@ -149,7 +157,7 @@ That looks OK to me. It seems that just like after classic training, there is a 
 We first want to see if there is any overall effect of aligned versus rotated training in the exposure group, with movement type and hand angle as fixed effects, and particiant as random effect.
 
 ```{r loc_exp}
-exposureLocalization(remove15=TRUE)
+exposureLocalization(remove15=TRUE, LMEmethod=LMEmethod)
 ```
 
 Wether or not the feedback was rotated makes a difference according to two terms in the model. In other words: exposure training caused localization responses to shift (systematically), as we could already guess by looking at the figure.
@@ -161,7 +169,7 @@ This means we can look at the difference between repsonses after rotated and aft
 Let's first see if there is a difference between active and passive localization after exposure training.
 
 ```{r loc_exp_movtype}
-exposureLocalizationShift(remove15=TRUE)
+exposureLocalizationShift(remove15=TRUE, LMEmethod=LMEmethod)
 ```
 
 There is no difference between passive and active localization after exposure training, even with double the number of trials as in classic delayed.
@@ -171,7 +179,7 @@ There is no difference between passive and active localization after exposure tr
 Let's see what we get in a model with all data (localization differences between rotated and aligned though) from both groups:
 
 ```{r loc_ombnibus}
-groupLocalization(model='full',remove15=TRUE)
+groupLocalization(model='full', remove15=TRUE, LMEmethod=LMEmethod)
 ```
 
 In the exposure group there is no effect of movement type, but we see one here. This could be because the effect of movement type is much larger in the classic group. This would predict an interaction between group and movement type, but this is not even a trend (p=.133).
@@ -179,7 +187,7 @@ In the exposure group there is no effect of movement type, but we see one here. 
 What if we don't care about hand angle:
 
 ```{r loc_groups_movementtype}
-groupLocalization(model='movementtype',remove15=TRUE)
+groupLocalization(model='movementtype', remove15=TRUE, LMEmethod=LMEmethod)
 ```
 
 Now there is a trend towards significance for the interaction between training group and movement type. That is closer to what we would expect.
@@ -187,7 +195,7 @@ Now there is a trend towards significance for the interaction between training g
 Let's see if the classic group shows an effect of movement type (with the current preprocessing procedures):
 
 ```{r loc_cla}
-classicLocalizationShift(remove15=TRUE)
+classicLocalizationShift(remove15=TRUE, LMEmethod=LMEmethod)
 ```
 
 So there is a fairly strong effect of movement type in the classic group. Together with the absence of an effect of movement type in the exposure group and a trend of an interaction between group and movement type, this might indicate a sub-threshold effect of movement type in the exposure group in the same direction as the effect of movement type in the classic group.

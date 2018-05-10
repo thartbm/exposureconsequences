@@ -7,7 +7,7 @@ source('shared.R')
 # not yet sure if we'll use Chi-square, or Satterthwaite estimates of F/p-values:
 # installRequire.Packages(c('nlme', 'car', 'lme4', 'lmerTest'))
 
-required.packages = c('nlme','car')
+required.packages = c('nlme', 'car', 'lme4', 'lmerTest')
 installRequire.Packages(required.packages)
 
 # nocursor data can be downloaded from OSF:
@@ -233,7 +233,7 @@ plotReachAftereffectDistributions <- function() {
   
 }
 
-exposureNoCursorChange <- function(printChange=FALSE) {
+exposureNoCursorChange <- function(printChange=FALSE,LMEmethod='chi-squared') {
   
   default.contrasts <- options('contrasts')
   options(contrasts=c('contr.sum','contr.poly'))
@@ -247,7 +247,13 @@ exposureNoCursorChange <- function(printChange=FALSE) {
   attach(nc.exp)
   
   cat('\nLME with session and target as fixed effects, and participant as random effect:\n\n')
-  print(Anova(lme(endpoint_angle ~ rotated * target, random = ~1|participant, na.action=na.exclude), type=3))
+  if (LMEmethod=='chi-squared') {
+    print(Anova(lme(endpoint_angle ~ rotated * target, random = ~1|participant, na.action=na.exclude), type=3))
+  }
+  if (LMEmethod=='Satterthwaite') {
+    exp_model_lmer <- lmer(endpoint_angle ~ rotated * target - (1|participant), na.action=na.exclude)
+    print(anova(exp_model_lmer,ddf='Satterthwaite',type=3))
+  }
   
   detach(nc.exp)
 
@@ -275,7 +281,7 @@ exposureNoCursorChange <- function(printChange=FALSE) {
   
 }
 
-exposureAftereffectsPersistent <- function() {
+exposureAftereffectsPersistent <- function(LMEmethod='chi-squared') {
   
   default.contrasts <- options('contrasts')
   options(contrasts=c('contr.sum','contr.poly'))
@@ -295,7 +301,16 @@ exposureAftereffectsPersistent <- function() {
   attach(exp)
   
   cat('\nLME with session and target as fixed effects, and participant as random effect:\n\n')
-  print(Anova(lme(endpoint_angle ~ iteration * target, random = ~1|participant, na.action=na.exclude), type=3))
+  
+  
+  if (LMEmethod=='chi-squared') {
+    print(Anova(lme(endpoint_angle ~ iteration * target, random = ~1|participant, na.action=na.exclude), type=3))
+  }
+  if (LMEmethod=='Satterthwaite') {
+    exp_model_lmer <- lmer(endpoint_angle ~ iteration * target - (1|participant), na.action=na.exclude)
+    print(anova(exp_model_lmer,ddf='Satterthwaite',type=3))
+  }
+  
   
   detach(exp)
   
@@ -303,7 +318,7 @@ exposureAftereffectsPersistent <- function() {
   
 }
 
-exposureClassicReachAftereffects <- function(noTarget=FALSE, remove15=FALSE) {
+exposureClassicReachAftereffects <- function(noTarget=FALSE, remove15=FALSE, LMEmethod='chi-squared') {
   
   default.contrasts <- options('contrasts')
   options(contrasts=c('contr.sum','contr.poly'))
@@ -327,11 +342,28 @@ exposureClassicReachAftereffects <- function(noTarget=FALSE, remove15=FALSE) {
   attach(RAE)
   
   if (noTarget) {
+    
     cat('\nLME with training type as fixed effects (without interacting), and participant and target as random effect:\n\n')
-    print(Anova(lme(endpoint_angle ~ training, random = ~1|participant/target, na.action=na.exclude), type=3))
+    if (LMEmethod=='chi-squared') {
+      print(Anova(lme(endpoint_angle ~ training, random = ~1|participant/target, na.action=na.exclude), type=3))
+    }
+    if (LMEmethod=='Satterthwiate') {
+      exp_cla_model_lmer <- lmer(endpoint_angle ~ training - (1|participant/target), na.action=na.exclude)
+      print(anova(exp_cla_model_lmer,ddf='Satterthwaite',type=3))
+    }
+    
   } else {
+    
     cat('\nLME with training type and target as fixed effects, and participant as random effect:\n\n')
-    print(Anova(lme(endpoint_angle ~ training * target, random = ~1|participant, na.action=na.exclude), type=3))
+    
+    if (LMEmethod=='chi-squared') {
+      print(Anova(lme(endpoint_angle ~ training * target, random = ~1|participant, na.action=na.exclude), type=3))
+    }
+    if (LMEmethod=='Satterthwaite') {
+      exp_cla_model_lmer <- lmer(endpoint_angle ~ training - (1|participant), na.action=na.exclude)
+      print(anova(exp_cla_model_lmer,ddf='Satterthwaite',type=3))
+    }
+    
   }
   
   detach(RAE)

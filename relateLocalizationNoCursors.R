@@ -172,8 +172,12 @@ multipleRegressionLocalization <- function(group,NCpart='all',expart='all',LRpar
   
   cat(sprintf('\n%s\n\n',toupper(group)))
   
-  fm <- step(lm(RAE ~ active + passive, data=df))
-    
+  str(df)
+  
+  # THIS CAUSES AN ERROR NOW: data argument is of the wrong type...
+  # because STEP is imported from lmerTest, but we want the basic one from 'stats'
+  fm <- stats::step(lm(RAE ~ active + passive, data=df))
+  
   print(summary(fm))
   
 }
