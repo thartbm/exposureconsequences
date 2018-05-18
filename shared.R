@@ -28,7 +28,6 @@ colorset[['onlActT']] <- '#b400e42f'
 colorset[['onlPasS']] <- '#ff6ec7ff' # pink
 colorset[['onlPasT']] <- '#ff6ec72f'
 
-
 library('ez')
 
 installRequire.Packages <- function(packages) {

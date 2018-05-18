@@ -72,8 +72,8 @@ correlateNoCursorsLocalization <- function(NCpart='all', generateSVG=FALSE) {
   xticks <- seq(from=-20,to=10,by=10)
   yticks <- rev(seq(from=-10,to=20,by=10))
   
-  ylab <- 'reach aftereffect [deg]'
-  xlab <- 'localization shift [deg]'
+  ylab <- 'reach aftereffect [°]'
+  xlab <- 'localization shift [°]'
   
   if (generateSVG) {
     installed.list <- rownames(installed.packages())
@@ -92,9 +92,15 @@ correlateNoCursorsLocalization <- function(NCpart='all', generateSVG=FALSE) {
   
   output <- list()
   
-  for (group in c('exposure','classic')) {
+  groups <- c('exposure','classic')
+  
+  for (groupno in c(1:length(groups))) {
+    
+    group <- groups[groupno]
     
     plot(-1000, -1000, main=group, xlab=xlab, ylab=ylab, asp=1, axes=FALSE, xlim=xlimits, ylim=ylimits)
+    
+    mtext(toupper(letters[groupno]), side=3, outer=TRUE, at=c((groupno-1)/3,1), line=-1, adj=0, padj=1, family='Arial')
     
     lines(c(0,0),range(yticks),col=rgb(.5,.5,.5,.5))
     lines(range(xticks),c(0,0),col=rgb(.5,.5,.5,.5))
@@ -127,7 +133,7 @@ correlateNoCursorsLocalization <- function(NCpart='all', generateSVG=FALSE) {
       
     }
     
-    legend(-3,-3,c('active','passive'),col=legendlinecolors,lwd=c(2,2),bty='n')
+    legend(-3,-3,c('active','passive'),col=legendlinecolors,lwd=c(1.5,1.5),bty='n')
     
     if (length(xticks)) {
       axis(1,at=xticks)
@@ -225,6 +231,6 @@ plotCorrelationWithCI <- function(X,Y,colors=c('black','red'),main='main title',
   polygon(c(pointlocs,rev(pointlocs)),c(y1,rev(y2)), col=colors[1], border=NA)
   
   # and use that to show a line:
-  lines(range(X), predict(this.lm, newdata=data.frame(X=range(X))), col=colors[2], lwd=2)
+  lines(range(X), predict(this.lm, newdata=data.frame(X=range(X))), col=colors[2], lwd=1.5)
   
 }

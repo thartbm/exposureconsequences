@@ -190,7 +190,7 @@ What if we don't care about hand angle:
 groupLocalization(model='movementtype', remove15=TRUE, LMEmethod=LMEmethod)
 ```
 
-Now there is a trend towards significance for the interaction between training group and movement type. That is closer to what we would expect.
+Still no effect...
 
 Let's see if the classic group shows an effect of movement type (with the current preprocessing procedures):
 

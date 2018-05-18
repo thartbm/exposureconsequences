@@ -90,7 +90,7 @@ plotReachAftereffects <- function(generateSVG=FALSE) {
   exposureAVGrem <- aggregate(endpoint_angle ~ target, data=exposure_rem, FUN=mean)
   classicAVG <- aggregate(endpoint_angle ~ target, data=classic, FUN=mean)
   exposureAVG <- aggregate(endpoint_angle ~ target, data=exposure, FUN=mean)
-  
+
   exposureCIini <- matrix(unlist(by(exposure_ini$endpoint_angle, INDICES=c(exposure_ini$target), FUN=t.interval)),nrow=2)
   exposureCIrem <- matrix(unlist(by(exposure_rem$endpoint_angle, INDICES=c(exposure_rem$target), FUN=t.interval)),nrow=2)
   classicCI <- matrix(unlist(by(classic$endpoint_angle, INDICES=c(classic$target), FUN=t.interval)),nrow=2)
@@ -102,31 +102,35 @@ plotReachAftereffects <- function(generateSVG=FALSE) {
   claY <- c(classicCI[1,],rev(classicCI[2,]))
   expY <- c(exposureCI[1,],rev(exposureCI[2,]))
   
-  plot(-1000,-1000, main='decay of reach aftereffects', xlab='target angle [deg]', ylab='reach endpoint deviation [deg]', xlim=c(10,80), ylim=c(0,15), axes=F)
+  plot(-1000,-1000, main='decay of reach aftereffects', xlab='target angle [°]', ylab='reach endpoint deviation [°]', xlim=c(10,80), ylim=c(0,15), axes=F)
+  
+  mtext('A', side=3, outer=TRUE, at=c(0,1), line=-1, adj=0, padj=1, family='Arial')
   
   polygon(X,expYrem,border=NA,col=colorset[['expActT']])
   polygon(X,expYini,border=NA,col=colorset[['expPasT']])
   
-  lines(points,exposureAVGrem$endpoint_angle,col=colorset[['expActS']],lty=2,lwd=2)
-  lines(points,exposureAVGini$endpoint_angle,col=colorset[['expPasS']],lwd=2)
+  lines(points,exposureAVGrem$endpoint_angle,col=colorset[['expActS']],lty=2,lwd=1.5)
+  lines(points,exposureAVGini$endpoint_angle,col=colorset[['expPasS']],lwd=1.5)
   
   axis(1,at=points)
   axis(2,at=c(0,5,10,15))
   
-  legend(10,15,c('immediate (iteration 1)','delayed (iterations 2-5)'),col=c(colorset[['expPasS']],colorset[['expActS']]),lty=c(1,2),lwd=c(2,2),bty='n')
+  legend(10,15,c('iteration 1','iterations 2-5'),col=c(colorset[['expPasS']],colorset[['expActS']]),lty=c(1,2),lwd=c(1.5,1.5),bty='n')
   
-  plot(-1000,-1000, main='reach aftereffects', xlab='target angle [deg]', ylab='reach endpoint deviation [deg]', xlim=c(10,80), ylim=c(0,15), axes=F)
+  plot(-1000,-1000, main='reach aftereffects', xlab='target angle [°]', ylab='reach endpoint deviation [°]', xlim=c(10,80), ylim=c(0,15), axes=F)
+  
+  mtext('B', side=3, outer=TRUE, at=c(1/3,1), line=-1, adj=0, padj=1, family='Arial')
   
   polygon(X,claY, border=NA,col=colorset[['claActT']])
   polygon(X,expY, border=NA,col=colorset[['expActT']])
   
-  lines(points,classicAVG$endpoint_angle,col=colorset[['claActS']],lwd=2)
-  lines(points,exposureAVG$endpoint_angle,col=colorset[['expActS']],lwd=2)
+  lines(points,classicAVG$endpoint_angle,col=colorset[['claActS']],lwd=1.5)
+  lines(points,exposureAVG$endpoint_angle,col=colorset[['expActS']],lwd=1.5)
 
   axis(1,at=points)
   axis(2,at=c(0,5,10,15))
   
-  legend(10,15,c('exposure','classic'),col=c(colorset[['expActS']],colorset[['claActS']]),lty=c(1,1),lwd=c(2,2),bty='n')
+  legend(10,15,c('exposure','classic'),col=c(colorset[['expActS']],colorset[['claActS']]),lty=c(1,1),lwd=c(1.5,1.5),bty='n')
   
   if (generateSVG) {
     dev.off()
@@ -373,7 +377,7 @@ exposureClassicReachAftereffects <- function(noTarget=FALSE, remove15=FALSE, LME
       print(Anova(lme(endpoint_angle ~ training * target, random = ~1|participant, na.action=na.exclude), type=3))
     }
     if (LMEmethod=='Satterthwaite') {
-      exp_cla_model_lmer <- lmer(endpoint_angle ~ training - (1|participant), na.action=na.exclude)
+      exp_cla_model_lmer <- lmer(endpoint_angle ~ training * target - (1|participant), na.action=na.exclude)
       print(anova(exp_cla_model_lmer,ddf='Satterthwaite',type=3))
     }
     

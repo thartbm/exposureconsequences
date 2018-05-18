@@ -176,7 +176,9 @@ plotLocalization <- function(classicOnline=FALSE, generateSVG=FALSE) {
   
   # panel A: exposure localization (active vs. passive)
   
-  plot(-1000,-1000, main='exposure', xlab='hand angle [deg]', ylab='localization shift [deg]', xlim=c(10,80), ylim=c(0,-15), axes=F)
+  plot(-1000,-1000, main='exposure', xlab='hand angle [°]', ylab='localization shift [°]', xlim=c(10,80), ylim=c(0,-15), axes=F)
+  
+  mtext('A', side=3, outer=TRUE, at=c(0,1), line=-1, adj=0, padj=1, family='Arial')
   
   X <- c(points, rev(points))
   exp.act.Y <- c(exp.CI.act[1,],rev(exp.CI.act[2,]))
@@ -185,19 +187,21 @@ plotLocalization <- function(classicOnline=FALSE, generateSVG=FALSE) {
   polygon(X,exp.act.Y,border=NA,col=colorset[['expActT']])
   polygon(X,exp.pas.Y,border=NA,col=colorset[['expPasT']])
   
-  lines(points[1:2],exp.avg.act$taperror_deg[1:2],col=colorset[['expActS']],lty=2,lwd=2)
-  lines(points[2:7],exp.avg.act$taperror_deg[2:7],col=colorset[['expActS']],lty=1,lwd=2)
-  lines(points[1:2],exp.avg.pas$taperror_deg[1:2],col=colorset[['expPasS']],lty=2,lwd=2)
-  lines(points[2:7],exp.avg.pas$taperror_deg[2:7],col=colorset[['expPasS']],lty=1,lwd=2)
+  lines(points[1:2],exp.avg.act$taperror_deg[1:2],col=colorset[['expActS']],lty=2,lwd=1.5)
+  lines(points[2:7],exp.avg.act$taperror_deg[2:7],col=colorset[['expActS']],lty=1,lwd=1.5)
+  lines(points[1:2],exp.avg.pas$taperror_deg[1:2],col=colorset[['expPasS']],lty=2,lwd=1.5)
+  lines(points[2:7],exp.avg.pas$taperror_deg[2:7],col=colorset[['expPasS']],lty=1,lwd=1.5)
   
   axis(1,at=points)
   axis(2,at=c(0,-5,-10,-15))
   
-  legend(10,-15,c('passive','active'),col=c(colorset[['expPasS']],colorset[['expActS']]),lty=c(1,1),lwd=c(2,2),bty='n')
+  legend(10,-15,c('passive','active'),col=c(colorset[['expPasS']],colorset[['expActS']]),lty=c(1,1),lwd=c(1.5,1.5),bty='n')
   
   # panel B: classic localization (active vs. passive)
   
-  plot(-1000,-1000, main='classic', xlab='hand angle [deg]', ylab='localization shift [deg]', xlim=c(10,80), ylim=c(0,-15), axes=F)
+  plot(-1000,-1000, main='classic', xlab='hand angle [°]', ylab='localization shift [°]', xlim=c(10,80), ylim=c(0,-15), axes=F)
+  
+  mtext('B', side=3, outer=TRUE, at=c(1/3,1), line=-1, adj=0, padj=1, family='Arial')
   
   X <- c(points, rev(points))
   cla.act.Y <- c(cla.CI.act[1,],rev(cla.CI.act[2,]))
@@ -206,19 +210,21 @@ plotLocalization <- function(classicOnline=FALSE, generateSVG=FALSE) {
   polygon(X,cla.act.Y,border=NA,col=colorset[['claActT']])
   polygon(X,cla.pas.Y,border=NA,col=colorset[['claPasT']])
   
-  lines(points[1:2],cla.avg.act$taperror_deg[1:2],col=colorset[['claActS']],lty=2,lwd=2)
-  lines(points[2:7],cla.avg.act$taperror_deg[2:7],col=colorset[['claActS']],lty=1,lwd=2)
-  lines(points[1:2],cla.avg.pas$taperror_deg[1:2],col=colorset[['claPasS']],lty=2,lwd=2)
-  lines(points[2:7],cla.avg.pas$taperror_deg[2:7],col=colorset[['claPasS']],lty=1,lwd=2)
+  lines(points[1:2],cla.avg.act$taperror_deg[1:2],col=colorset[['claActS']],lty=2,lwd=1.5)
+  lines(points[2:7],cla.avg.act$taperror_deg[2:7],col=colorset[['claActS']],lty=1,lwd=1.5)
+  lines(points[1:2],cla.avg.pas$taperror_deg[1:2],col=colorset[['claPasS']],lty=2,lwd=1.5)
+  lines(points[2:7],cla.avg.pas$taperror_deg[2:7],col=colorset[['claPasS']],lty=1,lwd=1.5)
   
   axis(1,at=points)
   axis(2,at=c(0,-5,-10,-15))
   
-  legend(10,-15,c('passive','active'),col=c(colorset[['claPasS']],colorset[['claActS']]),lty=c(1,1),lwd=c(2,2),bty='n')
+  legend(10,-15,c('passive','active'),col=c(colorset[['claPasS']],colorset[['claActS']]),lty=c(1,1),lwd=c(1.5,1.5),bty='n')
   
   if (classicOnline) {
     
-    plot(-1000,-1000, main='online', xlab='hand angle [deg]', ylab='localization shift [deg]', xlim=c(10,80), ylim=c(0,-15), axes=F)
+    plot(-1000,-1000, main='online', xlab='hand angle [°]', ylab='localization shift [°]', xlim=c(10,80), ylim=c(0,-15), axes=F)
+    
+    mtext('C', side=3, outer=TRUE, at=c(2/3,1), line=-1, adj=0, padj=1, family='Arial')
     
     X <- c(points, rev(points))
     onl.act.Y <- c(onl.CI.act[1,],rev(onl.CI.act[2,]))
@@ -227,15 +233,15 @@ plotLocalization <- function(classicOnline=FALSE, generateSVG=FALSE) {
     polygon(X,onl.act.Y,border=NA,col=colorset[['onlActT']])
     polygon(X,onl.pas.Y,border=NA,col=colorset[['onlPasT']])
     
-    lines(points[1:2],onl.avg.act$taperror_deg[1:2],col=colorset[['onlActS']],lty=2,lwd=2)
-    lines(points[2:7],onl.avg.act$taperror_deg[2:7],col=colorset[['onlActS']],lty=1,lwd=2)
-    lines(points[1:2],onl.avg.pas$taperror_deg[1:2],col=colorset[['onlPasS']],lty=2,lwd=2)
-    lines(points[2:7],onl.avg.pas$taperror_deg[2:7],col=colorset[['onlPasS']],lty=1,lwd=2)
+    lines(points[1:2],onl.avg.act$taperror_deg[1:2],col=colorset[['onlActS']],lty=2,lwd=1.5)
+    lines(points[2:7],onl.avg.act$taperror_deg[2:7],col=colorset[['onlActS']],lty=1,lwd=1.5)
+    lines(points[1:2],onl.avg.pas$taperror_deg[1:2],col=colorset[['onlPasS']],lty=2,lwd=1.5)
+    lines(points[2:7],onl.avg.pas$taperror_deg[2:7],col=colorset[['onlPasS']],lty=1,lwd=1.5)
     
     axis(1,at=points)
     axis(2,at=c(0,-5,-10,-15))
     
-    legend(10,-15,c('passive','active'),col=c(colorset[['onlPasS']],colorset[['onlActS']]),lty=c(1,1),lwd=c(2,2),bty='n')
+    legend(10,-15,c('passive','active'),col=c(colorset[['onlPasS']],colorset[['onlActS']]),lty=c(1,1),lwd=c(1.5,1.5),bty='n')
     
   }
   
