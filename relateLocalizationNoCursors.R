@@ -100,7 +100,7 @@ correlateNoCursorsLocalization <- function(NCpart='all', generateSVG=FALSE) {
     
     plot(-1000, -1000, main=group, xlab=xlab, ylab=ylab, asp=1, axes=FALSE, xlim=xlimits, ylim=ylimits)
     
-    mtext(toupper(letters[groupno]), side=3, outer=TRUE, at=c((groupno-1)/3,1), line=-1, adj=0, padj=1, family='Arial')
+    mtext(toupper(letters[groupno]), side=3, outer=TRUE, at=c((groupno-1)/3,1), line=-1, adj=0, padj=1)
     
     lines(c(0,0),range(yticks),col=rgb(.5,.5,.5,.5))
     lines(range(xticks),c(0,0),col=rgb(.5,.5,.5,.5))

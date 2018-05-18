@@ -329,11 +329,8 @@ What can we conclude? Here is an initial list of what we might conclude.
 
     1. There is also a trend towards significance for _passive localization_ to predict reach aftereffects after **classic training**. Perhaps active localization is more similar to no-cursor reaches after exposure training, as they both use recalibrated proprioception as well as updated predictions of sensory consequences -- which could mostly be proprioceptive consequences after exposure training. This does not explain the trend towards significance for predicting classic reach aftereffects with passive localization. A step-wise multiple regression favours an intercept model for classic reach aftereffects, hence none of the localization data was deemed informative. The same algorithm arrived at a model using active localization to predict exposure reach aftereffects. The intercept model for classic reach aftereffects could signify that not too much should be read into the trend towards significance in the correlation. On the other hand, the exposure group had twice as much data, so that the estimated recalibration would be more reliable within each participant. Perhaps with higher quality estimates of proprioceptive recalibration those would be able to predict part of the reach aftereffects even after classic training.
     
-# Figures
-
-Here we simply generate the same figures as above, but now they are saved as SVG files.
-
 ```{r create_svgs, cache=FALSE, include=FALSE}
+# This chunk creates SVG files but shouldn't show up in the PDF / HTML 
 plotReachAftereffects(generateSVG=TRUE)
 plotLocalization(classicOnline=TRUE, generateSVG=TRUE)
 correlations <- correlateNoCursorsLocalization(generateSVG=TRUE)

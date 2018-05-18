@@ -104,7 +104,7 @@ plotReachAftereffects <- function(generateSVG=FALSE) {
   
   plot(-1000,-1000, main='decay of reach aftereffects', xlab='target angle [°]', ylab='reach endpoint deviation [°]', xlim=c(10,80), ylim=c(0,15), axes=F)
   
-  mtext('A', side=3, outer=TRUE, at=c(0,1), line=-1, adj=0, padj=1, family='Arial')
+  mtext('A', side=3, outer=TRUE, at=c(0,1), line=-1, adj=0, padj=1)
   
   polygon(X,expYrem,border=NA,col=colorset[['expActT']])
   polygon(X,expYini,border=NA,col=colorset[['expPasT']])
@@ -119,7 +119,7 @@ plotReachAftereffects <- function(generateSVG=FALSE) {
   
   plot(-1000,-1000, main='reach aftereffects', xlab='target angle [°]', ylab='reach endpoint deviation [°]', xlim=c(10,80), ylim=c(0,15), axes=F)
   
-  mtext('B', side=3, outer=TRUE, at=c(1/3,1), line=-1, adj=0, padj=1, family='Arial')
+  mtext('B', side=3, outer=TRUE, at=c(1/3,1), line=-1, adj=0, padj=1)
   
   polygon(X,claY, border=NA,col=colorset[['claActT']])
   polygon(X,expY, border=NA,col=colorset[['expActT']])

@@ -178,7 +178,7 @@ plotLocalization <- function(classicOnline=FALSE, generateSVG=FALSE) {
   
   plot(-1000,-1000, main='exposure', xlab='hand angle [°]', ylab='localization shift [°]', xlim=c(10,80), ylim=c(0,-15), axes=F)
   
-  mtext('A', side=3, outer=TRUE, at=c(0,1), line=-1, adj=0, padj=1, family='Arial')
+  mtext('A', side=3, outer=TRUE, at=c(0,1), line=-1, adj=0, padj=1)
   
   X <- c(points, rev(points))
   exp.act.Y <- c(exp.CI.act[1,],rev(exp.CI.act[2,]))
@@ -201,7 +201,7 @@ plotLocalization <- function(classicOnline=FALSE, generateSVG=FALSE) {
   
   plot(-1000,-1000, main='classic', xlab='hand angle [°]', ylab='localization shift [°]', xlim=c(10,80), ylim=c(0,-15), axes=F)
   
-  mtext('B', side=3, outer=TRUE, at=c(1/3,1), line=-1, adj=0, padj=1, family='Arial')
+  mtext('B', side=3, outer=TRUE, at=c(1/3,1), line=-1, adj=0, padj=1)
   
   X <- c(points, rev(points))
   cla.act.Y <- c(cla.CI.act[1,],rev(cla.CI.act[2,]))
@@ -224,7 +224,7 @@ plotLocalization <- function(classicOnline=FALSE, generateSVG=FALSE) {
     
     plot(-1000,-1000, main='online', xlab='hand angle [°]', ylab='localization shift [°]', xlim=c(10,80), ylim=c(0,-15), axes=F)
     
-    mtext('C', side=3, outer=TRUE, at=c(2/3,1), line=-1, adj=0, padj=1, family='Arial')
+    mtext('C', side=3, outer=TRUE, at=c(2/3,1), line=-1, adj=0, padj=1)
     
     X <- c(points, rev(points))
     onl.act.Y <- c(onl.CI.act[1,],rev(onl.CI.act[2,]))
