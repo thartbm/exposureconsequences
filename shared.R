@@ -4,7 +4,7 @@
 nocursorURLs <- c('exposure'='https://osf.io/9s6au/?action=download', 'classic'='https://osf.io/8hm7f/?action=download')
 
 # no-cursor data can be downloaded from OSF:
-localizationURLs <- c('exposure'='https://osf.io/9f6gu/?action=download', 'classic'='https://osf.io/upw49/?action=download', 'online'='https://osf.io/wjcgk/download')
+localizationURLs <- c('exposure'='https://osf.io/bk4s6/?action=download', 'classic'='https://osf.io/upw49/?action=download', 'online'='https://osf.io/wjcgk/download')
 
 # we'll control the color in figures centrally from here:
 colorset <- list()
@@ -231,7 +231,7 @@ getPointLocalization <- function(group, difference=TRUE, points=c(15,25,35,45,55
     }
     # print(dim(groupdf))
   } else {
-    if (LRpart != 'both') {
+    if (LRpart != 'all') {
       cat('\nWARNING: Partial localization can not be returned for classic/online data.\n\n')
       # the full dataset is returned anyway?
     }
