@@ -1,14 +1,14 @@
 ---
 title: "Exposure Consequences - Statistics and Figures"
 output:
-  html_document:
-    df_print: paged
-    toc: yes
-    toc_depth: '2'
   pdf_document:
     number_sections: yes
     toc: yes
     toc_depth: 2
+  html_document:
+    df_print: paged
+    toc: yes
+    toc_depth: '2'
 ---
 
 ```{r setup, cache=FALSE, include=FALSE}
