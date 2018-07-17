@@ -263,7 +263,7 @@ exposureLocalization <- function(remove15=TRUE, LMEmethod='chi-squared') {
   }
   
   exp$participant   <- factor(exp$participant)
-  exp$rotated_b    <- factor(exp$rotated_b)
+  exp$rotated_b     <- factor(exp$rotated_b)
   exp$passive_b     <- factor(exp$passive_b)
   exp$handangle_deg <- factor(exp$handangle_deg)
   
@@ -510,5 +510,66 @@ getPeakLocConfidenceInterval <- function(group,part='initial',CIs=c(.95), moveme
   loc2 <- -1 * xtabs(taperror_deg ~ participant + handangle_deg,loc)
   
   bootstrapGaussianPeak(data=loc2,bootstraps=1000,mu=47.5,sigma=30,scale=10,offset=4,CIs=CIs)
+  
+}
+
+countLocNAs <- function(group='exposure', output='count') {
+  
+  loc <- getPointLocalization(group, difference=FALSE, verbose=FALSE)
+  loc <- loc[is.finite(loc$taperror_deg),]
+  
+  df <- expand.grid(unique(loc$participant), unique(loc$handangle_deg))
+  names(df) <- c('participant', 'handangle_deg')
+  df$count <- 0
+  
+  for (rown in c(1:nrow(df))) {
+    
+    pp    <- df[rown, 'participant']
+    angle <- df[rown, 'handangle_deg']
+    
+    subexp <- loc[which(loc$participant == pp & loc$handangle_deg == angle),]
+    df$count[rown] <- nrow(subexp)
+    
+  }
+  
+  if (output == 'count') {
+    # this is a count of participants with estimates in ALL 4 tasks
+    df$count[which(df$count < 4)] <- 0
+    df$count[which(df$count > 0)] <- 1
+    df <- aggregate(count ~ handangle_deg, data=df, FUN=sum)
+  }
+  
+  if (output == 'percentage') {
+    # this returns a percentage of existing estimates across the 4 tasks
+    df$count <- df$count/4
+    df <- aggregate(count ~ handangle_deg, data=df, FUN=mean)
+  }
+  
+  return(df)
+  
+}
+
+getLocCountTable <- function(output='count') {
+  
+  groups <- c('exposure','classic','online')
+  
+  for (group in groups) {
+    
+    counts <- countLocNAs(group=group, output=output)
+    
+    if (group == groups[1]) {
+      
+      df <- counts
+      names(df)[2] <- group
+      
+    } else {
+      
+      df[,group] <- counts$count
+      
+    }
+    
+  }
+  
+  return(df)
   
 }

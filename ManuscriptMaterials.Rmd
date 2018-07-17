@@ -1,14 +1,14 @@
 ---
 title: "Exposure Consequences - Statistics and Figures"
 output:
-  pdf_document:
-    number_sections: yes
-    toc: yes
-    toc_depth: 2
   html_document:
     df_print: paged
     toc: yes
     toc_depth: '2'
+  pdf_document:
+    number_sections: yes
+    toc: yes
+    toc_depth: 2
 ---
 
 ```{r setup, cache=FALSE, include=FALSE}
@@ -157,6 +157,16 @@ plotLocalization(classicOnline=TRUE)
 ```
 
 It seems that just like after classic training, there is a change in localization responses following exposure training. There might still be a difference between active and passive localization after exposure training - contrary to our expectations - but it could be smaller than the difference after classic training. This will need to be tested.
+
+## Missing data
+
+Here are the counts of participants with valid localization estimates in all 4 tasks for every hand angle. Missing data occurs here, because we don't extrapolate beyond the range of the data.
+
+```{r localization_count_table}
+kable(getLocCountTable())
+```
+
+Since the majority of missing data appears to be at the 15 degree location, we exclude that angle from analysis, with a switch in analysis functions `remove15=TRUE`, which can be set to false if we'd want.
 
 ## Is there a localization shift after exposure training?
 
