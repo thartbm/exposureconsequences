@@ -218,7 +218,7 @@ parGaussian <- function(par,x) {
 # handling localization data -----
 #   exp <- getPointLocalization('exposure', difference=TRUE, verbose=FALSE, selectPerformance=selectPerformance)
 
-getPointLocalization <- function(group, difference=TRUE, points=c(15,25,35,45,55,65,75), movementtype='both', verbose=TRUE, LRpart='all', selectPerformance=selectPerformance) {
+getPointLocalization <- function(group, difference=TRUE, points=c(15,25,35,45,55,65,75), movementtype='both', verbose=TRUE, LRpart='all', selectPerformance=TRUE) {
   
   df <- load.DownloadDataframe(url=localizationURLs[group],filename=sprintf('localization_%s.csv',group))
   
