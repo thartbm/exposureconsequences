@@ -1,5 +1,10 @@
 ---
-title: "Exposure Consequences - Statistics and Figures"
+title: "Motor Learning Without Moving"
+subtitle: "Figures and Statistics"
+author:
+- Ahmed A. Mostafa
+- Bernard Marius 't Hart
+- Denise Henriques
 output:
   pdf_document:
     number_sections: yes
@@ -15,7 +20,6 @@ output:
 library(knitr)
 opts_chunk$set(comment='')
 ```
-
 
 # Overview
 
@@ -144,7 +148,7 @@ print(table(participants$sex))
 Here is a plot, probably figure 2:
 
 ```{r fig3_localization, fig.width=7.5, fig.height=2.5}
-plotLocalization(classicOnline=TRUE,selectPerformance=selectPerformance)
+plotLocalization(classicOnline=TRUE, selectPerformance=selectPerformance)
 ```
 
 It seems that just like after classic training, there is a change in localization responses following exposure training. There might still be a difference between active and passive localization after exposure training - contrary to our expectations - but it could be smaller than the difference after classic training. This will need to be tested.
@@ -409,29 +413,36 @@ multipleRegressionLocalization(group='online',
 
 And that might be the case as one term is preserved by the model, but on the other hand, the predictions are pretty bad.
 
+What do these correlations mean? I'm not sure. There seems to be some relationship but it's not very strong. So either there are other factors playing a role, the measurements are too noisy, or we don't have enough power to detect any relationships. All of these are very likely, and then there is the other alternative that there is no relationship. So it's probably better not to include these (unplanned) analyses in the manuscript and leave this for a better dataset.
+
 # Conclusions
 
 What can we conclude? Here is an initial list of what we might conclude.
 
-1. Exposure training leads to robust reach aftereffects that are similar to those after classic training, although they seem to have a more pronouced generalization curve. This means that evoking propceptive recalibration with visual-proprioceptive discrepancies leads to motor changes. In other words: proprioception informs motor control.
-
-2. Exposure training leads to shifts in localization, that are not very different between active and passive localization. Since both active and passive movements access recalibrated proprioception, while active localization also accesses updated predictions, this indicates that hand localization is makes very good use of proprioception.
+1. Exposure training leads to shifts in localization, that are not very different between active and passive localization. Since both active and passive movements access recalibrated proprioception, while active localization also accesses updated predictions, this indicates that hand localization is makes very good use of proprioception.
 
     1. Additionally, since predictions should not be updated in exposure training, active localization could have resulted in a _lower_ shift in localization if hand location were estimated by combining recalibrated proprioception and updated prediction in a maximum likelihood way. If anything however, active localization is slightly larger (non-significant) than passive localization. This indicates a non-Bayesian process of combining predictions and perceptions -- in this case.
 
     2. After classic training (2016 paper) there was an effect of movement type, which indicates that with a training regime that allows updates of predicted sensory consequences, these updates do indeed also affect hand localization.
 
-    3. Within the workspace however, there is no interaction between movement type and training group (but there is a 'trend', p=.09, if hand angle is used as a random effect, in all analyses the 15 degree data is omitted as Denise said). Perhaps there is a small update of predicted proprioceptive consequences, that we can't parcel out. A more computational approach would be needed to see if this can explain the pattern of results here.
-
-3. Recalibrated proprioception can somewhat predict reach aftereffects, but only after **exposure** training and for _active localization_. This indicates that in some circumstances, recalibrated proprioception might drive motor changes. However, it is possible that the active component of the localization is crucial here. Perhaps exposure training leads to some updates in predicted sensory consequences after all -- be they visual or proprioceptive. These would also factor into the reach aftereffects.
-
-    1. There is also a trend towards significance for _passive localization_ to predict reach aftereffects after **classic training**. Perhaps active localization is more similar to no-cursor reaches after exposure training, as they both use recalibrated proprioception as well as updated predictions of sensory consequences -- which could mostly be proprioceptive consequences after exposure training. This does not explain the trend towards significance for predicting classic reach aftereffects with passive localization. A step-wise multiple regression favours an intercept model for classic reach aftereffects, hence none of the localization data was deemed informative. The same algorithm arrived at a model using active localization to predict exposure reach aftereffects. The intercept model for classic reach aftereffects could signify that not too much should be read into the trend towards significance in the correlation. On the other hand, the exposure group had twice as much data, so that the estimated recalibration would be more reliable within each participant. Perhaps with higher quality estimates of proprioceptive recalibration those would be able to predict part of the reach aftereffects even after classic training.
+    3. Within the workspace, there is an interaction between movement type and training group, which is predicted by there being an effect of updated predictions on active localization after classic training, but not after exposure training.
     
+    4. The generalization curves for localization are different between the two groups.
+
+2. Exposure training leads to robust reach aftereffects that are similar to those after classic training, although they seem to have a different generalization curve. This means that evoking propceptive recalibration with visual-proprioceptive discrepancies leads to motor changes. In other words: recalibrated proprioception informs motor control.
+
+    1. The generalization curves of reach aftereffects look somewhat different for both groups, which can be explained by the effect of updated predictions that factors into the curve for the classic training group, but not the exposure training group. However, it's not a large difference, and the analyses are ambiguous. Perhaps this is another cue that recalibrated proprioception dominates even reach aftereffects? Either way, we find no (statistically reliable) evidence that the updated predictions matter much for the generalization curves, which can have several causes.
+
+
 ```{r create_svgs, cache=FALSE, include=FALSE}
 # This chunk creates SVG files but shouldn't show up in the PDF / HTML 
-plotReachAftereffects(generateSVG=TRUE)
-plotLocalization(classicOnline=TRUE, generateSVG=TRUE)
-correlations <- correlateNoCursorsLocalization(generateSVG=TRUE)
+plotReachAftereffects(generateSVG=TRUE,
+                      selectPerformance=selectPerformance)
+plotLocalization(classicOnline=TRUE,
+                 generateSVG=TRUE, 
+                 selectPerformance=selectPerformance)
+correlations <- correlateNoCursorsLocalization(generateSVG=TRUE, 
+                                               selectPerformance=selectPerformance)
 #plotBlinkDetection(generateSVG=TRUE)
 ```
 
