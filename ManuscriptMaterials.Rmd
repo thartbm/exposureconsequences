@@ -129,13 +129,13 @@ if (selectPerformance) {
 We want to know some demographics, first mean age, and standard deviation:
 
 ```{r}
-c('mean'=mean(participants$age), 'sd'=sd(participants$age))
+print(c('mean'=mean(participants$age), 'sd'=sd(participants$age)))
 ```
 
 And the distribution of sex:
 
 ```{r}
-table(participants$sex)
+print(table(participants$sex))
 ```
 
 
