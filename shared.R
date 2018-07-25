@@ -4,7 +4,7 @@
 nocursorURLs <- c('exposure'='https://osf.io/9s6au/?action=download', 'classic'='https://osf.io/8hm7f/?action=download')
 
 # no-cursor data can be downloaded from OSF:
-localizationURLs <- c('exposure'='https://osf.io/bk4s6/?action=download', 'classic'='https://osf.io/upw49/?action=download', 'online'='https://osf.io/wjcgk/download')
+localizationURLs <- c('exposure'='https://osf.io/ysduw/?action=download', 'classic'='https://osf.io/upw49/?action=download', 'online'='https://osf.io/wjcgk/download')
 
 # information on exposure participants
 informationURLs <- c('blinkdetect'='https://osf.io/yrpkm/?action=download', 'demographics'='https://osf.io/7sn4b/?action=download')

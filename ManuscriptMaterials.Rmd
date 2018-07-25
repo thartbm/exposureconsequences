@@ -119,20 +119,22 @@ Which can also be set to FALSE to include those three participants in all analys
 
 First load the data, and select only the well performing ones:
 
-```{r eval=F}
+```{r}
 participants <- load.DownloadDataframe(informationURLs['demographics'],'participants_exposure.csv')
-participants <- participants[which(participants$participant %in% OKparticipants),]
+if (selectPerformance) {
+  participants <- participants[which(participants$participant %in% OKparticipants),]
+}
 ```
 
 We want to know some demographics, first mean age, and standard deviation:
 
-```{r eval=F}
+```{r}
 c('mean'=mean(participants$age), 'sd'=sd(participants$age))
 ```
 
 And the distribution of sex:
 
-```{r eval=F}
+```{r}
 table(participants$sex)
 ```
 
