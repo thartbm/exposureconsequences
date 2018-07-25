@@ -66,12 +66,12 @@ installRequire.Packages(required.packages)
 #   
 # }
 
-plotReachAftereffects <- function(generateSVG=FALSE) {
+plotReachAftereffects <- function(generateSVG=FALSE, selectPerformance=TRUE) {
   
   if (generateSVG) {
     installed.list <- rownames(installed.packages())
     if ('svglite' %in% installed.list) {
-      svglite(file='Fig2.svg', width=7.5, height=2.5, system_fonts=list(sans='Arial', mono='Times New Roman'))
+      svglite(file='Fig3.svg', width=7.5, height=2.5, system_fonts=list(sans='Arial', mono='Times New Roman'))
     } else {
       generateSVG=FALSE
     }
@@ -81,12 +81,12 @@ plotReachAftereffects <- function(generateSVG=FALSE) {
   
   points <- c(15,25,35,45,55,65,75)
   
-  exposure_ini <- getReachAftereffects('exposure',part='initial')
-  exposure_rem <- getReachAftereffects('exposure',part='remainder')
-  classic  <- getReachAftereffects('classic',part='all')
-  exposure <- getReachAftereffects('exposure',part='all')
+  exposure_ini <- getReachAftereffects('exposure',part='initial', selectPerformance=selectPerformance)
+  exposure_rem <- getReachAftereffects('exposure',part='remainder', selectPerformance=selectPerformance)
+  classic  <- getReachAftereffects('classic',part='all', selectPerformance=selectPerformance)
+  exposure <- getReachAftereffects('exposure',part='all', selectPerformance=selectPerformance)
   
-  exposureAVGini <- aggregate(endpoint_angle ~ target, data=exposure_ini, FUN=mean)
+  exposureAVGini <- aggregate(endpoint_angle ~ target, data=exposure_ini, FUN=mean) # error?
   exposureAVGrem <- aggregate(endpoint_angle ~ target, data=exposure_rem, FUN=mean)
   classicAVG <- aggregate(endpoint_angle ~ target, data=classic, FUN=mean)
   exposureAVG <- aggregate(endpoint_angle ~ target, data=exposure, FUN=mean)
@@ -138,11 +138,11 @@ plotReachAftereffects <- function(generateSVG=FALSE) {
   
 }
 
-getPeakConfidenceInterval <- function(group,validate=FALSE,part='initial',CIs=c(.95)) {
+getPeakConfidenceInterval <- function(group,validate=FALSE,part='initial',CIs=c(.95), selectPerformance=selectPerformance) {
   
   cat(sprintf('\n%s\n\n',toupper(group)))
   
-  RAE <- getReachAftereffects(group, part=part)
+  RAE <- getReachAftereffects(group, part=part, selectPerformance=selectPerformance)
   
   if (validate) {
     validParticipants <- validateReachAftereffects(group, method='45')
@@ -250,12 +250,12 @@ plotReachAftereffectDistributions <- function() {
   
 }
 
-exposureNoCursorChange <- function(printChange=FALSE,LMEmethod='chi-squared') {
+exposureNoCursorChange <- function(printChange=FALSE,LMEmethod='chi-squared',selectPerformance=selectPerformance) {
   
   default.contrasts <- options('contrasts')
   options(contrasts=c('contr.sum','contr.poly'))
   
-  nc.exp <- getReachAftereffects('exposure', part='initial', difference=FALSE)
+  nc.exp <- getReachAftereffects('exposure', part='initial', difference=FALSE, selectPerformance=selectPerformance)
   
   nc.exp$participant <- factor(nc.exp$participant)
   nc.exp$rotated <- factor(nc.exp$rotated)
@@ -278,7 +278,7 @@ exposureNoCursorChange <- function(printChange=FALSE,LMEmethod='chi-squared') {
   
   if (printChange) {
     
-    nc.exp <- getReachAftereffects('exposure', part='initial', difference=TRUE)
+    nc.exp <- getReachAftereffects('exposure', part='initial', difference=TRUE, selectPerformance=selectPerformance)
     
     nc.exp <- aggregate(endpoint_angle ~ target, data=nc.exp, FUN=mean)
     
@@ -286,7 +286,7 @@ exposureNoCursorChange <- function(printChange=FALSE,LMEmethod='chi-squared') {
     cat(sprintf('avg reach aftereffects: %0.1f (all targets)\n',mean(nc.exp$endpoint_angle, na.rm=TRUE)))
     cat(sprintf('avg reach aftereffects: %0.1f (targets above 15 degrees)\n',mean(nc.exp$endpoint_angle[which(nc.exp$target > 15)], na.rm=TRUE)))
     
-    nc.cla <- getReachAftereffects('classic', part='initial', difference=TRUE)
+    nc.cla <- getReachAftereffects('classic', part='initial', difference=TRUE, selectPerformance=selectPerformance)
     
     nc.cla <- aggregate(endpoint_angle ~ target, data=nc.cla, FUN=mean)
     
@@ -298,13 +298,13 @@ exposureNoCursorChange <- function(printChange=FALSE,LMEmethod='chi-squared') {
   
 }
 
-exposureAftereffectsPersistent <- function(LMEmethod='chi-squared') {
+exposureAftereffectsPersistent <- function(LMEmethod='chi-squared', selectPerformance=selectPerformance) {
   
   default.contrasts <- options('contrasts')
   options(contrasts=c('contr.sum','contr.poly'))
   
-  exp1 <- getReachAftereffects('exposure', part='initial', difference=TRUE)
-  exp2 <- getReachAftereffects('exposure', part='remainder', difference=TRUE)
+  exp1 <- getReachAftereffects('exposure', part='initial', difference=TRUE, selectPerformance=selectPerformance)
+  exp2 <- getReachAftereffects('exposure', part='remainder', difference=TRUE, selectPerformance=selectPerformance)
   
   exp1$iteration <- 1
   exp2$iteration <- 2
@@ -335,13 +335,13 @@ exposureAftereffectsPersistent <- function(LMEmethod='chi-squared') {
   
 }
 
-exposureClassicReachAftereffects <- function(noTarget=FALSE, remove15=FALSE, LMEmethod='chi-squared') {
+exposureClassicReachAftereffects <- function(noTarget=FALSE, remove15=FALSE, LMEmethod='chi-squared', selectPerformance=selectPerformance) {
   
   default.contrasts <- options('contrasts')
   options(contrasts=c('contr.sum','contr.poly'))
   
-  exp <- getReachAftereffects('exposure', part='all', difference=TRUE)
-  cla <- getReachAftereffects('classic', part='all', difference=TRUE)
+  exp <- getReachAftereffects('exposure', part='all', difference=TRUE, selectPerformance=selectPerformance)
+  cla <- getReachAftereffects('classic', part='all', difference=TRUE, selectPerformance=selectPerformance)
   if (remove15) {
     exp <- exp[-which(exp$target == 15),]
     cla <- cla[-which(cla$target == 15),]
@@ -386,5 +386,40 @@ exposureClassicReachAftereffects <- function(noTarget=FALSE, remove15=FALSE, LME
   detach(RAE)
   
   options('contrasts' <- default.contrasts)
+  
+}
+
+plotBlinkDetection <- function(generateSVG=FALSE) {
+  
+  if (generateSVG) {
+    installed.list <- rownames(installed.packages())
+    if ('svglite' %in% installed.list) {
+      svglite(file='Fig1.svg', width=4, height=4, system_fonts=list(sans='Arial', mono='Times New Roman'))
+    } else {
+      generateSVG=FALSE
+    }
+  }
+  
+  #blinks <- read.csv(, stringsAsFactors=F)
+  blinks <- load.DownloadDataframe(informationURLs['blinkdetect'],'blinkdetect_exposure.csv')
+  
+  participants <- unique(blinks$participant)
+  plot(x=c(1,2),y=c(.5,.5),type='l',lty=2,col=rgb(0,0,0),xlim=c(0,3),ylim=c(0,1),main='cursor-blink detection',axes=F,xlab='task',ylab='performance')
+  
+  for(participant in participants) {
+    pblink <- blinks[which(blinks$participant == participant),]
+    lines(x=c(1:2),y=pblink$performance,col=rgb(0.7,0.75,0.7))
+  }
+  
+  blinks$taskno <- blinks$taskno + (blinks$rotated_b)
+  avg <- aggregate(performance ~ taskno, data=blinks, FUN=mean)
+  lines(x=c(1:2),y=avg$performance,col=rgb(0,0,0))
+  
+  axis(side=1, at=c(1:2), labels=c('aligned','rotated'))
+  axis(side=2, at=c(0,0.5,1))
+  
+  if (generateSVG) {
+    dev.off()
+  }
   
 }

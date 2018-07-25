@@ -6,6 +6,9 @@ nocursorURLs <- c('exposure'='https://osf.io/9s6au/?action=download', 'classic'=
 # no-cursor data can be downloaded from OSF:
 localizationURLs <- c('exposure'='https://osf.io/bk4s6/?action=download', 'classic'='https://osf.io/upw49/?action=download', 'online'='https://osf.io/wjcgk/download')
 
+# information on exposure participants
+informationURLs <- c('blinkdetect'='https://osf.io/yrpkm/?action=download', 'demographics'='https://osf.io/7sn4b/?action=download')
+
 # we'll control the color in figures centrally from here:
 colorset <- list()
 
@@ -18,8 +21,8 @@ colorset[['claActT']] <- '#e516362f'
 colorset[['claPasS']] <- '#ff8200ff' # orange
 colorset[['claPasT']] <- '#ff82002f'
 
-colorset[['extra1S']] <- '#c400c4ff' # purple
-colorset[['extra1T']] <- '#c400c42f'
+# colorset[['extra1S']] <- '#c400c4ff' # purple
+# colorset[['extra1T']] <- '#c400c42f'
 
 colorset[['onlActS']] <- '#b400e4ff' # purple
 colorset[['onlActT']] <- '#b400e42f'
@@ -213,10 +216,17 @@ parGaussian <- function(par,x) {
 
 
 # handling localization data -----
+#   exp <- getPointLocalization('exposure', difference=TRUE, verbose=FALSE, selectPerformance=selectPerformance)
 
-getPointLocalization <- function(group, difference=TRUE, points=c(15,25,35,45,55,65,75), movementtype='both', verbose=TRUE, LRpart='all') {
+getPointLocalization <- function(group, difference=TRUE, points=c(15,25,35,45,55,65,75), movementtype='both', verbose=TRUE, LRpart='all', selectPerformance=selectPerformance) {
   
   df <- load.DownloadDataframe(url=localizationURLs[group],filename=sprintf('localization_%s.csv',group))
+  
+  if (selectPerformance & group=='exposure') {
+    blinks <- load.DownloadDataframe(informationURLs['blinkdetect'],'blinkdetect_exposure.csv')
+    OKparticipants <- blinks$participant[which(blinks$rotated_b == 1 & blinks$performance > 0.65)]
+    df <- df[which(df$participant %in% OKparticipants),]
+  }
   
   df <- aspligned(df)
   
@@ -365,8 +375,8 @@ getLocalizationPoints <- function(subdf, points=c(15,25,35,45,55,65,75), removeO
   
   # remove data points out of range:
   idx <- which(X > 0 & X < 90)
-  X <- X[idx]
-  Y <- Y[idx]
+  X   <- X[idx]
+  Y   <- Y[idx]
   
   # see if samples are reasonably close to what a smoothed spline on the rest of the data would predict:
   if (removeOutliers) {
@@ -379,7 +389,7 @@ getLocalizationPoints <- function(subdf, points=c(15,25,35,45,55,65,75), removeO
       sampleY <- Y[idx.idx]
       
       # spar determines smoothness:
-      # if set too smooth, some effects disappear
+      # if set too smooth, some effects disappear, but set as high as still seems to work
       spl <- smooth.spline(X[-idx.idx],Y[-idx.idx], spar=.90, keep.data=FALSE) # spar=.90
       
       sampleP <- predict(spl, x=sampleX)
@@ -396,19 +406,19 @@ getLocalizationPoints <- function(subdf, points=c(15,25,35,45,55,65,75), removeO
   }
   
   # cubic spline object, based on the data:
-  spl <- smooth.spline(X, Y, spar=0.65, keep.data=FALSE) # spar=0.65
+  spl <- smooth.spline(X, Y, spar=0.65, keep.data=FALSE) # spar=0.65 # smoothness as low as works
   
   # predict (interpolate) at given coordinates:
   spl.pr <- predict(spl,points)
   # spl.pr$y now has the estimated values of Y (the localization error) at the points of interest
   
-  group <- rep(subdf$group[1],length(points))
-  online_b <- rep(subdf$online_b[1],length(points))
-  participant <- rep(subdf$participant[1],length(points))
-  rotated_b <- rep(subdf$rotated_b[1],length(points))
-  passive_b <- rep(subdf$passive_b[1],length(points))
+  group         <- rep(subdf$group[1],length(points))
+  online_b      <- rep(subdf$online_b[1],length(points))
+  participant   <- rep(subdf$participant[1],length(points))
+  rotated_b     <- rep(subdf$rotated_b[1],length(points))
+  passive_b     <- rep(subdf$passive_b[1],length(points))
   handangle_deg <- points
-  taperror_deg <- round(spl.pr$y, digits=5)
+  taperror_deg  <- round(spl.pr$y, digits=5)
   
   # since splines do well at interpolating, but not extrapolating
   # everything outside of the range of the data should be set to NAs:
@@ -428,18 +438,24 @@ getLocalizationPoints <- function(subdf, points=c(15,25,35,45,55,65,75), removeO
 
 # for every group, this loads the no-cursor reach directions in all relevant tasks,
 # and calcuates the reach aftereffects from them
-getReachAftereffects <- function(group, part='all', clean=TRUE, difference=TRUE) {
+getReachAftereffects <- function(group, part='all', clean=TRUE, difference=TRUE, selectPerformance=TRUE) {
   
   if (group == 'online') {
-    group <- 'classic'
+    group <- 'classic' # same participants, same data, so only stored in one file
   }
   
   # load pre-processed data for the required group (no default)
   raw.df <- load.DownloadDataframe(url=nocursorURLs[group],filename=sprintf('nocursor_%s.csv',group))
   
+  if (group=='exposure' & selectPerformance) {
+    blinks <- load.DownloadDataframe(informationURLs['blinkdetect'],'blinkdetect_exposure.csv')
+    OKparticipants <- blinks$participant[which(blinks$rotated_b == 1 & blinks$performance > 0.65)]
+    raw.df <- raw.df[which(raw.df$participant %in% OKparticipants),]
+  }
+  
   # remove outliers if requested (default: yes)
   if (clean) {
-    clean.df <- removeOutliers(raw.df) 
+    raw.df <- removeOutliers(raw.df)
   }
   
   # select part of the data if requested (default: use all of it)
@@ -458,15 +474,15 @@ getReachAftereffects <- function(group, part='all', clean=TRUE, difference=TRUE)
     avg.df <- aggregate(endpoint_angle ~ participant + target, data=avg.df, FUN=diff)
   }
   
-  # return te result:
+  # return the result:
   return(avg.df)
   
 }
 
 
-
 removeOutliers <- function(df, stds=2) {
   
+  NOKidx <- c()
   OKidx <- c()
   targets <- unique(df$target)
   participants <- unique(df$participant)
@@ -479,8 +495,8 @@ removeOutliers <- function(df, stds=2) {
         
         subidx <- which(df$participant == participant & df$target == target & df$rotated == rotated)
         angles <- df$endpoint_angle[subidx]
-        OKidx <- c(OKidx, which(abs(angles - mean(angles)) < (stds * sd(angles))))
-        
+        # OKidx <- c(OKidx, which(abs(angles - mean(angles)) < (stds * sd(angles))))
+        NOKidx <- c(NOKidx, which(abs(angles - mean(angles)) > (stds * sd(angles))))
       }
       
     }
@@ -488,12 +504,13 @@ removeOutliers <- function(df, stds=2) {
   }
   
   Nobs <- nrow(df)
-  Nkept <- length(OKidx)
+  Nkept <- Nobs - length(NOKidx)
   cat(sprintf('removed %d outliers, kept %0.1f%%\n', Nobs-Nkept, (100 * (Nkept/Nobs))))
   
-  df <- df[OKidx,]
+  # df <- df[OKidx,]
+  df$endpoint_angle[NOKidx] <- NA
   
-  df <- aggregate(endpoint_angle ~ participant + rotated + repetition + target, data=df, FUN=mean)
+  df <- aggregate(endpoint_angle ~ participant + rotated + repetition + target, data=df, FUN=mean, na.rm=TRUE)
   
   return(df)
   

@@ -3,13 +3,13 @@ source('shared.R')
 
 
 
-correlateNoCursorsLocalization <- function(NCpart='all', generateSVG=FALSE) {
+correlateNoCursorsLocalization <- function(NCpart='all', generateSVG=FALSE, selectPerformance=TRUE) {
   
   # first we do all responses, plan to split it by target later
   # get all data, for classic and exposure, we need localization and reach aftereffects
   
   # LOCALIZATION SHIFT for exposure
-  local.exp <- getPointLocalization(group='exposure', difference=FALSE, verbose=FALSE)
+  local.exp <- getPointLocalization(group='exposure', difference=FALSE, verbose=FALSE, selectPerformance=selectPerformance)
   # active
   loc.exp.act.ro <- aggregate(taperror_deg ~ participant + handangle_deg, data=local.exp[local.exp$rotated_b == 1 & local.exp$passive_b == 0,], FUN=mean, drop=FALSE)
   loc.exp.act.al <- aggregate(taperror_deg ~ participant + handangle_deg, data=local.exp[local.exp$rotated_b == 0 & local.exp$passive_b == 0,], FUN=mean, drop=FALSE)
@@ -22,7 +22,7 @@ correlateNoCursorsLocalization <- function(NCpart='all', generateSVG=FALSE) {
   local.exp.pas$taperror_deg <- local.exp.pas$taperror_deg - loc.exp.pas.al$taperror_deg
   
   # REACH AFTEREFFECTS for exposure
-  nocur.exp <- getReachAftereffects(group='exposure', part=NCpart, clean=TRUE) 
+  nocur.exp <- getReachAftereffects(group='exposure', part=NCpart, clean=TRUE, selectPerformance=selectPerformance) 
   names(nocur.exp)[names(nocur.exp) == 'endpoint_angle'] <- 'RAE'
   # combine data frames for exposure
   exposure <- nocur.exp[which(nocur.exp$participant %in% local.exp.act$participant),]
@@ -30,7 +30,7 @@ correlateNoCursorsLocalization <- function(NCpart='all', generateSVG=FALSE) {
   exposure$passive_localization_shift <- local.exp.pas$taperror_deg
   
   # LOCALIZATION SHIFT for classic
-  local.cla <- getPointLocalization(group='classic', difference=FALSE, verbose=FALSE)
+  local.cla <- getPointLocalization(group='classic', difference=FALSE, verbose=FALSE, selectPerformance=selectPerformance)
   # active
   loc.cla.act.ro <- aggregate(taperror_deg ~ participant + handangle_deg, data=local.cla[local.cla$rotated_b == 1 & local.cla$passive_b == 0,], FUN=mean, drop=FALSE)
   loc.cla.act.al <- aggregate(taperror_deg ~ participant + handangle_deg, data=local.cla[local.cla$rotated_b == 0 & local.cla$passive_b == 0,], FUN=mean, drop=FALSE)
@@ -43,7 +43,7 @@ correlateNoCursorsLocalization <- function(NCpart='all', generateSVG=FALSE) {
   local.cla.pas$taperror_deg <- local.cla.pas$taperror_deg - loc.cla.pas.al$taperror_deg
   
   # REACH AFTEREFFECTS for classic
-  nocur.cla <- getReachAftereffects(group='classic', part=NCpart, clean=TRUE) 
+  nocur.cla <- getReachAftereffects(group='classic', part=NCpart, clean=TRUE, selectPerformance=selectPerformance) 
   names(nocur.cla)[names(nocur.cla) == 'endpoint_angle'] <- 'RAE'
   # combine the dataframes for classic:
   classic <- nocur.cla[which(nocur.cla$participant %in% local.cla$participant),]
@@ -153,13 +153,13 @@ correlateNoCursorsLocalization <- function(NCpart='all', generateSVG=FALSE) {
 }
 
 
-multipleRegressionLocalization <- function(group,NCpart='all',expart='all',LRpart='all') {
+multipleRegressionLocalization <- function(group,NCpart='all',expart='all',LRpart='all', selectPerformance=TRUE) {
   
   # first we do all responses, plan to split it by target later
   # get all data, for classic and exposure, we need localization and reach aftereffects
   
   # LOCALIZATION SHIFT
-  local <- getPointLocalization(group=group, difference=FALSE, verbose=FALSE, LRpart=LRpart)
+  local <- getPointLocalization(group=group, difference=FALSE, verbose=FALSE, LRpart=LRpart, selectPerformance=selectPerformance)
   # active
   loc.act.ro <- aggregate(taperror_deg ~ participant + handangle_deg, data=local[local$rotated_b == 1 & local$passive_b == 0,], FUN=mean, drop=FALSE)
   loc.act.al <- aggregate(taperror_deg ~ participant + handangle_deg, data=local[local$rotated_b == 0 & local$passive_b == 0,], FUN=mean, drop=FALSE)
@@ -172,7 +172,7 @@ multipleRegressionLocalization <- function(group,NCpart='all',expart='all',LRpar
   local.pas$taperror_deg <- local.pas$taperror_deg - loc.pas.al$taperror_deg
   
   # REACH AFTEREFFECTS
-  nocur <- getReachAftereffects(group=group, part=NCpart, clean=TRUE) 
+  nocur <- getReachAftereffects(group=group, part=NCpart, clean=TRUE, selectPerformance=selectPerformance) 
   names(nocur)[names(nocur) == 'endpoint_angle'] <- 'RAE'
   # combine data frames
   df <- nocur[which(nocur$participant %in% local.act$participant),]
@@ -190,7 +190,7 @@ multipleRegressionLocalization <- function(group,NCpart='all',expart='all',LRpar
   
   cat(sprintf('\n%s\n\n',toupper(group)))
   
-  str(df)
+  # str(df)
   
   # THIS CAUSES AN ERROR NOW: data argument is of the wrong type...
   # because STEP is imported from lmerTest, but we want the basic one from 'stats'

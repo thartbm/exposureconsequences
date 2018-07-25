@@ -124,11 +124,11 @@ localizationLMEsSatterthwaite <- function() {
 
 # PLOTS / FIGURES ------
 
-plotLocalization <- function(classicOnline=FALSE, generateSVG=FALSE) {
+plotLocalization <- function(classicOnline=FALSE, generateSVG=FALSE, selectPerformance=TRUE) {
   
   # get the data to plot:
-  exp <- getPointLocalization('exposure', difference=TRUE, verbose=FALSE)
-  cla <- getPointLocalization('classic', difference=TRUE, verbose=FALSE)
+  exp <- getPointLocalization('exposure', difference=TRUE, verbose=FALSE, selectPerformance=selectPerformance)
+  cla <- getPointLocalization('classic', difference=TRUE, verbose=FALSE, selectPerformance=FALSE)
   
   # get the averages for the line plots:
   exp.avg <- aggregate(taperror_deg ~ passive_b + handangle_deg, data=exp, FUN=mean)
@@ -149,7 +149,7 @@ plotLocalization <- function(classicOnline=FALSE, generateSVG=FALSE) {
   cla.CI.pas <- matrix(unlist(by(cla.pas$taperror_deg, INDICES=c(cla.pas$handangle_deg), FUN=t.interval)),nrow=2)
 
   if (classicOnline) {
-    onl <- getPointLocalization('online', difference=TRUE, verbose=FALSE)
+    onl <- getPointLocalization('online', difference=TRUE, verbose=FALSE, selectPerformance=FALSE)
     
     onl.avg <- aggregate(taperror_deg ~ passive_b + handangle_deg, data=onl, FUN=mean)
     onl.avg.act <- onl.avg[which(onl.avg$passive_b == 0),]
@@ -164,7 +164,7 @@ plotLocalization <- function(classicOnline=FALSE, generateSVG=FALSE) {
   if (generateSVG) {
     installed.list <- rownames(installed.packages())
     if ('svglite' %in% installed.list) {
-      svglite(file='Fig3.svg', width=7.5, height=2.5, system_fonts=list(sans='Arial', mono='Times New Roman'))
+      svglite(file='Fig2.svg', width=7.5, height=2.5, system_fonts=list(sans='Arial', mono='Times New Roman'))
     } else {
       generateSVG=FALSE
     }
@@ -251,12 +251,12 @@ plotLocalization <- function(classicOnline=FALSE, generateSVG=FALSE) {
   
 }
 
-exposureLocalization <- function(remove15=TRUE, LMEmethod='chi-squared') {
+exposureLocalization <- function(remove15=TRUE, LMEmethod='chi-squared', selectPerformance=TRUE) {
   
   default.contrasts <- options('contrasts')
   options(contrasts=c('contr.sum','contr.poly'))
   
-  exp <- getPointLocalization('exposure', difference=FALSE, verbose=FALSE)
+  exp <- getPointLocalization('exposure', difference=FALSE, verbose=FALSE, selectPerformance=selectPerformance)
   
   if (remove15) {
     exp <- exp[-which(exp$handangle_deg == 15),]
@@ -285,12 +285,12 @@ exposureLocalization <- function(remove15=TRUE, LMEmethod='chi-squared') {
   
 }
 
-exposureLocalizationShift <- function(noHandAngle=FALSE, remove15=TRUE, LMEmethod='chi-squared') {
+exposureLocalizationShift <- function(noHandAngle=FALSE, remove15=TRUE, LMEmethod='chi-squared', selectPerformance=TRUE) {
   
   default.contrasts <- options('contrasts')
   options(contrasts=c('contr.sum','contr.poly'))
   
-  exp <- getPointLocalization('exposure', difference=TRUE, verbose=FALSE)
+  exp <- getPointLocalization('exposure', difference=TRUE, verbose=FALSE, selectPerformance=selectPerformance)
   
   if (remove15) {
     exp <- exp[-which(exp$handangle_deg == 15),]
@@ -334,13 +334,13 @@ exposureLocalizationShift <- function(noHandAngle=FALSE, remove15=TRUE, LMEmetho
   
 }
 
-groupLocalization <- function(model='full', remove15=TRUE, LMEmethod='chi-squared') {
+groupLocalization <- function(model='full', remove15=TRUE, LMEmethod='chi-squared', selectPerformance=TRUE) {
   
   default.contrasts <- options('contrasts')
   options(contrasts=c('contr.sum','contr.poly'))
   
-  exp <- getPointLocalization('exposure', difference=TRUE, verbose=FALSE)
-  cla <- getPointLocalization('classic', difference=TRUE, verbose=FALSE)
+  exp <- getPointLocalization('exposure', difference=TRUE, verbose=FALSE, selectPerformance=selectPerformance)
+  cla <- getPointLocalization('classic', difference=TRUE, verbose=FALSE, selectPerformance=selectPerformance)
   
   loc <- rbind(exp, cla)
   
@@ -501,11 +501,11 @@ boxPlotLocalization <- function() {
   
 }
 
-getPeakLocConfidenceInterval <- function(group,part='initial',CIs=c(.95), movementtype='both', LRpart='all') {
+getPeakLocConfidenceInterval <- function(group,part='initial',CIs=c(.95), movementtype='both', LRpart='all', selectPerformance=TRUE) {
   
   cat(sprintf('\n%s\n\n',toupper(group)))
   
-  loc <- getPointLocalization(group, difference=TRUE, points=c(15,25,35,45,55,65,75), movementtype=movementtype, LRpart=LRpart, verbose=FALSE)
+  loc <- getPointLocalization(group, difference=TRUE, points=c(15,25,35,45,55,65,75), movementtype=movementtype, LRpart=LRpart, verbose=FALSE, selectPerformance=selectPerformance)
   
   loc2 <- -1 * xtabs(taperror_deg ~ participant + handangle_deg,loc)
   
@@ -513,9 +513,9 @@ getPeakLocConfidenceInterval <- function(group,part='initial',CIs=c(.95), moveme
   
 }
 
-countLocNAs <- function(group='exposure', output='count') {
+countLocNAs <- function(group='exposure', output='count', selectPerformance=selectPerformance) {
   
-  loc <- getPointLocalization(group, difference=FALSE, verbose=FALSE)
+  loc <- getPointLocalization(group, difference=FALSE, verbose=FALSE, selectPerformance=selectPerformance)
   loc <- loc[is.finite(loc$taperror_deg),]
   
   df <- expand.grid(unique(loc$participant), unique(loc$handangle_deg))
@@ -549,13 +549,13 @@ countLocNAs <- function(group='exposure', output='count') {
   
 }
 
-getLocCountTable <- function(output='count') {
+getLocCountTable <- function(output='count', selectPerformance=selectPerformance) {
   
   groups <- c('exposure','classic','online')
   
   for (group in groups) {
     
-    counts <- countLocNAs(group=group, output=output)
+    counts <- countLocNAs(group=group, output=output, selectPerformance=selectPerformance)
     
     if (group == groups[1]) {
       
