@@ -67,6 +67,17 @@ source('nocursor.R') # functions for no-cursor reach data
 source('relateLocalizationNoCursors.R') # functions that correlate the two kinds of data
 ```
 
+And we try to import some packages we use here:
+
+```{r require_lme_packages}
+required.packages = c('lme4', 'lmerTest', installmissing=FALSE)
+installRequire.Packages(required.packages)
+```
+
+Note: the packages `foreach` and `doParallel` will speed up the bootstrapping of peak fits, but the scripts will also run without.
+
+Note: the package `svglite` is used to generate SVG files with figures, but the scripts will simply skip this if the package is not available.
+
 ## Topics
 
 In the manuscript we'll first show that there indeed are localization shifts after exposure training (with the no-cursor data) and then compare that with the classic. Second are the no-cursor reaches (and the reach aftereffects). A third topic might be if localization shifts can predict no-cursor changes, which we'll call the "correlation" topic. Here we'll also follow this order:
@@ -83,10 +94,18 @@ In the manuscript we'll first show that there indeed are localization shifts aft
 
 Since in the localization tasks there is missing data at some points (usually at the extremes) we can't use ANOVAs directly on the data. Imputation is going to be very hard because the missing data is systematically missing. Hence, we are using Linear Mixed Effects models as an alternative, but this presents a new problem. Getting the usual F-values and p-values is not so straightforward. Initially we decided to use the $\chi^2$ approach that we get from the `Anova` function from the `car` package. However, a paper from Steven G. Luke (2017, _Evaluating significance in linear mixed-effects models in R_) suggests using Satterthwaite approximation. So all functions running an LME now take an argument that tells them to use the Satterthwaite method, but the default is chi-squared. It turns out that it doesn't matter much, so it's a good sanity check. For consistency across all the analyses, we set the value of that argument here:
 
-```{r}
+```{r set_LMEmethod}
 LMEmethod <- 'Satterthwaite'
 # options: 'Satterthwaite', 'chi-squared'
 ```
+
+If `LMEmethod` is set as 'chi-squared', we need some other packages to be able to run this:
+
+```{r requireChiSquared_packages}
+required.packages = c('nlme', 'car')
+installRequire.Packages(required.packages, installmissing=FALSE)
+```
+
 
 ### Peak location of generalization
 
@@ -100,20 +119,20 @@ There are no scripts for this part, as the code is simple and can just be embedd
 
 Let's look at the blink detect performance.
 
-```{r}
+```{r plotBlinkDetectionPerformance}
 plotBlinkDetection()
 ```
 
 Turns out the blink detection is hard and needs practice. But three participants are still performing around chance in the rotated training task, so we want to remove them from the data:
 
-```{r}
+```{r selectHighPerformingParticipants}
 blinks <- load.DownloadDataframe(informationURLs['blinkdetect'],'blinkdetect_exposure.csv')
 OKparticipants <- blinks$participant[which(blinks$rotated_b == 1 & blinks$performance > 0.65)]
 ```
 
 We'll also set a variable that is to be passed to all functions to exclude the underperformance:
 
-```{r}
+```{r set_selectPerformance_variable}
 selectPerformance <- TRUE
 ```
 
@@ -123,7 +142,7 @@ Which can also be set to FALSE to include those three participants in all analys
 
 First load the data, and select only the well performing ones:
 
-```{r}
+```{r load_select_participantInfo}
 participants <- load.DownloadDataframe(informationURLs['demographics'],'participants_exposure.csv')
 if (selectPerformance) {
   participants <- participants[which(participants$participant %in% OKparticipants),]
@@ -132,13 +151,13 @@ if (selectPerformance) {
 
 We want to know some demographics, first mean age, and standard deviation:
 
-```{r}
+```{r age_stats}
 print(c('mean'=mean(participants$age), 'sd'=sd(participants$age)))
 ```
 
 And the distribution of sex:
 
-```{r}
+```{r sex_distribution}
 print(table(participants$sex))
 ```
 
@@ -317,7 +336,7 @@ correlations <- correlateNoCursorsLocalization(selectPerformance=selectPerforman
 
 It looks like for exposure, both types of localization might be able to predict of reach aftereffects, whereas in classic it is only passive localization. But are any of these reliable? The function also returns the correlation tests and linear regressions for all four datasets.
 
-## Pearons Correlations
+## Pearson Correlations
 
 As one possibility, we can look at the correlations:
 
@@ -443,6 +462,5 @@ plotLocalization(classicOnline=TRUE,
                  selectPerformance=selectPerformance)
 correlations <- correlateNoCursorsLocalization(generateSVG=TRUE, 
                                                selectPerformance=selectPerformance)
-#plotBlinkDetection(generateSVG=TRUE)
 ```
 

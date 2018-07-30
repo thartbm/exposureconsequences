@@ -1,13 +1,23 @@
 # some functions shared by the analyses of the two types of data
 
-# localization data can be downloaded from OSF:
+# these packages are required:
+required.packages = c('lme4', 'lmerTest')
+# they will be loaded later on
+
+# these packages or no longer used/required, but might help
+# 'nlme', 'car', 'svglite', 'doParallel', 'foreach'
+
+
+
+# URLs of data files on OSF
+# localization data:
 nocursorURLs <- c('exposure'='https://osf.io/9s6au/?action=download', 'classic'='https://osf.io/8hm7f/?action=download')
-
-# no-cursor data can be downloaded from OSF:
+# no-cursor data:
 localizationURLs <- c('exposure'='https://osf.io/ysduw/?action=download', 'classic'='https://osf.io/upw49/?action=download', 'online'='https://osf.io/wjcgk/download')
-
-# information on exposure participants
+# information on exposure participants:
 informationURLs <- c('blinkdetect'='https://osf.io/yrpkm/?action=download', 'demographics'='https://osf.io/7sn4b/?action=download')
+
+
 
 # we'll control the color in figures centrally from here:
 colorset <- list()
@@ -31,9 +41,8 @@ colorset[['onlActT']] <- '#b400e42f'
 colorset[['onlPasS']] <- '#ff6ec7ff' # pink
 colorset[['onlPasT']] <- '#ff6ec72f'
 
-library('ez')
 
-installRequire.Packages <- function(packages) {
+installRequire.Packages <- function(packages, installmissing=FALSE) {
   
   installed.list <- rownames(installed.packages())
   missingpackages <- c()
@@ -54,12 +63,20 @@ installRequire.Packages <- function(packages) {
     cat('\nWARNING, some pacakages are missing:\n')
     cat(missingpackages)
     cat('\nlme4 and lmerTest are required to reproduce the Satterthwaite LME analyses\n')
-    cat('\ncar and nlme are required to reproduce the analyses using Chi-squared apprcimation\n')
+    cat('\ncar and nlme are required to reproduce the analyses using Chi-squared approximation\n')
+    cat('\nnot required, but helpful:\n')
     cat('\nforeach and doParallel speed up a few functions\n')
     cat('\nsvglite is used to produce SVG files with figures\n')
+    if (installmissing) {
+      install.packages(missingpackages)
+    }
   }
   
 }
+
+
+installRequire.Packages(required.packages)
+
 
 load.DownloadDataframe <- function(url,filename) {
   
@@ -216,7 +233,6 @@ parGaussian <- function(par,x) {
 
 
 # handling localization data -----
-#   exp <- getPointLocalization('exposure', difference=TRUE, verbose=FALSE, selectPerformance=selectPerformance)
 
 getPointLocalization <- function(group, difference=TRUE, points=c(15,25,35,45,55,65,75), movementtype='both', verbose=TRUE, LRpart='all', selectPerformance=TRUE) {
   
@@ -662,108 +678,110 @@ getCDFpeaks <- function(group='classic', response='RAE', movementtype='active', 
   
 }
 
-doLocCDFpeakANOVA <- function(test='training') {
-  
-  peaks <- NA
-  
-  if (test == 'training') {
-    groups <- c('classic','exposure')
-  }
-  if (test == 'loctime') {
-    groups <- c('classic','online')
-  }
-  
-  for (group in groups) {
-    
-    for (movementtype in c('active','passive')) {
-      
-      thisPeakDF <- getCDFpeaks(group=group,response='loc',movementtype=movementtype,makefigure=TRUE)
-      thisPeakDF$group <- group
-      thisPeakDF$movementtype <- movementtype
-      
-      if (is.data.frame(peaks)) {
-        peaks <- rbind(peaks, thisPeakDF)
-      } else {
-        peaks <- thisPeakDF
-      }
-      
-    }
-    
-  }
-  
-  cols <- c('participant','group','movementtype')
-  peaks[cols] <- lapply(peaks[cols], factor)
-  
-  if (test == 'training') {
-    print(ezANOVA(data=peaks, wid=participant, dv=peak, within=movementtype, between=group, type=3))
-    print(ezANOVA(data=peaks, wid=participant, dv=width, within=movementtype, between=group, type=3))
-  }
-  if (test == 'loctime') {
-    print(ezANOVA(data=peaks, wid=participant, dv=peak, within=c(movementtype, group), type=3))
-    print(ezANOVA(data=peaks, wid=participant, dv=width, within=c(movementtype, group), type=3))
-  }
-  
-}
-
-doRAElocCDFpeakANOVA <- function() {
-  
-  peaks <- NA
-  
-  groups <- c('classic','exposure')
-
-  for (group in groups) {
-    
-    for (response in c('RAE','loc')) {
-      
-      if (response == 'RAE') {
-        thisPeakDF <- getCDFpeaks(group=group,response=response,movementtype='active',makefigure=FALSE)
-        thisPeakDF$group <- group
-        thisPeakDF$response <- response
-        
-        if (is.data.frame(peaks)) {
-          peaks <- rbind(peaks, thisPeakDF)
-        } else {
-          peaks <- thisPeakDF
-        }
-      }
-      
-      if (response == 'loc') {
-        
-        for (movementtype in c('active','passive')) {
-          
-          thisPeakDF <- getCDFpeaks(group=group,response=response,movementtype=movementtype,makefigure=FALSE)
-          thisPeakDF$group <- group
-          thisPeakDF$response <- sprintf('%s%s',movementtype,response)
-          
-          if (is.data.frame(peaks)) {
-            peaks <- rbind(peaks, thisPeakDF)
-          } else {
-            peaks <- thisPeakDF
-          }
-          
-        }
-        
-      }
-      
-    }
-    
-  }
-  
-  peaks <- peaks[-which(peaks$participant == 'gb'),]
-  
-  cols <- c('participant','group','response')
-  peaks[cols] <- lapply(peaks[cols], factor)
-  
-  peakAOV <- ezANOVA(data=peaks, wid=participant, dv=peak, within=response, between=group, type=3, return_aov=TRUE)
-  print(peakAOV[1:3])
-  widthAOV <- ezANOVA(data=peaks, wid=participant, dv=width, within=response, between=group, type=3, return_aov=TRUE)
-  print(widthAOV[1:3])
-  
-  print(TukeyHSD(ezANOVA(data=peaks, wid=participant, dv=peak, between=c(response, group), type=3, return_aov=TRUE)$aov))
-  print(TukeyHSD(ezANOVA(data=peaks, wid=participant, dv=width, between=c(response, group), type=3, return_aov=TRUE)$aov))
-  
-  print(aggregate(width ~ response + group, data=peaks, FUN=mean))
-  
-  print(aggregate(peak ~ response + group, data=peaks, FUN=mean))
-  
-}
+# doLocCDFpeakANOVA <- function(test='training') {
+#   
+#   # this function is no longer used
+#   
+#   peaks <- NA
+#   
+#   if (test == 'training') {
+#     groups <- c('classic','exposure')
+#   }
+#   if (test == 'loctime') {
+#     groups <- c('classic','online')
+#   }
+#   
+#   for (group in groups) {
+#     
+#     for (movementtype in c('active','passive')) {
+#       
+#       thisPeakDF <- getCDFpeaks(group=group,response='loc',movementtype=movementtype,makefigure=TRUE)
+#       thisPeakDF$group <- group
+#       thisPeakDF$movementtype <- movementtype
+#       
+#       if (is.data.frame(peaks)) {
+#         peaks <- rbind(peaks, thisPeakDF)
+#       } else {
+#         peaks <- thisPeakDF
+#       }
+#       
+#     }
+#     
+#   }
+#   
+#   cols <- c('participant','group','movementtype')
+#   peaks[cols] <- lapply(peaks[cols], factor)
+#   
+#   if (test == 'training') {
+#     print(ezANOVA(data=peaks, wid=participant, dv=peak, within=movementtype, between=group, type=3))
+#     print(ezANOVA(data=peaks, wid=participant, dv=width, within=movementtype, between=group, type=3))
+#   }
+#   if (test == 'loctime') {
+#     print(ezANOVA(data=peaks, wid=participant, dv=peak, within=c(movementtype, group), type=3))
+#     print(ezANOVA(data=peaks, wid=participant, dv=width, within=c(movementtype, group), type=3))
+#   }
+#   
+# }
+# 
+# doRAElocCDFpeakANOVA <- function() {
+#   
+#   peaks <- NA
+#   
+#   groups <- c('classic','exposure')
+# 
+#   for (group in groups) {
+#     
+#     for (response in c('RAE','loc')) {
+#       
+#       if (response == 'RAE') {
+#         thisPeakDF <- getCDFpeaks(group=group,response=response,movementtype='active',makefigure=FALSE)
+#         thisPeakDF$group <- group
+#         thisPeakDF$response <- response
+#         
+#         if (is.data.frame(peaks)) {
+#           peaks <- rbind(peaks, thisPeakDF)
+#         } else {
+#           peaks <- thisPeakDF
+#         }
+#       }
+#       
+#       if (response == 'loc') {
+#         
+#         for (movementtype in c('active','passive')) {
+#           
+#           thisPeakDF <- getCDFpeaks(group=group,response=response,movementtype=movementtype,makefigure=FALSE)
+#           thisPeakDF$group <- group
+#           thisPeakDF$response <- sprintf('%s%s',movementtype,response)
+#           
+#           if (is.data.frame(peaks)) {
+#             peaks <- rbind(peaks, thisPeakDF)
+#           } else {
+#             peaks <- thisPeakDF
+#           }
+#           
+#         }
+#         
+#       }
+#       
+#     }
+#     
+#   }
+#   
+#   peaks <- peaks[-which(peaks$participant == 'gb'),]
+#   
+#   cols <- c('participant','group','response')
+#   peaks[cols] <- lapply(peaks[cols], factor)
+#   
+#   peakAOV <- ezANOVA(data=peaks, wid=participant, dv=peak, within=response, between=group, type=3, return_aov=TRUE)
+#   print(peakAOV[1:3])
+#   widthAOV <- ezANOVA(data=peaks, wid=participant, dv=width, within=response, between=group, type=3, return_aov=TRUE)
+#   print(widthAOV[1:3])
+#   
+#   print(TukeyHSD(ezANOVA(data=peaks, wid=participant, dv=peak, between=c(response, group), type=3, return_aov=TRUE)$aov))
+#   print(TukeyHSD(ezANOVA(data=peaks, wid=participant, dv=width, between=c(response, group), type=3, return_aov=TRUE)$aov))
+#   
+#   print(aggregate(width ~ response + group, data=peaks, FUN=mean))
+#   
+#   print(aggregate(peak ~ response + group, data=peaks, FUN=mean))
+#   
+# }
