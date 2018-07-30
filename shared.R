@@ -1,5 +1,10 @@
 # some functions shared by the analyses of the two types of data
 
+# these packages are required:
+required.packages = c('nlme', 'car', 'lme4', 'lmerTest', 'svglite')
+#  , 'ez'
+# they will be loaded later on
+
 # localization data can be downloaded from OSF:
 nocursorURLs <- c('exposure'='https://osf.io/9s6au/?action=download', 'classic'='https://osf.io/8hm7f/?action=download')
 
@@ -31,9 +36,8 @@ colorset[['onlActT']] <- '#b400e42f'
 colorset[['onlPasS']] <- '#ff6ec7ff' # pink
 colorset[['onlPasT']] <- '#ff6ec72f'
 
-library('ez')
 
-installRequire.Packages <- function(packages) {
+installRequire.Packages <- function(packages, installmissing=FALSE) {
   
   installed.list <- rownames(installed.packages())
   missingpackages <- c()
@@ -54,12 +58,20 @@ installRequire.Packages <- function(packages) {
     cat('\nWARNING, some pacakages are missing:\n')
     cat(missingpackages)
     cat('\nlme4 and lmerTest are required to reproduce the Satterthwaite LME analyses\n')
-    cat('\ncar and nlme are required to reproduce the analyses using Chi-squared apprcimation\n')
+    cat('\ncar and nlme are required to reproduce the analyses using Chi-squared approximation\n')
+    cat('\nnot required, but helpful:\n')
     cat('\nforeach and doParallel speed up a few functions\n')
     cat('\nsvglite is used to produce SVG files with figures\n')
+    if (installmissing) {
+      install.packages(missingpackages)
+    }
   }
   
 }
+
+
+installRequire.Packages(required.packages)
+
 
 load.DownloadDataframe <- function(url,filename) {
   

@@ -1,8 +1,6 @@
 
 source('shared.R')
 
-
-
 correlateNoCursorsLocalization <- function(NCpart='all', generateSVG=FALSE, selectPerformance=TRUE) {
   
   # first we do all responses, plan to split it by target later
