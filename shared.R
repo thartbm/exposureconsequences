@@ -1,11 +1,20 @@
 # some functions shared by the analyses of the two types of data
 
 # these packages are required:
+<<<<<<< HEAD
 required.packages = c('lme4', 'lmerTest')
 # they will be loaded later on
 
 # these packages or no longer used/required, but might help
 # 'nlme', 'car', 'svglite', 'doParallel', 'foreach'
+=======
+required.packages = c('nlme', 'car', 'lme4', 'lmerTest', 'svglite')
+#  , 'ez'
+# they will be loaded later on
+
+# localization data can be downloaded from OSF:
+nocursorURLs <- c('exposure'='https://osf.io/9s6au/?action=download', 'classic'='https://osf.io/8hm7f/?action=download')
+>>>>>>> 01b71f2e7cdf732f910f96310c7953c133e563f7
 
 
 
