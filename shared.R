@@ -1,5 +1,7 @@
 # some functions shared by the analyses of the two types of data
 
+# BASICS -----
+
 # these packages are required:
 required.packages = c('lme4', 'lmerTest')
 # they will be loaded later on
@@ -41,6 +43,7 @@ colorset[['onlActT']] <- '#b400e42f'
 colorset[['onlPasS']] <- '#ff6ec7ff' # pink
 colorset[['onlPasT']] <- '#ff6ec72f'
 
+# UTILITY FUNCTIONS -----
 
 installRequire.Packages <- function(packages, installmissing=FALSE) {
   
@@ -126,6 +129,8 @@ bootstrapGaussianPeak <- function(data,bootstraps=1000,mu=47.5,sigma=30,scale=10
   # parallel for-loop?
   # installRequire.Packages(c('foreach','doParallel'))
   
+  cat(sprintf('with %d bootstraps\n',bootstraps))
+  
   installed.list <- rownames(installed.packages())
   packages <- c('foreach','doParallel')
   allInstalled <- TRUE
@@ -141,6 +146,9 @@ bootstrapGaussianPeak <- function(data,bootstraps=1000,mu=47.5,sigma=30,scale=10
   x <- as.numeric(names(colMeans(data)))
   
   if (allInstalled) {
+    
+    cat('using parallel processing\n\n')
+    
     cores=detectCores()
     
     # very friendly for the rest of the system
@@ -162,6 +170,8 @@ bootstrapGaussianPeak <- function(data,bootstraps=1000,mu=47.5,sigma=30,scale=10
     stopCluster(cl)
     
   } else {
+    
+    cat('NOT using parallel processing\n\n')
     
     mus <- c()
     
@@ -207,7 +217,7 @@ bootstrapGaussianPeak <- function(data,bootstraps=1000,mu=47.5,sigma=30,scale=10
 # stopCluster(cl)
 
 
-getGaussianFit <- function(x,y,mu=47.5,sigma=30,scale=10,offset=4) {
+getGaussianFit <- function(x,y,mu=47.5,sigma=15,scale=-10,offset=-4) {
   
   data = data.frame(x,y)
   
@@ -234,7 +244,7 @@ parGaussian <- function(par,x) {
 
 # handling localization data -----
 
-getPointLocalization <- function(group, difference=TRUE, points=c(15,25,35,45,55,65,75), movementtype='both', verbose=TRUE, LRpart='all', selectPerformance=TRUE) {
+getPointLocalization <- function(group, difference=TRUE, points=c(15,25,35,45,55,65,75), movementtype='both', verbose=TRUE, LRpart='all', selectPerformance=TRUE, removeOutliers=FALSE) {
   
   df <- load.DownloadDataframe(url=localizationURLs[group],filename=sprintf('localization_%s.csv',group))
   
@@ -311,7 +321,7 @@ getPointLocalization <- function(group, difference=TRUE, points=c(15,25,35,45,55
           next()
         }
         
-        locdf <- getLocalizationPoints(subdf, points=points, removeOutliers=TRUE)
+        locdf <- getLocalizationPoints(subdf, points=points, removeOutliers=removeOutliers)
         
         if (any(is.na(locdf$taperror_deg))) {
           if (verbose) {
@@ -454,7 +464,7 @@ getLocalizationPoints <- function(subdf, points=c(15,25,35,45,55,65,75), removeO
 
 # for every group, this loads the no-cursor reach directions in all relevant tasks,
 # and calcuates the reach aftereffects from them
-getReachAftereffects <- function(group, part='all', clean=TRUE, difference=TRUE, selectPerformance=TRUE) {
+getReachAftereffects <- function(group, part='all', clean=FALSE, difference=TRUE, selectPerformance=TRUE) {
   
   if (group == 'online') {
     group <- 'classic' # same participants, same data, so only stored in one file
@@ -469,7 +479,7 @@ getReachAftereffects <- function(group, part='all', clean=TRUE, difference=TRUE,
     raw.df <- raw.df[which(raw.df$participant %in% OKparticipants),]
   }
   
-  # remove outliers if requested (default: yes)
+  # remove outliers if requested (default: no)
   if (clean) {
     raw.df <- removeOutliers(raw.df)
   }
@@ -483,7 +493,7 @@ getReachAftereffects <- function(group, part='all', clean=TRUE, difference=TRUE,
   }
   
   # average across the task iterations and target repetitions
-  avg.df <- aggregate(endpoint_angle ~ participant + rotated + target, data=raw.df, FUN=mean)
+  avg.df <- aggregate(endpoint_angle ~ participant + rotated + target, data=raw.df, FUN=median)
   
   # get the difference if requested (default: yes)
   if (difference) {
@@ -532,9 +542,11 @@ removeOutliers <- function(df, stds=2) {
   
 }
 
+# CDF fits of generalization -----
+
 psychometricGeneralization <- function(df, makefigure=FALSE, response='RAE') {
   
-  # well... psychometric... Ijust use a cumulative normal distribution function
+  # well... psychometric... I just use a cumulative normal distribution function
   
   # does everything use the same dependent variables?
   

@@ -1,126 +1,11 @@
 
 source('shared.R')
 
-# first make sure we have all necessary packages installed and loaded:
-# installRequire.Packages(c('nlme', 'car'))
-
-# , 'lme4', 'lmerTest'
-# 
-# # no-cursor reach data is not uploaded yet (not sure about the format)
-# 
-# localizationLMEsChiSq <- function() {
-#   
-#   default.contrasts <- options('contrasts')
-#   options(contrasts=c('contr.sum','contr.poly'))
-# 
-#   exposure <- getANOVAlocalization('exposure')
-#   classic <- getANOVAlocalization('classic')
-#   
-#   exposure$participant <- exposure$participant + 100
-# 
-#   exposure <- exposure[-which(exposure$handangle_deg == 15),]
-#   classic <- classic[-which(classic$handangle_deg == 15),]
-#   
-#   # they all have this header:
-#   # group,online_b,participant,rotated_b,passive_b,handangle_deg,tapangle_deg
-#   # (where group is uninformative)
-# 
-#   localization <- rbind(exposure,classic)
-#   
-#   localization$group         <- factor(localization$group)
-#   localization$participant   <- factor(localization$participant)
-#   localization$online_b      <- factor(localization$online_b)
-#   localization$rotated_b     <- factor(localization$rotated_b)
-#   localization$passive_b     <- factor(localization$passive_b)
-#   localization$handangle_deg <- factor(localization$handangle_deg)
-#   
-#   # str(localization)
-#   
-#   # prepare a data frame with the training-induced changes in hand localization:
-#   locshift <- localization[which(localization$rotated_b == 1),]
-#   locshift$taperror_deg <- locshift$taperror_deg - localization$taperror_deg[which(localization$rotated_b == 0)]
-#   
-#   # first a model including the aligned and rotated data
-#   # here we look for any effect of session (rotated_b)
-#   # and if it is there, we continue with other analyses that are easier to grasp:
-#   exp_full_model <- lme(taperror_deg ~ rotated_b * passive_b * group, data=localization, random = ~1|participant/handangle_deg, na.action=na.exclude)
-#   print(Anova(exp_full_model, type=3))
-# 
-#   # the main question is whether or not the training type ('group') interacts with:
-#   # 1) the effect of the type of movement, active or passive ('passive_b') before localization
-#   # and perhaps on:
-#   # 2) the location of the hand in the workspace ('handangle_deg')
-#   # so we make the simplest model that allows testing those two interactions:
-#   simple_exp_model <- lme(taperror_deg ~ group + handangle_deg:group + passive_b:group, data=locshift, random = ~1|participant, na.action=na.exclude)
-#   print(Anova(simple_exp_model, type=3))
-#   
-#   # given that one or two of the interactions in the simple model were significant,
-#   # we now want to test the main effects of the factors of interest in each group
-#   # (as a follow-up / post-hoc if you will)
-#   exposure_hand_model <- lme(taperror_deg ~ handangle_deg + passive_b, data=exposure, random = ~1|participant, na.action=na.exclude)
-#   print(Anova(exposure_hand_model, type=3))
-#   classic_hand_model <- lme(taperror_deg ~ handangle_deg + passive_b, data=classic, random = ~1|participant, na.action=na.exclude)
-#   print(Anova(classic_hand_model, type=3))
-#   
-#   options('contrasts' <- default.contrasts)
-#   
-# }
-# 
-# localizationLMEsSatterthwaite <- function() {
-#   
-#   default.contrasts <- options('contrasts')
-#   options(contrasts=c('contr.sum','contr.poly'))
-#   
-#   exposure <- getANOVAlocalization('exposure')
-#   classic <- getANOVAlocalization('classic')
-#   
-#   exposure$participant <- exposure$participant + 100
-#   
-#   exposure <- exposure[-which(exposure$handangle_deg == 15),]
-#   classic <- classic[-which(classic$handangle_deg == 15),]
-#   
-#   # they all have this header:
-#   # group,online_b,participant,rotated_b,passive_b,handangle_deg,tapangle_deg
-#   # (where group is uninformative)
-#   
-#   localization <- rbind(exposure,classic)
-#   
-#   localization$group         <- factor(localization$group)
-#   localization$participant   <- factor(localization$participant)
-#   localization$online_b      <- factor(localization$online_b)
-#   localization$rotated_b     <- factor(localization$rotated_b)
-#   localization$passive_b     <- factor(localization$passive_b)
-#   localization$handangle_deg <- factor(localization$handangle_deg)
-#   
-#   # str(localization)
-#   
-#   locshift <- localization[which(localization$rotated_b == 1),]
-#   locshift$taperror_deg <- locshift$taperror_deg - localization$taperror_deg[which(localization$rotated_b == 0)]
-#   
-#   # "omnibus" test
-#   exp_full_model_lmer <- lmer(taperror_deg ~ rotated_b * passive_b * group - (1|participant/handangle_deg), data=localization, na.action=na.exclude)
-#   print(anova(exp_full_model_lmer,ddf='Satterthwaite',type=3))
-#   
-#   # with restricted model:
-#   simple_exp_model_lmer <- lmer(taperror_deg ~ group+ handangle_deg:group + passive_b:group - (1|participant), data=locshift, na.action=na.exclude)
-#   print(anova(simple_exp_model_lmer,ddf='Satterthwaite',type=3))
-#   
-#   # split by group:
-#   exposure_hand_model_lmer <- lmer(taperror_deg ~ handangle_deg + passive_b - (1|participant), data=exposure, na.action=na.exclude)
-#   print(anova(exposure_hand_model_lmer,ddf='Satterthwaite',type=3))
-#   classic_hand_model_lmer <- lmer(taperror_deg ~ handangle_deg + passive_b - (1|participant), data=classic, na.action=na.exclude)
-#   print(anova(classic_hand_model_lmer,ddf='Satterthwaite',type=3))
-#   
-#   options('contrasts' <- default.contrasts)
-#   
-# }
 
 
+# PLOT / FIGURE ------
 
-
-# PLOTS / FIGURES ------
-
-plotLocalization <- function(classicOnline=FALSE, generateSVG=FALSE, selectPerformance=TRUE) {
+plotLocalization <- function(classicOnline=FALSE, generateSVG=FALSE, selectPerformance=TRUE, remove15=FALSE) {
   
   # get the data to plot:
   exp <- getPointLocalization('exposure', difference=TRUE, verbose=FALSE, selectPerformance=selectPerformance)
@@ -160,7 +45,7 @@ plotLocalization <- function(classicOnline=FALSE, generateSVG=FALSE, selectPerfo
   if (generateSVG) {
     installed.list <- rownames(installed.packages())
     if ('svglite' %in% installed.list) {
-      svglite(file='Fig2.svg', width=7.5, height=2.5, system_fonts=list(sans='Arial', mono='Times New Roman'))
+      svglite(file='Fig2.svg', width=7.5, height=3, system_fonts=list(sans='Arial', mono='Times New Roman'))
     } else {
       generateSVG=FALSE
     }
@@ -239,6 +124,91 @@ plotLocalization <- function(classicOnline=FALSE, generateSVG=FALSE, selectPerfo
     
     legend(10,-15,c('passive','active'),col=c(colorset[['onlPasS']],colorset[['onlActS']]),lty=c(1,1),lwd=c(1.5,1.5),bty='n')
     
+  } else {
+    
+    points=c(15,25,35,45,55,65,75)
+    exp <- getPointLocalization(group='exposure', difference=TRUE, points=points, movementtype='both', LRpart='all', verbose=FALSE, selectPerformance=selectPerformance)
+    cla <- getPointLocalization(group='classic', difference=TRUE, points=points, movementtype='both', LRpart='all', verbose=FALSE, selectPerformance=selectPerformance)
+    
+    exp.act <- exp[which(exp$passive_b == 0 & is.finite(exp$taperror_deg)),]
+    cla.act <- cla[which(cla$passive_b == 0 & is.finite(cla$taperror_deg)),]
+    
+    # cla.avg.act <- aggregate(taperror_deg ~ handangle_deg, data=cla.act, FUN=mean) 
+    # exp.avg.act <- aggregate(taperror_deg ~ handangle_deg, data=exp.act, FUN=mean) 
+      
+    # if (remove15) {
+    #   exp.act <- exp.act[which(exp.act$handangle_deg > 15),]
+    #   cla.act <- cla.act[which(cla.act$handangle_deg > 15),]
+    # }
+    
+    # fitting on all data:
+    exp.fit <- getGaussianFit(x=exp.act$handangle_deg,exp.act$taperror_deg,mu=50,sigma=10,scale=-75,offset=-4)
+    cla.fit <- getGaussianFit(x=cla.act$handangle_deg,cla.act$taperror_deg,mu=50,sigma=10,scale=-75,offset=-4)
+    
+    # get confidence intervals for the peak of the generalization curve for localization shifts:
+    cla.locshift <- getPeakLocConfidenceInterval(group='classic',
+                                 CIs=c(.95), 
+                                 movementtype='active', 
+                                 LRpart='all',
+                                 selectPerformance=FALSE,
+                                 remove15=remove15)
+    exp.locshift <- getPeakLocConfidenceInterval(group='exposure',
+                                 CIs=c(.95), 
+                                 movementtype='active', 
+                                 LRpart='all', 
+                                 selectPerformance=selectPerformance,
+                                 remove15=remove15)
+    
+    plot(-1000,-1000, main='generalization curves', xlab='hand angle [°]', ylab='localization shift [°]', xlim=c(10,80), ylim=c(0,-15), axes=F)
+    
+    mtext('C', side=3, outer=TRUE, at=c(2/3,1), line=-1, adj=0, padj=1)
+    
+    # plot the data, faintly
+    
+    # lines(points[1:2],cla.avg.act$taperror_deg[1:2],col=colorset[['claActT']],lty=2,lwd=1.5)
+    # lines(points[2:7],cla.avg.act$taperror_deg[2:7],col=colorset[['claActT']],lty=1,lwd=1.5)
+    # lines(points[1:2],exp.avg.act$taperror_deg[1:2],col=colorset[['expActT']],lty=2,lwd=1.5)
+    # lines(points[2:7],exp.avg.act$taperror_deg[2:7],col=colorset[['expActT']],lty=1,lwd=1.5)
+
+    lines(points,cla.avg.act$taperror_deg,col=colorset[['claActT']],lty=1,lwd=1.5)
+    lines(points,exp.avg.act$taperror_deg,col=colorset[['expActT']],lty=1,lwd=1.5)
+    
+    # plot fitted Gaussian functions to all data:
+
+    X <- seq(15,75)
+    cla.Y.fit <- cla.fit$par['scale']*parGaussian(cla.fit$par,X)
+    cla.Y.fit <- cla.Y.fit + cla.fit$par['offset']
+    exp.Y.fit <- exp.fit$par['scale']*parGaussian(exp.fit$par,X)
+    exp.Y.fit <- exp.Y.fit + exp.fit$par['offset']
+    
+    lines(X,cla.Y.fit,col=colorset[['claActS']],lty=1,lw=1.5)
+    lines(X,exp.Y.fit,col=colorset[['expActS']],lty=1,lw=1.5)
+    
+    cla.idx <- which.min(cla.Y.fit)
+    exp.idx <- which.min(exp.Y.fit)
+    
+    # connect peaks of group fits to CIs:
+    
+    arrows(X[cla.idx],cla.Y.fit[cla.idx],X[cla.idx],-2.5,col=colorset[['claActS']],lwd=1.5,length=.05)
+    arrows(X[exp.idx],exp.Y.fit[exp.idx],X[exp.idx],-2.5,col=colorset[['expActS']],lwd=1.5,length=.05)
+    
+    # indicate feedback and hand position during training:
+    
+    arrows(45,-2.5,45,-1,col='black',lw=1.5,length=0.05)
+    arrows(75,0,75,-1.5,col='black',lw=1.5,length=0.05)
+    
+    # plot the bootstrap peaks of the generalization functions
+    
+    polygon(cla.locshift$value[c(1,3,3,1)],c(0,0,-1,-1),border=NA,col=colorset[['claActT']])
+    polygon(exp.locshift$value[c(1,3,3,1)],c(-1.5,-1.5,-2.5,-2.5),border=NA,col=colorset[['expActT']])
+    
+    lines(cla.locshift$value[c(2,2)],c(0,-2.5),col=colorset[['claActS']],lty=1,lw=1.5)
+    lines(exp.locshift$value[c(2,2)],c(0,-2.5),col=colorset[['expActS']],lty=1,lw=1.5)
+    
+    # add tick marks:
+    axis(1,at=points)
+    axis(2,at=c(0,-5,-10,-15))
+    
   }
   
   if (generateSVG) {
@@ -246,6 +216,8 @@ plotLocalization <- function(classicOnline=FALSE, generateSVG=FALSE, selectPerfo
   }
   
 }
+
+# ANALYSES ------
 
 exposureLocalization <- function(remove15=TRUE, LMEmethod='chi-squared', selectPerformance=TRUE) {
   
@@ -453,61 +425,83 @@ classicLocalizationShift <- function(factors='both',remove15=TRUE, LMEmethod='ch
   
 }
 
-boxPlotLocalization <- function() {
+# boxPlotLocalization <- function() {
+#   
+#   # par(mfrow=c(4,1),mar=c(2,3,1,1))
+#   
+#   for (group in c('exposure','classic','online')) {
+#     
+#     df <- getPointLocalization(group, difference=FALSE, verbose=FALSE)
+#     
+#     # print(str(df))
+#     
+#     for (rotated in c(0,1)) {
+#       
+#       for (passive in c(0,1)) {
+#         
+#         # subdf <- df[which(df$rotated_b == rotated & df$passive_b == passive),]
+#         
+#         # boxplot(taperror_deg ~ handangle_deg, data=df, axes=F, bty='n')
+#         
+#         for (target in c(15,25,35,45,55,65,75)) {
+#           
+#           subdf <- df[which(df$rotated_b == rotated & df$passive_b == passive & df$handangle_deg == target),]
+#           
+#           ppno <- subdf$participant
+#           taperror <- subdf$taperror_deg
+#           
+#           idx <- which(abs(taperror - mean(taperror)) > (3 * sd(taperror)))
+#           
+#           if (length(idx) > 0) {
+#             
+#             cat(sprintf('%s %s %s %d deg\n', group, c('aligned','rotated')[rotated+1], c('active','passive')[passive+1], target))
+#             print(ppno[idx])
+#             
+#           }
+#           
+#         }
+#         
+#       }
+#       
+#     }
+#     
+#   }
+#   
+# }
+
+getPeakLocConfidenceInterval <- function(group, CIs=c(.95), movementtype='active', LRpart='all', selectPerformance=TRUE, iterations=100000, remove15=FALSE) {
   
-  # par(mfrow=c(4,1),mar=c(2,3,1,1))
+  filename <- sprintf('LOC_peakCI_%s.csv', group)
   
-  for (group in c('exposure','classic','online')) {
+  if (file.exists(filename)) {
     
-    df <- getPointLocalization(group, difference=FALSE, verbose=FALSE)
+    df <- read.csv(filename, stringsAsFactors=FALSE)
     
-    # print(str(df))
+  } else {
     
-    for (rotated in c(0,1)) {
-      
-      for (passive in c(0,1)) {
-        
-        # subdf <- df[which(df$rotated_b == rotated & df$passive_b == passive),]
-        
-        # boxplot(taperror_deg ~ handangle_deg, data=df, axes=F, bty='n')
-        
-        for (target in c(15,25,35,45,55,65,75)) {
-          
-          subdf <- df[which(df$rotated_b == rotated & df$passive_b == passive & df$handangle_deg == target),]
-          
-          ppno <- subdf$participant
-          taperror <- subdf$taperror_deg
-          
-          idx <- which(abs(taperror - mean(taperror)) > (3 * sd(taperror)))
-          
-          if (length(idx) > 0) {
-            
-            cat(sprintf('%s %s %s %d deg\n', group, c('aligned','rotated')[rotated+1], c('active','passive')[passive+1], target))
-            print(ppno[idx])
-            
-          }
-          
-        }
-        
-      }
-      
+    cat(sprintf('\nbootstrapping peak LOC generalization for: %s\n',toupper(group)))
+    
+    loc <- getPointLocalization(group, difference=TRUE, points=c(15,25,35,45,55,65,75), movementtype=movementtype, LRpart=LRpart, verbose=FALSE, selectPerformance=selectPerformance)
+    
+    if (remove15) {
+      loc <- loc[which(loc$handangle_deg > 15),]
     }
+    
+    loc2 <- -1 * xtabs(taperror_deg ~ participant + handangle_deg,loc)
+    
+    data <- bootstrapGaussianPeak(data=loc2,bootstraps=5000,mu=47.5,sigma=15,scale=10,offset=4,CIs=CIs)
+    
+    df <- data.frame('level'=names(data),'value'=data)
+    
+    write.csv(df,filename,row.names=FALSE,quote=FALSE)
     
   }
   
+  return(df)
+  
 }
 
-getPeakLocConfidenceInterval <- function(group,part='initial',CIs=c(.95), movementtype='both', LRpart='all', selectPerformance=TRUE) {
-  
-  cat(sprintf('\n%s\n\n',toupper(group)))
-  
-  loc <- getPointLocalization(group, difference=TRUE, points=c(15,25,35,45,55,65,75), movementtype=movementtype, LRpart=LRpart, verbose=FALSE, selectPerformance=selectPerformance)
-  
-  loc2 <- -1 * xtabs(taperror_deg ~ participant + handangle_deg,loc)
-  
-  bootstrapGaussianPeak(data=loc2,bootstraps=1000,mu=47.5,sigma=30,scale=10,offset=4,CIs=CIs)
-  
-}
+# DATA DESCRIPTIVES ------
 
 countLocNAs <- function(group='exposure', output='count', selectPerformance=selectPerformance) {
   
@@ -567,5 +561,69 @@ getLocCountTable <- function(output='count', selectPerformance=selectPerformance
   }
   
   return(df)
+  
+}
+
+countSelectedLocalizations <- function(group, ignoreRepetitions=FALSE, selectPerformance=TRUE) {
+  
+  df <- load.DownloadDataframe(url=localizationURLs[group],filename=sprintf('localization_%s.csv',group))
+  
+  if (selectPerformance & group=='exposure') {
+    blinks <- load.DownloadDataframe(informationURLs['blinkdetect'],'blinkdetect_exposure.csv')
+    OKparticipants <- blinks$participant[which(blinks$rotated_b == 1 & blinks$performance > 0.65)]
+    df <- df[which(df$participant %in% OKparticipants),]
+  }
+  
+  participant <- c()
+  rotated <- c()
+  passive <- c()
+  repetition <- c()
+  trials <- c()
+  
+  mintrials <- 25
+  
+  participants <- unique(df$participant)
+  
+  for (ppid in participants) {
+    
+    ppdf <- df[which(df$participant == ppid),]
+    
+    for (session in c(0,1)) {
+      
+      for (movtype in c(0,1)) {
+        
+        subdf <- ppdf[which(ppdf$rotated_b == session & ppdf$passive_b == movtype),]
+        
+        iters <- unique(subdf$iteration)
+        
+        for (iterno in c(1:length(iters))) {
+          
+          iter <- iters[iterno]
+          
+          iterdf <- subdf[which(subdf$iteration == iter),]
+          
+          Ntrials <- dim(iterdf)[1]
+          
+          if (Ntrials < mintrials) {
+            mintrials <- Ntrials
+          }
+          
+          participant <- c(participant, ppid)
+          rotated     <- c(rotated, session)
+          passive     <- c(passive, movtype)
+          repetition  <- c(repetition, iter)
+          trials      <- c(trials, (Ntrials/.25))
+          
+        }
+        
+      }
+      
+    }
+    
+  }
+  
+  #cat(sprintf('\nminimum trials selected: %d\n\n',mintrials))
+  
+  return(data.frame(participant, rotated, passive, repetition, trials))
   
 }

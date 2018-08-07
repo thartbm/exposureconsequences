@@ -1,77 +1,15 @@
 
 source('shared.R')
 
-# first make sure we have all necessary packages installed and loaded:
-# installRequire.Packages(c())
+# FIGURE -----
 
-# not yet sure if we'll use Chi-square, or Satterthwaite estimates of F/p-values:
-# installRequire.Packages(c('nlme', 'car', 'lme4', 'lmerTest'))
-
-required.packages = c('nlme', 'car', 'lme4', 'lmerTest', 'svglite')
-installRequire.Packages(required.packages)
-
-# nocursor data can be downloaded from OSF:
-# groupURLs <- c('exposure'='https://osf.io/9s6au/?action=download', 'classic'='https://osf.io/8hm7f/?action=download')
-
-
-# # plot both groups reach aftereffects in one figure
-# OLDplotReachAftereffects <- function(validate=FALSE) {
-#   
-#   points <- c(15,25,35,45,55,65,75)
-#   
-#   exposure <- getReachAftereffects('exposure',part='initial')
-#   classic  <- getReachAftereffects('classic',part='initial')
-#   exposure_rem <- getReachAftereffects('exposure',part='remainder')
-#   classic_rem  <- getReachAftereffects('classic',part='remainder')
-#   
-#   if (validate) {
-#     
-#     validExp <- validateReachAftereffects('exposure')
-#     validExpParticipants <- validExp$participant[which(validExp$RAE == 1)]
-#     exposure <- exposure[which(exposure$participant %in% validExpParticipants),]
-# 
-#     validCla <- validateReachAftereffects('classic')
-#     validClaParticipants <- validCla$participant[which(validCla$RAE == 1)]
-#     classic <- classic[which(classic$participant %in% validClaParticipants),]
-#     
-#   }
-#   
-#   exposureAVG <- aggregate(endpoint_angle ~ target, data=exposure, FUN=mean)
-#   classicAVG <- aggregate(endpoint_angle ~ target, data=classic, FUN=mean)
-#   
-#   exposureAVGrem <- aggregate(endpoint_angle ~ target, data=exposure_rem, FUN=mean)
-#   classicAVGrem <- aggregate(endpoint_angle ~ target, data=classic_rem, FUN=mean)
-#   
-#   exposureCI <- matrix(unlist(by(exposure$endpoint_angle, INDICES=c(exposure$target), FUN=t.interval)),nrow=2)
-#   classicCI <- matrix(unlist(by(classic$endpoint_angle, INDICES=c(classic$target), FUN=t.interval)),nrow=2)
-#   
-#   X <- c(points, rev(points))
-#   expY <- c(exposureCI[1,],rev(exposureCI[2,]))
-#   claY <- c(classicCI[1,],rev(classicCI[2,]))
-#   
-#   plot(-1000,-1000, main='reach aftereffects', xlab='target angle [deg]', ylab='reach endpoint deviation [deg]', xlim=c(10,80), ylim=c(0,15), axes=F)
-#   
-#   polygon(X,claY,border=NA,col=rgb(1,0,0,.2))
-#   polygon(X,expY,border=NA,col=rgb(0,0,1,.2))
-# 
-#   lines(points,classicAVG$endpoint_angle,col=rgb(1,0,0))
-#   lines(points,exposureAVG$endpoint_angle,col=rgb(0,0,1))
-#   lines(points,classicAVGrem$endpoint_angle,col=rgb(1,0,0),lty=2)
-#   lines(points,exposureAVGrem$endpoint_angle,col=rgb(0,0,1),lty=2)
-# 
-#   axis(1,at=points)
-#   axis(2,at=c(0,5,10,15))
-#   
-#   legend(10,15,c('exposure','classic'),col=c(rgb(0,0,1),rgb(1,0,0)),lty=c(1,1),bty='n')
-#   
-# }
-
-plotReachAftereffects <- function(generateSVG=FALSE, selectPerformance=TRUE) {
+plotReachAftereffects <- function(generateSVG=FALSE, selectPerformance=TRUE, addNormalFits=TRUE) {
   
   if (generateSVG) {
     installed.list <- rownames(installed.packages())
     if ('svglite' %in% installed.list) {
-      svglite(file='Fig3.svg', width=7.5, height=2.5, system_fonts=list(sans='Arial', mono='Times New Roman'))
+      library('svglite')
+      svglite(file='Fig3.svg', width=7.5, height=3, system_fonts=list(sans='Arial', mono='Times New Roman'))
     } else {
       generateSVG=FALSE
     }
@@ -132,29 +70,75 @@ plotReachAftereffects <- function(generateSVG=FALSE, selectPerformance=TRUE) {
   
   legend(10,15,c('exposure','classic'),col=c(colorset[['expActS']],colorset[['claActS']]),lty=c(1,1),lwd=c(1.5,1.5),bty='n')
   
+  if (addNormalFits) {
+    
+    points=c(15,25,35,45,55,65,75)
+    
+    classic  <- getReachAftereffects('classic',part='all', selectPerformance=selectPerformance)
+    exposure <- getReachAftereffects('exposure',part='all', selectPerformance=selectPerformance)
+    
+    # fitting group data:
+    exp.fit <- getGaussianFit(x=exposure$target,exposure$endpoint_angle,mu=50,sigma=30,scale=50,offset=4)
+    cla.fit <- getGaussianFit(x=classic$target,classic$endpoint_angle,mu=50,sigma=30,scale=50,offset=4)
+    
+    # get confidence intervals for the peak of the generalization curve for localization shifts:
+    cla.RAEshift <- getPeakConfidenceInterval('classic', part='all', CIs=c(.95), selectPerformance=selectPerformance)
+    exp.RAEshift <- getPeakConfidenceInterval('exposure', part='all', CIs=c(.95), selectPerformance=selectPerformance)
+    
+    plot(-1000,-1000, main='generalization curves', xlab='target angle [°]', ylab='reach endpoint deviation [°]', xlim=c(10,80), ylim=c(0,15), axes=F)
+    
+    mtext('C', side=3, outer=TRUE, at=c(2/3,1), line=-1, adj=0, padj=1)
+    
+    # plot the data, faintly
+    
+    lines(points,classicAVG$endpoint_angle,col=colorset[['claActT']],lwd=1.5)
+    lines(points,exposureAVG$endpoint_angle,col=colorset[['expActT']],lwd=1.5)
+    
+    # plot fitted Gaussian functions to all data:
+    
+    X <- seq(15,75)
+    cla.Y.fit <- cla.fit$par['scale']*parGaussian(cla.fit$par,X)
+    cla.Y.fit <- cla.Y.fit + cla.fit$par['offset']
+    exp.Y.fit <- exp.fit$par['scale']*parGaussian(exp.fit$par,X)
+    exp.Y.fit <- exp.Y.fit + exp.fit$par['offset']
+    
+    lines(X,cla.Y.fit,col=colorset[['claActS']],lty=1,lw=1.5)
+    lines(X,exp.Y.fit,col=colorset[['expActS']],lty=1,lw=1.5)
+    
+    cla.idx <- which.max(cla.Y.fit)
+    exp.idx <- which.max(exp.Y.fit)
+    
+    # connect peaks of group fits to CIs:
+    
+    arrows(X[cla.idx],cla.Y.fit[cla.idx],X[cla.idx],2.5,col=colorset[['claActS']],lwd=1.5,length=.05)
+    arrows(X[exp.idx],exp.Y.fit[exp.idx],X[exp.idx],2.5,col=colorset[['expActS']],lwd=1.5,length=.05)
+    
+    # indicate feedback and hand position during training:
+    
+    arrows(45,2.5,45,1,col='black',lw=1.5,length=0.05)
+    arrows(75,0,75,1.5,col='black',lw=1.5,length=0.05)
+    
+    # plot the bootstrap peaks of the generalization functions
+    
+    polygon(cla.RAEshift$value[c(1,3,3,1)],c(0,0,1,1),border=NA,col=colorset[['claActT']])
+    polygon(exp.RAEshift$value[c(1,3,3,1)],c(1.5,1.5,2.5,2.5),border=NA,col=colorset[['expActT']])
+    
+    lines(cla.RAEshift$value[c(2,2)],c(0,2.5),col=colorset[['claActS']],lty=1,lw=1.5)
+    lines(exp.RAEshift$value[c(2,2)],c(0,2.5),col=colorset[['expActS']],lty=1,lw=1.5)
+    
+    # add tick marks:
+    axis(1,at=points)
+    axis(2,at=c(0,5,10,15))
+    
+  }
+  
   if (generateSVG) {
     dev.off()
   }
   
 }
 
-getPeakConfidenceInterval <- function(group,validate=FALSE,part='initial',CIs=c(.95), selectPerformance=selectPerformance) {
-  
-  cat(sprintf('\n%s\n\n',toupper(group)))
-  
-  RAE <- getReachAftereffects(group, part=part, selectPerformance=selectPerformance)
-  
-  if (validate) {
-    validParticipants <- validateReachAftereffects(group, method='45')
-    validParticipants <- validParticipants$participant[which(validParticipants$RAE == 1)]
-    RAE <- RAE[which(RAE$participant %in% validParticipants),]
-  }
-  
-  RAE <- xtabs(endpoint_angle~.,RAE)
-  
-  bootstrapGaussianPeak(data=RAE,bootstraps=1000,mu=47.5,sigma=30,scale=10,offset=4,CIs=CIs)
-  
-}
+# VALIDATION (NOT USED ANYMORE) -----
 
 validateReachAftereffects <- function(group, method='45') {
   
@@ -389,6 +373,8 @@ exposureClassicReachAftereffects <- function(noTarget=FALSE, remove15=FALSE, LME
   
 }
 
+# BLINK DETECTION PERFORMANCE -----
+
 plotBlinkDetection <- function(generateSVG=FALSE) {
   
   if (generateSVG) {
@@ -421,5 +407,103 @@ plotBlinkDetection <- function(generateSVG=FALSE) {
   if (generateSVG) {
     dev.off()
   }
+  
+}
+
+# GENERALIZATION PEAK CI -----
+
+getPeakConfidenceInterval <- function(group,validate=FALSE,part='all',CIs=c(.95), selectPerformance=selectPerformance,iterations=100000) {
+  
+  filename <- sprintf('RAE_peakCI_%s.csv', group)
+  
+  if (file.exists(filename)) {
+    
+    df <- read.csv(filename, stringsAsFactors=FALSE)
+    
+  } else {
+    
+    cat(sprintf('\nbootstrapping peak RAE generalization for: %s\n',toupper(group)))
+    
+    RAE <- getReachAftereffects(group, part=part, selectPerformance=selectPerformance)
+    
+    # if (validate) {
+    #   validParticipants <- validateReachAftereffects(group, method='45')
+    #   validParticipants <- validParticipants$participant[which(validParticipants$RAE == 1)]
+    #   RAE <- RAE[which(RAE$participant %in% validParticipants),]
+    # }
+    
+    RAE <- xtabs(endpoint_angle~.,RAE)
+    
+    # data <- bootstrapGaussianPeak(data=RAE,bootstraps=iterations,mu=47.5,sigma=30,scale=10,offset=4,CIs=CIs)
+    data <- bootstrapGaussianPeak(data=RAE,bootstraps=iterations,mu=50,sigma=30,scale=50,offset=4,CIs=CIs)
+    
+    df <- data.frame('level'=names(data),'value'=data)
+    
+    write.csv(df,filename,row.names=FALSE,quote=FALSE)
+    
+  }
+  
+  return(df)
+  
+}
+
+# DATA DESCRIPTIVES -----
+
+countSelectedNoCursors <- function(group, ignoreRepetitions=FALSE, selectPerformance=TRUE) {
+  
+  df <- load.DownloadDataframe(url=nocursorURLs[group],filename=sprintf('nocursor_%s.csv',group))
+  
+  if (selectPerformance & group=='exposure') {
+    blinks <- load.DownloadDataframe(informationURLs['blinkdetect'],'blinkdetect_exposure.csv')
+    OKparticipants <- blinks$participant[which(blinks$rotated_b == 1 & blinks$performance > 0.65)]
+    df <- df[which(df$participant %in% OKparticipants),]
+  }
+  
+  participant <- c()
+  rotated <- c()
+  passive <- c()
+  repetition <- c()
+  trials <- c()
+  
+  mintrials <- 21
+  
+  participants <- unique(df$participant)
+  
+  for (ppid in participants) {
+    
+    ppdf <- df[which(df$participant == ppid),]
+    
+    for (session in c(0,1)) {
+      
+      subdf <- ppdf[which(ppdf$rotated == session),]
+      
+      iters <- unique(subdf$repetition)
+      
+      for (iterno in c(1:length(iters))) {
+        
+        iter <- iters[iterno]
+        
+        iterdf <- subdf[which(subdf$repetition == iter),]
+        
+        Ntrials <- dim(iterdf)[1]
+        
+        if (Ntrials < mintrials) {
+          mintrials <- Ntrials
+        }
+        
+        participant <- c(participant, ppid)
+        rotated     <- c(rotated, session)
+        repetition  <- c(repetition, iter)
+        trials      <- c(trials, (Ntrials/.21))
+        
+      }
+      
+    }
+    
+  }
+  
+  #cat(sprintf('\nminimum trials selected: %d\n\n',mintrials))
+  
+  return(data.frame(participant, rotated, repetition, trials))
   
 }
