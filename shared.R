@@ -217,20 +217,59 @@ bootstrapGaussianPeak <- function(data,bootstraps=1000,mu=47.5,sigma=30,scale=10
 # stopCluster(cl)
 
 
-getGaussianFit <- function(x,y,mu=47.5,sigma=15,scale=-10,offset=-4) {
+getGaussianFit <- function(x,y,mu=47.5,sigma=15,scale=-10,offset=-4,gridsearch=TRUE) {
   
   data = data.frame(x,y)
   
-  optim(par=c('mu'=mu,'sigma'=sigma, 'scale'=scale, 'offset'=offset), GaussianErrors, data=data)
+  if (gridsearch) {
+    
+    combinations <- expand.grid(mu=seq(40,66,2),sigma=seq(9,30,3),scale=seq(5,20,2.5),offset=seq(0,10,2))
+    
+    combinations$MSE <- NA
+    
+    for (rown in c(1:nrow(combinations))) {
+      
+      par <- as.numeric(combinations[rown,])
+      names(par) <- c('mu', 'sigma', 'scale', 'offset')
+      
+      combinations$MSE[rown] <- GaussianErrors(par, data) # / nrow(data)
+      
+    }
+    
+    Nbest <- 10
+    bestpars <- combinations[order(combinations$MSE)[1:Nbest],]
+    
+    MSEs <- c()
+    
+    for (parN in c(1:Nbest)) {
+      
+      par <- as.numeric(bestpars[parN,])
+      names(par) <- c('mu', 'sigma', 'scale', 'offset')
+      
+      result <- optim(par=par, GaussianErrors, data=data)
+
+      MSEs <- c(MSEs, result$value)
+      
+    }
+    
+    par <- bestpars[order(MSEs)[1],]
+    names(par) <- c('mu', 'sigma', 'scale', 'offset')
+    
+    return(optim(par=par, GaussianErrors, data=data))
+    
+    
+  } else {
+  
+    return(optim(par=c('mu'=mu,'sigma'=sigma, 'scale'=scale, 'offset'=offset), GaussianErrors, data=data))
+    
+  }
   
 }
 
 GaussianErrors <- function(par, data) {
   
-  errors <- sum(abs(data$y - (par['offset']+(par['scale']*parGaussian(par, data$x)))))^2
-  
-  return(errors)
-  
+  return( mean( (data$y - (par['offset']+(par['scale']*parGaussian(par, data$x))))^2, na.rm=TRUE ) )
+
 }
 
 parGaussian <- function(par,x) {
