@@ -62,7 +62,6 @@ Participants sat in a height-adjustable chair to ensure that they could easily s
 The first part of the experiment used training with a cursor aligned with the hand and the second part had training with a cursor rotated around the start position (Fig 1b; white rows in Table 1). During the training with rotated feedback, the cursor was gradually rotated 30° clockwise. This introduced a discrepancy between the actual, or felt, hand position and the visual feedback, that should evoke proprioceptive recalibration. However, the movements were robot generated, so that there were no predicted sensory consequences based on the outgoing motor command. Hence the prediction errors that are thought to lead to motor learning were absent as well. After both types of training, participants did open-loop reaches as well as two kinds of hand localization tasks, to test the effect of training on proprioceptive and predictive hand estimates.
 
 
-$
 
 \newcommand{\headrow}{\rowcolor{black!20}}
 \newcommand{\thead}[1]{\multicolumn{1}{l}{\bfseries #1\rule[-1.2ex]{0pt}{2em}}}
@@ -116,7 +115,8 @@ $
 \end{tablenotes}
 \end{threeparttable}
 \end{table}
-$
+
+
 
 ## Exposure training
 
