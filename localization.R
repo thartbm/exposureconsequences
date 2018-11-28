@@ -7,6 +7,8 @@ source('shared.R')
 
 plotLocalization <- function(classicOnline=FALSE, generateSVG=FALSE, selectPerformance=TRUE, remove15=FALSE) {
   
+  classicOnline = FALSE # the third panel is now used for generalization curves
+  
   # get the data to plot:
   exp <- getPointLocalization('exposure', difference=TRUE, verbose=FALSE, selectPerformance=selectPerformance)
   cla <- getPointLocalization('classic', difference=TRUE, verbose=FALSE, selectPerformance=FALSE)
@@ -213,6 +215,96 @@ plotLocalization <- function(classicOnline=FALSE, generateSVG=FALSE, selectPerfo
   
   if (generateSVG) {
     dev.off()
+  }
+  
+}
+
+plotALignedRotatedLocalization <- function(classicOnline=FALSE, generateSVG=FALSE, selectPerformance=TRUE, remove15=FALSE) {
+  
+  groups <- c('exposure','classic')
+  
+  if (classicOnline) {
+    
+    groups <- c(groups,'online')
+    
+  }
+  
+  if (generateSVG) {
+    installed.list <- rownames(installed.packages())
+    if ('svglite' %in% installed.list) {
+      # nothing
+    } else {
+      generateSVG=FALSE
+    }
+  }
+  
+  par(mfrow=c(7,3),mai=c(.6,.5,.01,.01))
+  
+  points <- c(15,25,35,45,55,65,75)
+  
+  
+  for (group in groups) {
+    
+    SP <- FALSE
+    if (group == 'exposure') {
+      SP <- selectPerformance
+    }
+    
+    df <- load.DownloadDataframe(url=localizationURLs[group],filename=sprintf('localization_%s.csv',group))
+    
+    if (selectPerformance & group=='exposure') {
+      blinks <- load.DownloadDataframe(informationURLs['blinkdetect'],'blinkdetect_exposure.csv')
+      OKparticipants <- blinks$participant[which(blinks$rotated_b == 1 & blinks$performance > 0.65)]
+      df <- df[which(df$participant %in% OKparticipants),]
+    }
+    
+    participants <- unique(df$participant)
+    
+    for (passive in c(0,1)) {
+      
+      if (generateSVG) {
+        svglite(file=sprintf('Fig5_%s_%s.svg',group,c('active','passive')[passive+1]), width=8.5, height=11, system_fonts=list(sans='Arial', mono='Times New Roman'))
+        par(mfrow=c(7,3),mai=c(.6,.5,.01,.01))
+      }
+        
+      for (participant in participants) {
+      
+        # create plot:
+        plot(-1000,-1000, main='', xlab='hand angle [°]', ylab='localization error [°]', xlim=c(0,90), ylim=c(20,-40), axes=F)
+        
+        lines(c(10,80),c(0,0),col='#999999')
+        
+        for (rotated in c(0,1)) {
+        
+          subdf <- df[which(df$participant == participant & df$rotated_b == rotated & df$passive_b == passive),]
+          
+          color <- colorset[[sprintf('%s%s%s',substr(group,1,3),c('Act','Pas')[passive+1],c('T','S')[rotated+1])]]
+          
+          points(subdf$handangle_deg, subdf$taperror_deg,col=color)
+          
+          if (nrow(subdf) == 0) {
+            # participant has no data in sub-condition?
+            next()
+          }
+          
+          locdf <- getLocalizationPoints(subdf, points=points, removeOutliers=TRUE)
+          
+          lty <- c(2,1)[rotated]
+          lines(locdf$handangle_deg,locdf$taperror_deg,lty=1,lw=2,col=color)
+          
+        }
+        
+        axis(1,at=points)
+        axis(2,at=c(10,-10,-30))
+        
+      }
+      
+      if (generateSVG) {
+        dev.off()
+      }
+        
+    }
+    
   }
   
 }
