@@ -17,4 +17,4 @@ ManuscriptMaterials.log
 *.html
 *.pdf
 *.tex
-paper/*.tex
+paper/paper.tex
