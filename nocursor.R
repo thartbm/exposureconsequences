@@ -3,13 +3,13 @@ source('shared.R')
 
 # FIGURE -----
 
-plotReachAftereffects <- function(generateSVG=FALSE, selectPerformance=TRUE, addNormalFits=TRUE) {
+plotReachAftereffects <- function(generateSVG=FALSE, selectPerformance=TRUE, addNormalFits=FALSE) {
   
   if (generateSVG) {
     installed.list <- rownames(installed.packages())
     if ('svglite' %in% installed.list) {
       library('svglite')
-      svglite(file='Fig3.svg', width=7.5, height=3, system_fonts=list(sans='Arial', mono='Times New Roman'))
+      svglite(file='Fig4.svg', width=7.5, height=3, system_fonts=list(sans='Arial', mono='Times New Roman'))
     } else {
       generateSVG=FALSE
     }
@@ -380,7 +380,8 @@ plotBlinkDetection <- function(generateSVG=FALSE) {
   if (generateSVG) {
     installed.list <- rownames(installed.packages())
     if ('svglite' %in% installed.list) {
-      svglite(file='Fig1.svg', width=4, height=4, system_fonts=list(sans='Arial', mono='Times New Roman'))
+      library('svglite')
+      svglite(file='Fig2.5.svg', width=4, height=4, system_fonts=list(sans='Arial', mono='Times New Roman'))
     } else {
       generateSVG=FALSE
     }

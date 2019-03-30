@@ -76,7 +76,8 @@ correlateNoCursorsLocalization <- function(NCpart='all', generateSVG=FALSE, sele
   if (generateSVG) {
     installed.list <- rownames(installed.packages())
     if ('svglite' %in% installed.list) {
-      svglite(file='Fig4.svg', width=7.5, height=2.5, system_fonts=list(sans='Arial', mono='Times New Roman'))
+      library('svglite')
+      svglite(file='Fig6.svg', width=7.5, height=2.5, system_fonts=list(sans='Arial', mono='Times New Roman'))
     } else {
       generateSVG=FALSE
     }
@@ -230,5 +231,204 @@ plotCorrelationWithCI <- function(X,Y,colors=c('black','red'),main='main title',
   
   # and use that to show a line:
   lines(range(X), predict(this.lm, newdata=data.frame(X=range(X))), col=colors[2], lwd=1.5)
+  
+}
+
+# Generalization -----
+
+plotGeneralization <- function(generateSVG=FALSE, selectPerformance=TRUE) {
+  
+  if (generateSVG) {
+    installed.list <- rownames(installed.packages())
+    if ('svglite' %in% installed.list) {
+      library('svglite')
+      svglite(file='Fig5.svg', width=7.5, height=3, system_fonts=list(sans='Arial', mono='Times New Roman'))
+    } else {
+      generateSVG=FALSE
+    }
+  }
+  
+  
+  par(mfrow=c(1,3))
+  
+  # get the data to plot:
+  exp <- getPointLocalization('exposure', difference=TRUE, verbose=FALSE, selectPerformance=selectPerformance)
+  cla <- getPointLocalization('classic', difference=TRUE, verbose=FALSE, selectPerformance=FALSE)
+  
+  # get the averages for the line plots:
+  exp.avg <- aggregate(taperror_deg ~ passive_b + handangle_deg, data=exp, FUN=mean)
+  exp.avg.act <- exp.avg[which(exp.avg$passive_b == 0),]
+  exp.avg.pas <- exp.avg[which(exp.avg$passive_b == 1),]
+  cla.avg <- aggregate(taperror_deg ~ passive_b + handangle_deg, data=cla, FUN=mean)
+  cla.avg.act <- cla.avg[which(cla.avg$passive_b == 0),]
+  cla.avg.pas <- cla.avg[which(cla.avg$passive_b == 1),]
+  
+  points=c(15,25,35,45,55,65,75)
+  exp <- getPointLocalization(group='exposure', difference=TRUE, points=points, movementtype='both', LRpart='all', verbose=FALSE, selectPerformance=selectPerformance)
+  cla <- getPointLocalization(group='classic', difference=TRUE, points=points, movementtype='both', LRpart='all', verbose=FALSE, selectPerformance=selectPerformance)
+  
+  exp.act <- exp[which(exp$passive_b == 0 & is.finite(exp$taperror_deg)),]
+  cla.act <- cla[which(cla$passive_b == 0 & is.finite(cla$taperror_deg)),]
+  
+  # cla.avg.act <- aggregate(taperror_deg ~ handangle_deg, data=cla.act, FUN=mean) 
+  # exp.avg.act <- aggregate(taperror_deg ~ handangle_deg, data=exp.act, FUN=mean) 
+  
+  # if (remove15) {
+  #   exp.act <- exp.act[which(exp.act$handangle_deg > 15),]
+  #   cla.act <- cla.act[which(cla.act$handangle_deg > 15),]
+  # }
+  
+  # fitting on all data:
+  exp.fit <- getGaussianFit(x=exp.act$handangle_deg,exp.act$taperror_deg,mu=50,sigma=10,scale=-75,offset=-4)
+  cla.fit <- getGaussianFit(x=cla.act$handangle_deg,cla.act$taperror_deg,mu=50,sigma=10,scale=-75,offset=-4)
+  
+  # get confidence intervals for the peak of the generalization curve for localization shifts:
+  cla.locshift <- getPeakLocConfidenceInterval(group='classic',
+                                               CIs=c(.95), 
+                                               movementtype='active', 
+                                               LRpart='all',
+                                               selectPerformance=FALSE,
+                                               remove15=remove15)
+  exp.locshift <- getPeakLocConfidenceInterval(group='exposure',
+                                               CIs=c(.95), 
+                                               movementtype='active', 
+                                               LRpart='all', 
+                                               selectPerformance=selectPerformance,
+                                               remove15=remove15)
+  
+  plot(-1000,-1000, main='localization shifts', xlab='hand angle [°]', ylab='localization shift [°]', xlim=c(10,80), ylim=c(0,-15), axes=F)
+  
+  mtext('A', side=3, outer=TRUE, at=c(0,1), line=-1, adj=0, padj=1)
+  
+  # plot the data, faintly
+  
+  # lines(points[1:2],cla.avg.act$taperror_deg[1:2],col=colorset[['claActT']],lty=2,lwd=1.5)
+  # lines(points[2:7],cla.avg.act$taperror_deg[2:7],col=colorset[['claActT']],lty=1,lwd=1.5)
+  # lines(points[1:2],exp.avg.act$taperror_deg[1:2],col=colorset[['expActT']],lty=2,lwd=1.5)
+  # lines(points[2:7],exp.avg.act$taperror_deg[2:7],col=colorset[['expActT']],lty=1,lwd=1.5)
+  
+  lines(points,cla.avg.act$taperror_deg,col=colorset[['claActT']],lty=1,lwd=1.5)
+  lines(points,exp.avg.act$taperror_deg,col=colorset[['expActT']],lty=1,lwd=1.5)
+  
+  # plot fitted Gaussian functions to all data:
+  
+  X <- seq(15,75)
+  cla.Y.fit <- cla.fit$par['scale']*parGaussian(cla.fit$par,X)
+  cla.Y.fit <- cla.Y.fit + cla.fit$par['offset']
+  exp.Y.fit <- exp.fit$par['scale']*parGaussian(exp.fit$par,X)
+  exp.Y.fit <- exp.Y.fit + exp.fit$par['offset']
+  
+  lines(X,cla.Y.fit,col=colorset[['claActS']],lty=1,lw=1.5)
+  lines(X,exp.Y.fit,col=colorset[['expActS']],lty=1,lw=1.5)
+  
+  cla.idx <- which.min(cla.Y.fit)
+  exp.idx <- which.min(exp.Y.fit)
+  
+  # connect peaks of group fits to CIs:
+  
+  arrows(X[cla.idx],cla.Y.fit[cla.idx],X[cla.idx],-2.5,col=colorset[['claActS']],lwd=1.5,length=.05)
+  arrows(X[exp.idx],exp.Y.fit[exp.idx],X[exp.idx],-2.5,col=colorset[['expActS']],lwd=1.5,length=.05)
+  
+  # indicate feedback and hand position during training:
+  
+  arrows(45,-2.5,45,-1,col='black',lw=1.5,length=0.05)
+  arrows(75,0,75,-1.5,col='black',lw=1.5,length=0.05)
+  
+  # plot the bootstrap peaks of the generalization functions
+  
+  polygon(cla.locshift$value[c(1,3,3,1)],c(0,0,-1,-1),border=NA,col=colorset[['claActT']])
+  polygon(exp.locshift$value[c(1,3,3,1)],c(-1.5,-1.5,-2.5,-2.5),border=NA,col=colorset[['expActT']])
+  
+  lines(cla.locshift$value[c(2,2)],c(0,-2.5),col=colorset[['claActS']],lty=1,lw=1.5)
+  lines(exp.locshift$value[c(2,2)],c(0,-2.5),col=colorset[['expActS']],lty=1,lw=1.5)
+  
+  # add legend
+  legend(10,-15,c('exposure','classic'),col=c(colorset[['expActS']],colorset[['claActS']]),lty=c(1,1),lwd=c(1.5,1.5),bty='n')
+  
+  # add tick marks:
+  axis(1,at=points)
+  axis(2,at=c(0,-5,-10,-15))
+  
+  
+  
+  # B      Reach Aftereffects
+  
+  
+  classic  <- getReachAftereffects('classic',part='all', selectPerformance=selectPerformance)
+  exposure <- getReachAftereffects('exposure',part='all', selectPerformance=selectPerformance)
+  
+  # exposureAVGini <- aggregate(endpoint_angle ~ target, data=exposure_ini, FUN=mean) # error?
+  # exposureAVGrem <- aggregate(endpoint_angle ~ target, data=exposure_rem, FUN=mean)
+  classicAVG <- aggregate(endpoint_angle ~ target, data=classic, FUN=mean)
+  exposureAVG <- aggregate(endpoint_angle ~ target, data=exposure, FUN=mean)
+  
+  
+  points=c(15,25,35,45,55,65,75)
+  
+  classic  <- getReachAftereffects('classic',part='all', selectPerformance=selectPerformance)
+  exposure <- getReachAftereffects('exposure',part='all', selectPerformance=selectPerformance)
+  
+  # fitting group data:
+  exp.fit <- getGaussianFit(x=exposure$target,exposure$endpoint_angle,mu=50,sigma=30,scale=50,offset=4)
+  cla.fit <- getGaussianFit(x=classic$target,classic$endpoint_angle,mu=50,sigma=30,scale=50,offset=4)
+  
+  # get confidence intervals for the peak of the generalization curve for localization shifts:
+  cla.RAEshift <- getPeakConfidenceInterval('classic', part='all', CIs=c(.95), selectPerformance=selectPerformance)
+  exp.RAEshift <- getPeakConfidenceInterval('exposure', part='all', CIs=c(.95), selectPerformance=selectPerformance)
+  
+  plot(-1000,-1000, main='reach aftereffects', xlab='target angle [°]', ylab='reach endpoint deviation [°]', xlim=c(10,80), ylim=c(0,15), axes=F)
+  
+  mtext('B', side=3, outer=TRUE, at=c(1/3,1), line=-1, adj=0, padj=1)
+  
+  # plot the data, faintly
+  
+  lines(points,classicAVG$endpoint_angle,col=colorset[['claActT']],lwd=1.5)
+  lines(points,exposureAVG$endpoint_angle,col=colorset[['expActT']],lwd=1.5)
+  
+  # plot fitted Gaussian functions to all data:
+  
+  X <- seq(15,75)
+  cla.Y.fit <- cla.fit$par['scale']*parGaussian(cla.fit$par,X)
+  cla.Y.fit <- cla.Y.fit + cla.fit$par['offset']
+  exp.Y.fit <- exp.fit$par['scale']*parGaussian(exp.fit$par,X)
+  exp.Y.fit <- exp.Y.fit + exp.fit$par['offset']
+  
+  lines(X,cla.Y.fit,col=colorset[['claActS']],lty=1,lw=1.5)
+  lines(X,exp.Y.fit,col=colorset[['expActS']],lty=1,lw=1.5)
+  
+  cla.idx <- which.max(cla.Y.fit)
+  exp.idx <- which.max(exp.Y.fit)
+  
+  # connect peaks of group fits to CIs:
+  
+  arrows(X[cla.idx],cla.Y.fit[cla.idx],X[cla.idx],2.5,col=colorset[['claActS']],lwd=1.5,length=.05)
+  arrows(X[exp.idx],exp.Y.fit[exp.idx],X[exp.idx],2.5,col=colorset[['expActS']],lwd=1.5,length=.05)
+  
+  # indicate feedback and hand position during training:
+  
+  arrows(45,2.5,45,1,col='black',lw=1.5,length=0.05)
+  arrows(75,0,75,1.5,col='black',lw=1.5,length=0.05)
+  
+  # plot the bootstrap peaks of the generalization functions
+  
+  polygon(cla.RAEshift$value[c(1,3,3,1)],c(0,0,1,1),border=NA,col=colorset[['claActT']])
+  polygon(exp.RAEshift$value[c(1,3,3,1)],c(1.5,1.5,2.5,2.5),border=NA,col=colorset[['expActT']])
+  
+  lines(cla.RAEshift$value[c(2,2)],c(0,2.5),col=colorset[['claActS']],lty=1,lw=1.5)
+  lines(exp.RAEshift$value[c(2,2)],c(0,2.5),col=colorset[['expActS']],lty=1,lw=1.5)
+  
+  # add tick marks:
+  axis(1,at=points)
+  axis(2,at=c(0,5,10,15))
+  
+  
+  
+  
+  
+  if (generateSVG) {
+    dev.off()
+  }
+  
+  
   
 }

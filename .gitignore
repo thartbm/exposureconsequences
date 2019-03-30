@@ -18,3 +18,4 @@ ManuscriptMaterials.log
 *.pdf
 *.tex
 paper/paper.tex
+velocityCheck.R

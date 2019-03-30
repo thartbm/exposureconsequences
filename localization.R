@@ -2,12 +2,14 @@
 source('shared.R')
 
 
-
 # PLOT / FIGURE ------
 
-plotLocalization <- function(classicOnline=FALSE, generateSVG=FALSE, selectPerformance=TRUE, remove15=FALSE) {
+plotLocalization <- function(classicOnline=FALSE, generateSVG=FALSE, selectPerformance=TRUE, remove15=FALSE, thirdPanel='2x2') {
   
-  classicOnline = FALSE # the third panel is now used for generalization curves
+  # thirdPanel=
+  # 'peakCIs'
+  # 'classicOnline'
+  # '2x2'
   
   # get the data to plot:
   exp <- getPointLocalization('exposure', difference=TRUE, verbose=FALSE, selectPerformance=selectPerformance)
@@ -31,7 +33,7 @@ plotLocalization <- function(classicOnline=FALSE, generateSVG=FALSE, selectPerfo
   cla.pas <- cla[which(cla$passive_b == 1),]
   cla.CI.pas <- matrix(unlist(by(cla.pas$taperror_deg, INDICES=c(cla.pas$handangle_deg), FUN=t.interval)),nrow=2)
 
-  if (classicOnline) {
+  if (thirdPanel == 'classicOnline') {
     onl <- getPointLocalization('online', difference=TRUE, verbose=FALSE, selectPerformance=FALSE)
     
     onl.avg <- aggregate(taperror_deg ~ passive_b + handangle_deg, data=onl, FUN=mean)
@@ -47,7 +49,8 @@ plotLocalization <- function(classicOnline=FALSE, generateSVG=FALSE, selectPerfo
   if (generateSVG) {
     installed.list <- rownames(installed.packages())
     if ('svglite' %in% installed.list) {
-      svglite(file='Fig2.svg', width=7.5, height=3, system_fonts=list(sans='Arial', mono='Times New Roman'))
+      library('svglite')
+      svglite(file='Fig3.svg', width=7.5, height=3, system_fonts=list(sans='Arial', mono='Times New Roman'))
     } else {
       generateSVG=FALSE
     }
@@ -103,7 +106,7 @@ plotLocalization <- function(classicOnline=FALSE, generateSVG=FALSE, selectPerfo
   
   legend(10,-15,c('passive','active'),col=c(colorset[['claPasS']],colorset[['claActS']]),lty=c(1,1),lwd=c(1.5,1.5),bty='n')
   
-  if (classicOnline) {
+  if (thirdPanel == 'classicOnline') {
     
     plot(-1000,-1000, main='online', xlab='hand angle [°]', ylab='localization shift [°]', xlim=c(10,80), ylim=c(0,-15), axes=F)
     
@@ -126,7 +129,7 @@ plotLocalization <- function(classicOnline=FALSE, generateSVG=FALSE, selectPerfo
     
     legend(10,-15,c('passive','active'),col=c(colorset[['onlPasS']],colorset[['onlActS']]),lty=c(1,1),lwd=c(1.5,1.5),bty='n')
     
-  } else {
+  } else if (thirdPanel == 'peakCIs') {
     
     points=c(15,25,35,45,55,65,75)
     exp <- getPointLocalization(group='exposure', difference=TRUE, points=points, movementtype='both', LRpart='all', verbose=FALSE, selectPerformance=selectPerformance)
@@ -211,6 +214,45 @@ plotLocalization <- function(classicOnline=FALSE, generateSVG=FALSE, selectPerfo
     axis(1,at=points)
     axis(2,at=c(0,-5,-10,-15))
     
+  } else if (thirdPanel == '2x2') {
+    
+    # get the data again, because we remove the 15 degree point?
+    #exp <- getPointLocalization('exposure', difference=TRUE, verbose=FALSE, selectPerformance=selectPerformance)
+    #cla <- getPointLocalization('classic', difference=TRUE, verbose=FALSE, selectPerformance=FALSE)
+    
+    # get the averages for the line plots:
+    exp.act <- aggregate(taperror_deg ~ participant, data=exp[which(exp$passive_b == 0 & exp$handangle_deg > 15),], FUN=mean)
+    exp.pas <- aggregate(taperror_deg ~ participant, data=exp[which(exp$passive_b == 1 & exp$handangle_deg > 15),], FUN=mean)
+    #
+    cla.act <- aggregate(taperror_deg ~ participant, data=cla[which(cla$passive_b == 0 & exp$handangle_deg > 15),], FUN=mean)
+    cla.pas <- aggregate(taperror_deg ~ participant, data=cla[which(cla$passive_b == 1 & exp$handangle_deg > 15),], FUN=mean)
+    
+    # get the confidence intervals for polygon areas:
+    exp.act.CI <- t.interval(exp.act$taperror_deg)
+    exp.pas.CI <- t.interval(exp.pas$taperror_deg)
+    cla.act.CI <- t.interval(cla.act$taperror_deg)
+    cla.pas.CI <- t.interval(cla.pas$taperror_deg)
+    
+    plot(-1000,-1000, main='localization shifts', xlab='localization task', ylab='mean localization shift [°]', xlim=c(10,80), ylim=c(0,-15), axes=F)
+    
+    mtext('C', side=3, outer=TRUE, at=c(2/3,1), line=-1, adj=0, padj=1)
+    
+    X    <- c(20,70,70,20)
+    Yexp <- c(exp.act.CI[1],exp.pas.CI[1],exp.pas.CI[2],exp.act.CI[2]) 
+    Ycla <- c(cla.act.CI[1],cla.pas.CI[1],cla.pas.CI[2],cla.act.CI[2]) 
+    
+    polygon(X,Yexp,border=NA,col=colorset[['expActT']])
+    polygon(X,Ycla,border=NA,col=colorset[['claActT']])
+    
+    lines(c(20,70),c(mean(exp.act$taperror_deg),mean(exp.pas$taperror_deg)),col=colorset[['expActS']],lty=1,lw=1.5)
+    lines(c(20,70),c(mean(cla.act$taperror_deg),mean(cla.pas$taperror_deg)),col=colorset[['claActS']],lty=1,lw=1.5)
+    
+    legend(10,-15,c('exposure','classic'),col=c(colorset[['expActS']],colorset[['claActS']]),lty=c(1,1),lwd=c(1.5,1.5),bty='n')
+    
+    # add tick marks:
+    axis(1,at=c(20,70),labels=c('active','passive'))
+    axis(2,at=c(0,-5,-10,-15))
+    
   }
   
   if (generateSVG) {
@@ -233,6 +275,7 @@ plotALignedRotatedLocalization <- function(classicOnline=FALSE, generateSVG=FALS
     installed.list <- rownames(installed.packages())
     if ('svglite' %in% installed.list) {
       # nothing
+      library('svglite')
     } else {
       generateSVG=FALSE
     }
@@ -263,7 +306,8 @@ plotALignedRotatedLocalization <- function(classicOnline=FALSE, generateSVG=FALS
     for (passive in c(0,1)) {
       
       if (generateSVG) {
-        svglite(file=sprintf('Fig5_%s_%s.svg',group,c('active','passive')[passive+1]), width=8.5, height=11, system_fonts=list(sans='Arial', mono='Times New Roman'))
+        # should have been loaded if available:
+        svglite(file=sprintf('Fig7_%s_%s.svg',group,c('active','passive')[passive+1]), width=8.5, height=11, system_fonts=list(sans='Arial', mono='Times New Roman'))
         par(mfrow=c(7,3),mai=c(.6,.5,.01,.01))
       }
         
