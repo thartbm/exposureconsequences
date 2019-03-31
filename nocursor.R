@@ -419,6 +419,8 @@ getPeakConfidenceInterval <- function(group,validate=FALSE,part='all',CIs=c(.95)
   
   if (file.exists(filename)) {
     
+    cat(sprintf('\nloading peak RAE generalization from file for: %s\n',toupper(group)))
+    
     df <- read.csv(filename, stringsAsFactors=FALSE)
     
   } else {

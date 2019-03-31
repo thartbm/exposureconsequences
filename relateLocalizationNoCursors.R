@@ -236,7 +236,7 @@ plotCorrelationWithCI <- function(X,Y,colors=c('black','red'),main='main title',
 
 # Generalization -----
 
-plotGeneralization <- function(generateSVG=FALSE, selectPerformance=TRUE) {
+plotGeneralization <- function(generateSVG=FALSE, selectPerformance=TRUE, remove15=FALSE) {
   
   if (generateSVG) {
     installed.list <- rownames(installed.packages())

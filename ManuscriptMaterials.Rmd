@@ -390,7 +390,18 @@ To sum up:
 
 # Generalization Maxima
 
-Here we'll look at the differences in generalization suggested by both the LME on localization shift and on reach aftereffects. In particular, we estimate the peak of each curve by bootstrapping participants and fitting a Gaussian (normal) function a 1000 times. This disregards other possible differences in generalization curves: the width of the curve, the peak amplitude or the offset. There may be effects there, but we are most interested in the location of the maxima.
+Here we'll look at the differences in generalization suggested by both the LME on localization shift and on reach aftereffects. In particular, we estimate the peak of each curve by bootstrapping participants and fitting a Gaussian (normal) function 100000 times. This disregards other possible differences in generalization curves: the width of the curve, the peak amplitude or the offset. There may be effects there, but we didn't check, as we are mostly interested in the location of the maxima.
+
+Since this is a very time-consuming process (more than an hour on my laptop), the results of the bootstrapping analyses are saved in files and can be downloaded from the OSF repository.
+
+Alternatively, if you want to check the results, you can run this chunk to delete the pre-calculated results, which will force the code to re-calculate it. However, by default, the code here will only use 5000 iterations for bootstrapping, which will ensure that the confidence intervals are less precise than the ones we pre-calculated.
+
+```{r delete_download_genmaxfiles}
+# set delete=TRUE to force redoing the bootstrapping 
+# set download=TRUE to download pre-calculated confidence intervals instead
+generalizationMaximaFiles(delete=FALSE, download=TRUE)
+```
+
 
 First, a figure:
 
@@ -568,7 +579,11 @@ What can we conclude? Here is an initial list of what we might conclude.
 
 
 ```{r create_svgs, cache=FALSE, include=FALSE}
+
+# #########
 # This chunk creates SVG files but shouldn't show up in the PDF / HTML 
+# #########
+
 plotLocalization(classicOnline=FALSE,
                  generateSVG=TRUE, 
                  selectPerformance=selectPerformance)

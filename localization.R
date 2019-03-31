@@ -611,6 +611,8 @@ getPeakLocConfidenceInterval <- function(group, CIs=c(.95), movementtype='active
   
   if (file.exists(filename)) {
     
+    cat(sprintf('\nloading peak LOC generalization from file for: %s\n',toupper(group)))
+    
     df <- read.csv(filename, stringsAsFactors=FALSE)
     
   } else {
@@ -625,7 +627,7 @@ getPeakLocConfidenceInterval <- function(group, CIs=c(.95), movementtype='active
     
     loc2 <- -1 * xtabs(taperror_deg ~ participant + handangle_deg,loc)
     
-    data <- bootstrapGaussianPeak(data=loc2,bootstraps=5000,mu=47.5,sigma=15,scale=10,offset=4,CIs=CIs)
+    data <- bootstrapGaussianPeak(data=loc2,bootstraps=iterations,mu=47.5,sigma=15,scale=10,offset=4,CIs=CIs)
     
     df <- data.frame('level'=names(data),'value'=data)
     

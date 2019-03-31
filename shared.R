@@ -99,6 +99,22 @@ load.DownloadDataframe <- function(url,filename) {
   
 }
 
+generalizationMaximaFiles <- function(delete=FALSE, download=FALSE) {
+  
+  if (delete) {
+    file.remove('LOC_peakCI_classic.csv',
+                'LOC_peakCI_exposure.csv',
+                'RAE_peakCI_classic.csv',
+                'RAE_peakCI_exposure.csv')
+  }
+  
+  if (download) {
+    cat('\nNOT IMPLEMENTED YET\n')
+  }
+  
+}
+
+
 t.interval = function(data, variance = var(data, na.rm=TRUE), conf.level = 0.95) {
   
   data <- data[!is.na(data)]
