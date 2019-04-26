@@ -23,7 +23,7 @@ opts_chunk$set(comment='')
 
 # Overview
 
-This document collects statistics and figures to be used in the manuscript on the exposure consequences project.
+This document collects statistics and figures to be used in the manuscript on the exposure consequences project. It downloads files from the accompanying Open Science Framework project: [https://osf.io/zfdth/](https://osf.io/zfdth/)
 
 ## Figures
 
@@ -182,6 +182,14 @@ kable( c('mean'=mean(participants$age), 'sd'=sd(participants$age)),
        caption='age of participants')
 ```
 
+Is the age of this group of participants lower than that of the classic group? We can do a t-test against 24:
+
+```{r age_group_test}
+t.test(participants$age, mu=24)
+
+```
+
+
 And the distribution of sex:
 
 ```{r sex_distribution}
@@ -190,15 +198,21 @@ kable( table(participants$sex),
        col.names=c('sex','frequency'))
 ```
 
+So there are also more females now. Let's see if that is significantly different with a binomial exact test:
+
+```{r sex_group_test}
+binom.test(x=c(13,8),p=11/21)
+```
+
+
 ## Localization selection statistics
 
-We've manually selected localization responses that were unlikely to be true responses. Here are the statistics on how many were removed in each dataset. For exposure:
+We've manually selected localization responses that were unlikely to be true responses, and we removed data from reaches where the hand was outside the 0-90 degree span. Here are the statistics on how many were removed in each dataset. For exposure:
 
 ```{r exposure_loc_selection}
 kable( aggregate(trials ~ rotated * passive, 
                  data=countSelectedLocalizations('exposure'), 
-                 FUN=mean), 
-       caption='percentages selected localization trials after exposure training')
+                 FUN=mean), caption='percentages selected localization trials after exposure training')
 ```
 
 For classic:
@@ -214,10 +228,24 @@ This is highly similar between conditions and training paradigms, and at an acce
 
 We decided not to use any more outlier removal, but it is implemented and can be switched on in the code: set the `removeOutliers` argument to the `getPointLocalization` function in `shared.R` to TRUE.
 
+## Distribution of data
+
+Let's see how the data is distributed through the workspace. The plot below bins the data, with bins centred on the 7 angles we're interested in, using bins of 10 degrees wide.
+
+```{r loc_bin_counts, fig.width=8, fig.height=5}
+plotLocalizationBinCounts()
+```
+
+So we have at well over 100 data points close to every hand angle. But we want to know if there are participants without estimates of localization at some points in the workspace. So here are the counts of participants with valid localization estimates in all 4 tasks for every hand angle. Missing data occurs here, because we don't extrapolate beyond the range of the data.
+
+```{r localization_count_table}
+kable(getLocCountTable(selectPerformance=selectPerformance),
+      caption='count of participants with localization data at each hand angle')
+```
+
 ## No-cursor selection statistics
 
 Similarly, we get the percentage of selected trials in no-cursor reach tasks in exposure training:
-
 
 ```{r exposure_nocursor_selection}
 kable( aggregate(trials ~ 1, 
@@ -239,22 +267,15 @@ These high percentages may indicate there are some additional no-cursor reaches 
 
 # Localization
 
-Here is a plot, probably figure 2:
+Here is a plot, probably figure 3:
 
 ```{r fig3_localization, fig.width=7.5, fig.height=3}
-plotLocalization(selectPerformance=selectPerformance,remove15=FALSE)
+plotLocalization(selectPerformance=selectPerformance,remove15=FALSE,points=c(15,25,35,45,55,65,75))
 ```
 
 It seems that just like after classic training, there is a change in localization responses following exposure training. There might still be a difference between active and passive localization after exposure training - contrary to our expectations - but it could be smaller than the difference after classic training. This will need to be tested.
 
 ## Missing data
-
-Here are the counts of participants with valid localization estimates in all 4 tasks for every hand angle. Missing data occurs here, because we don't extrapolate beyond the range of the data.
-
-```{r localization_count_table}
-kable(getLocCountTable(selectPerformance=selectPerformance),
-      caption='count of participants with localization data at each hand angle')
-```
 
 Since there is a good amount of missing data at the 15 degree location, we exclude that angle from analysis, with a switch in analysis functions `remove15=TRUE`, which can be set to false if we'd want.
 
@@ -328,6 +349,46 @@ To sum up our findings on localization:
 5. The shift in localization is different across the workspace in the exposure group. I.e., there is a generalization _curve_.
 6. This effect is not present in the classic group, so that generalization can be said to be flat; there is no _curve_. **NOTE:** When we do include the 15 degree target, there is an effect of hand angle though.
 
+## Localization precision
+
+Many people keep being interested in the precision of active versus passive localization. If active movements before localization result in higher precision, then the variance of the response errors should be lower for active movements. Let's test this in the aligned data for exposure:
+
+```{r exp_loc_var_check}
+exp_a <- getLocalizationVariance(group='exposure')
+t.test(taperror_deg ~ passive_b, data=exp_a, paired=T)
+```
+
+An alternative is to see how many participants were more precise in the active versus the passive localization task, using a binomial exact test. We compare the observed data to a 50% chance which would express the hypothesis that it doesn't matter for localization precision.
+
+```{r}
+binom.test( x=sum(aggregate(taperror_deg ~ participant, data=exp_a, FUN=diff)$taperror_deg < 0), n=21, p=.5 )
+```
+
+And for the classic group, we do the same:
+
+```{r cla_loc_var_check}
+loc_a <- getLocalizationVariance(group='classic')
+t.test(taperror_deg ~ passive_b, data=loc_a, paired=T)
+binom.test( x=sum(aggregate(taperror_deg ~ participant, data=loc_a, FUN=diff)$taperror_deg < 0), n=21, p=.5 )
+```
+
+How about the rotated session for the exposure group:
+
+```{r exp_rot_loc_var_check}
+exp_r <- getLocalizationVariance(group='exposure', session='rotated')
+t.test(taperror_deg ~ passive_b, data=exp_r, paired=T)
+binom.test( x=sum(aggregate(taperror_deg ~ participant, data=exp_r, FUN=diff)$taperror_deg < 0), n=21, p=.5 )
+```
+
+Or the rotated session for the classic group:
+
+```{r cla_rot_loc_var_check}
+loc_r <- getLocalizationVariance(group='classic', session='rotated')
+t.test(taperror_deg ~ passive_b, data=loc_r, paired=T)
+binom.test( x=sum(aggregate(taperror_deg ~ participant, data=loc_r, FUN=diff)$taperror_deg < 0), n=21, p=.5 )
+```
+
+So in all four cases, making active movements doesn't change the variance: it is neither increased nor decreased. As expected, this confirms all our other tests in previous/upcoming papers.
 
 # Reach Aftereffects
 
@@ -344,7 +405,7 @@ Messages of the figure:
 
 These claims require analyses.
 
-## Is there an effect of exposure training on reach aftereffects?
+## Is there an effect of exposure training on open-loop reaches?
 
 First, we look at the no-cursor reaches after exposure training only (see Fig 3a). We show that no-cursor reaches change direction immediately after exposure training (iteration 1):
 
@@ -353,11 +414,11 @@ exposureNoCursorChange(LMEmethod=LMEmethod,
                        selectPerformance=selectPerformance)
 ```
 
-So this shows that whether or not the feedback was rotated mattered for the reach deviations in the exposure training group, i.e.: there are reach aftereffects.
+So this shows that whether or not the feedback was rotated mattered for the reach deviations in the exposure training group, i.e.: there are reach aftereffects. This means that we subtract the aligned no-cursor reach end-point deviation for each participant and target from the rotated no-cursor reach end-point deviation from the same participant and target, to get the training induced _change_ in reach deviations.
 
 ## Do the motor changes persist during localization?
 
-The second analysis is to show that the reach aftereffects aren't all that different for first and later iterations of the rotated no-cursor tasks. (The rotated data is always compared with _all_ aligned iterations of the task.)
+The second analysis is to show that the reach aftereffects aren't all that different for first and later iterations of the rotated no-cursor tasks.
 
 ```{r RAE_exp_iterations}
 exposureAftereffectsPersistent(LMEmethod=LMEmethod, 
@@ -394,7 +455,7 @@ Here we'll look at the differences in generalization suggested by both the LME o
 
 Since this is a very time-consuming process (more than an hour on my laptop), the results of the bootstrapping analyses are saved in files and can be downloaded from the OSF repository.
 
-Alternatively, if you want to check the results, you can run this chunk to delete the pre-calculated results, which will force the code to re-calculate it. However, by default, the code here will only use 5000 iterations for bootstrapping, which will ensure that the confidence intervals are less precise than the ones we pre-calculated.
+Alternatively, if you want to thoroughly check the results, you can run this chunk to delete the pre-calculated results (set delete=TRUE and download=FALSE), which will force the code to re-calculate it. By default, the code here will use "only" 1000 iterations for bootstrapping, which will run 20 times faster, but also guarantees that the confidence intervals are less precise than the ones we pre-calculated.
 
 ```{r delete_download_genmaxfiles}
 # set delete=TRUE to force redoing the bootstrapping 
@@ -402,30 +463,32 @@ Alternatively, if you want to check the results, you can run this chunk to delet
 generalizationMaximaFiles(delete=FALSE, download=TRUE)
 ```
 
-
 First, a figure:
 
 ```{r fig5_generalization_maxima, fig.width=7.5, fig.height=3}
 plotGeneralization(generateSVG=FALSE,
-                   selectPerformance=selectPerformance)
+                   selectPerformance=selectPerformance,
+                   iterations=200)
 ```
 
 
 ## Localization
 
-There was an interaction between group and hand angle on localization shifts in the LME (far) above, which suggests different generalization curves in the two groups. Here are the confidence intervals for the peaks of the generalization curves for _active_ localization:
+There was an interaction between group and hand angle on localization shifts in the LME described (far) above, which suggests different generalization curves in the two groups. Here are the confidence intervals for the peaks of the generalization curves for _active_ localization:
 
 ```{r localization_peaks}
 getPeakLocConfidenceInterval(group='classic',
                              CIs=c(.95), 
                              movementtype='active', 
                              LRpart='all',
-                             selectPerformance=FALSE)
+                             selectPerformance=selectPerformance,
+                             iterations=1000)
 getPeakLocConfidenceInterval(group='exposure',
                              CIs=c(.95), 
                              movementtype='active', 
                              LRpart='all', 
-                             selectPerformance=selectPerformance)
+                             selectPerformance=selectPerformance,
+                             iterations=1000)
 ```
 
 The median values are a little over 13 degrees apart, and median for classic falls just outside the exposure confidence interval. This could explain the interaction between group and hand angle on localization shifts, but the other way around it's not so clear.
@@ -438,11 +501,13 @@ Now we look at the confidence intervals for the maxima of the generalization cur
 getPeakConfidenceInterval('classic', 
                           part='all', 
                           CIs=c(.95), 
-                          selectPerformance=selectPerformance)
+                          selectPerformance=selectPerformance,
+                          iterations=1000)
 getPeakConfidenceInterval('exposure', 
                           part='all', 
                           CIs=c(.95), 
-                          selectPerformance=selectPerformance)
+                          selectPerformance=selectPerformance,
+                          iterations=1000)
 ```
 
 The 95% confidence interval for the classically trained group includes the 45 degree target (where the visual feedback was during training) but not the 75 degree target, whereas the 95% confidence interval for the exposure training group includes the 75 degree target (where the hand really was during training) but not the 45 degree target. Something might be going on -- but the two confidence intervals are not different from each other, which is not in line with the LME results. We can't conclude much, except that we don't know if the differences in generalization curves comes from a difference in the location of the maxima, or perhaps the width of the curves, or both.
@@ -581,17 +646,17 @@ What can we conclude? Here is an initial list of what we might conclude.
 ```{r create_svgs, cache=FALSE, include=FALSE}
 
 # #########
-# This chunk creates SVG files but shouldn't show up in the PDF / HTML 
+# This chunk creates SVG files for all the figures but shouldn't show up in the PDF / HTML 
 # #########
 
 plotLocalization(classicOnline=FALSE,
                  generateSVG=TRUE, 
-                 selectPerformance=selectPerformance)
+                 selectPerformance=selectPerformance,points=c(15,25,35,45,55,65,75))
 plotReachAftereffects(generateSVG=TRUE,
                       selectPerformance=selectPerformance)
 plotGeneralization(generateSVG=TRUE,
-                   selectPerformance=selectPerformance)
+                   selectPerformance=selectPerformance,
+                   iterations=1000)
 correlations <- correlateNoCursorsLocalization(generateSVG=TRUE, 
                                                selectPerformance=selectPerformance)
 ```
-
