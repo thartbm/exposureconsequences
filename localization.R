@@ -4,7 +4,7 @@ source('shared.R')
 
 # PLOT / FIGURE ------
 
-plotLocalization <- function(classicOnline=FALSE, generateSVG=FALSE, selectPerformance=TRUE, remove15=FALSE, thirdPanel='2x2') {
+plotLocalization <- function(classicOnline=FALSE, generateSVG=FALSE, selectPerformance=TRUE, remove15=FALSE, thirdPanel='2x2',  points=c(15,25,35,45,55,65,75)) {
   
   # thirdPanel=
   # 'peakCIs'
@@ -12,8 +12,8 @@ plotLocalization <- function(classicOnline=FALSE, generateSVG=FALSE, selectPerfo
   # '2x2'
   
   # get the data to plot:
-  exp <- getPointLocalization('exposure', difference=TRUE, verbose=FALSE, selectPerformance=selectPerformance)
-  cla <- getPointLocalization('classic', difference=TRUE, verbose=FALSE, selectPerformance=FALSE)
+  exp <- getPointLocalization('exposure', difference=TRUE, verbose=FALSE, selectPerformance=selectPerformance, points=points)
+  cla <- getPointLocalization('classic', difference=TRUE, verbose=FALSE, selectPerformance=FALSE, points=points)
   
   # get the averages for the line plots:
   exp.avg <- aggregate(taperror_deg ~ passive_b + handangle_deg, data=exp, FUN=mean)
@@ -58,15 +58,16 @@ plotLocalization <- function(classicOnline=FALSE, generateSVG=FALSE, selectPerfo
   
   par(mfrow=c(1,3))
   
-  points <- c(15,25,35,45,55,65,75)
+  #points <- c(15,25,35,45,55,65,75,85)
   
   # panel A: exposure localization (active vs. passive)
   
-  plot(-1000,-1000, main='exposure', xlab='hand angle [°]', ylab='localization shift [°]', xlim=c(10,80), ylim=c(0,-15), axes=F)
+  plot(-1000,-1000, main='exposure', xlab='hand angle [°]', ylab='localization shift [°]', xlim=c(min(points)-5,max(points)+5), ylim=c(0,-15), axes=F)
   
   mtext('A', side=3, outer=TRUE, at=c(0,1), line=-1, adj=0, padj=1)
   
   X <- c(points, rev(points))
+  
   exp.act.Y <- c(exp.CI.act[1,],rev(exp.CI.act[2,]))
   exp.pas.Y <- c(exp.CI.pas[1,],rev(exp.CI.pas[2,]))
   
@@ -74,9 +75,9 @@ plotLocalization <- function(classicOnline=FALSE, generateSVG=FALSE, selectPerfo
   polygon(X,exp.pas.Y,border=NA,col=colorset[['expPasT']])
   
   lines(points[1:2],exp.avg.act$taperror_deg[1:2],col=colorset[['expActS']],lty=2,lwd=1.5)
-  lines(points[2:7],exp.avg.act$taperror_deg[2:7],col=colorset[['expActS']],lty=1,lwd=1.5)
+  lines(points[2:length(points)],exp.avg.act$taperror_deg[2:length(points)],col=colorset[['expActS']],lty=1,lwd=1.5)
   lines(points[1:2],exp.avg.pas$taperror_deg[1:2],col=colorset[['expPasS']],lty=2,lwd=1.5)
-  lines(points[2:7],exp.avg.pas$taperror_deg[2:7],col=colorset[['expPasS']],lty=1,lwd=1.5)
+  lines(points[2:length(points)],exp.avg.pas$taperror_deg[2:length(points)],col=colorset[['expPasS']],lty=1,lwd=1.5)
   
   axis(1,at=points)
   axis(2,at=c(0,-5,-10,-15))
@@ -85,7 +86,7 @@ plotLocalization <- function(classicOnline=FALSE, generateSVG=FALSE, selectPerfo
   
   # panel B: classic localization (active vs. passive)
   
-  plot(-1000,-1000, main='classic', xlab='hand angle [°]', ylab='localization shift [°]', xlim=c(10,80), ylim=c(0,-15), axes=F)
+  plot(-1000,-1000, main='classic', xlab='hand angle [°]', ylab='localization shift [°]', xlim=c(min(points)-5,max(points+5)), ylim=c(0,-15), axes=F)
   
   mtext('B', side=3, outer=TRUE, at=c(1/3,1), line=-1, adj=0, padj=1)
   
@@ -97,9 +98,9 @@ plotLocalization <- function(classicOnline=FALSE, generateSVG=FALSE, selectPerfo
   polygon(X,cla.pas.Y,border=NA,col=colorset[['claPasT']])
   
   lines(points[1:2],cla.avg.act$taperror_deg[1:2],col=colorset[['claActS']],lty=2,lwd=1.5)
-  lines(points[2:7],cla.avg.act$taperror_deg[2:7],col=colorset[['claActS']],lty=1,lwd=1.5)
+  lines(points[2:length(points)],cla.avg.act$taperror_deg[2:length(points)],col=colorset[['claActS']],lty=1,lwd=1.5)
   lines(points[1:2],cla.avg.pas$taperror_deg[1:2],col=colorset[['claPasS']],lty=2,lwd=1.5)
-  lines(points[2:7],cla.avg.pas$taperror_deg[2:7],col=colorset[['claPasS']],lty=1,lwd=1.5)
+  lines(points[2:length(points)],cla.avg.pas$taperror_deg[2:length(points)],col=colorset[['claPasS']],lty=1,lwd=1.5)
   
   axis(1,at=points)
   axis(2,at=c(0,-5,-10,-15))
@@ -605,13 +606,13 @@ classicLocalizationShift <- function(factors='both',remove15=TRUE, LMEmethod='ch
 #   
 # }
 
-getPeakLocConfidenceInterval <- function(group, CIs=c(.95), movementtype='active', LRpart='all', selectPerformance=TRUE, iterations=100000, remove15=FALSE) {
+getPeakLocConfidenceInterval <- function(group, CIs=c(.95), movementtype='active', LRpart='all', selectPerformance=TRUE, iterations=1000, remove15=FALSE) {
   
-  filename <- sprintf('LOC_peakCI_%s.csv', group)
+  filename <- sprintf('maxima_LOC_%s.csv', group)
   
   if (file.exists(filename)) {
     
-    cat(sprintf('\nloading peak LOC generalization from file for: %s\n',toupper(group)))
+    #cat(sprintf('\nloading peak LOC generalization from file for: %s\n',toupper(group)))
     
     df <- read.csv(filename, stringsAsFactors=FALSE)
     
@@ -763,5 +764,153 @@ countSelectedLocalizations <- function(group, ignoreRepetitions=FALSE, selectPer
   #cat(sprintf('\nminimum trials selected: %d\n\n',mintrials))
   
   return(data.frame(participant, rotated, passive, repetition, trials))
+  
+}
+
+countBinnedLocalizations <- function(group, ignoreRepetitions=FALSE, selectPerformance=TRUE) {
+  
+  df <- load.DownloadDataframe(url=localizationURLs[group],filename=sprintf('localization_%s.csv',group))
+  
+  if (selectPerformance & group=='exposure') {
+    blinks <- load.DownloadDataframe(informationURLs['blinkdetect'],'blinkdetect_exposure.csv')
+    OKparticipants <- blinks$participant[which(blinks$rotated_b == 1 & blinks$performance > 0.65)]
+    df <- df[which(df$participant %in% OKparticipants),]
+  }
+  
+  participant <- c()
+  rotated <- c()
+  passive <- c()
+  repetition <- c()
+  bin <- c()
+  trials <- c()
+  
+  bincentres <- c(15,25,35,45,55,65,75)
+  binspan <- 5
+  
+  mintrials <- 25
+  
+  participants <- unique(df$participant)
+  
+  for (ppid in participants) {
+    
+    ppdf <- df[which(df$participant == ppid),]
+    
+    for (session in c(0,1)) {
+      
+      for (movtype in c(0,1)) {
+        
+        subdf <- ppdf[which(ppdf$rotated_b == session & ppdf$passive_b == movtype),]
+        
+        iters <- unique(subdf$iteration)
+        
+        for (iterno in c(1:length(iters))) {
+          
+          iter <- iters[iterno]
+          
+          iterdf <- subdf[which(subdf$iteration == iter),]
+          
+          for (bincentre in bincentres) {
+            
+            bindf <- iterdf[which(iterdf$handangle_deg > (bincentre-binspan) & iterdf$handangle_deg < (bincentre+binspan)),]
+            
+            Ntrials <- dim(bindf)[1]
+            
+            # if (Ntrials < mintrials) {
+            #   mintrials <- Ntrials
+            # }
+            
+            participant <- c(participant, ppid)
+            rotated     <- c(rotated, session)
+            passive     <- c(passive, movtype)
+            repetition  <- c(repetition, iter)
+            bin         <- c(bin, bincentre)
+            trials      <- c(trials, (Ntrials/.25)) # why is this divided by .25? (multiplied by 4 essentially)
+            
+          }           
+          
+
+        }
+        
+      }
+      
+    }
+    
+  }
+  
+  #cat(sprintf('\nminimum trials selected: %d\n\n',mintrials))
+  
+  return(data.frame(participant, rotated, passive, repetition, bin, trials))
+  
+}
+
+plotLocalizationBinCounts <- function() {
+  
+  par(mfrow=c(1,2))
+  
+  for (group in c('exposure','classic')) {
+    
+    df <- countBinnedLocalizations(group, ignoreRepetitions=FALSE, selectPerformance=TRUE)
+    
+    ylim <- list('exposure'=c(0,700), 'classic'=c(0,350))[[group]]
+    
+    plot(-1000,-1000,main=group,xlim=c(5,85),ylim=ylim,ylab='number of trials',xlab='hand angle bin centre [deg]',ax=F,bty='n')
+    
+    colors <- c()
+    linestyles <- c()
+    labels <- c()
+    
+    for (session in c('aligned','rotated')) {
+      
+      for (movement in c('active','passive')) {
+        
+        rotated <- list('aligned'=0, 'rotated'=1)[[session]]
+        passive <- list('active'=0, 'passive'=1)[[movement]]
+        
+        binCounts <- aggregate(trials ~ bin, data=df[which(df$rotated == rotated & df$passive == passive),], FUN=sum)
+        
+        col <- colorset[[sprintf('%s%s%sS', substr(group,1,3), toupper(substr(movement,1,1)), substr(movement,2,3))]]
+        
+        lst <- list('aligned'=1,'rotated'=2)[[session]]
+        
+        lines(binCounts$bin, binCounts$trials, lty=lst, col=col)
+        
+        colors <- c(colors, col)
+        linestyles <- c(linestyles, lst)
+        labels <- c(labels, sprintf('%s %s',session,movement))
+        
+      }
+      
+    }
+    
+    legend(30,3*(max(ylim)/7),legend=labels,col=colors,lty=linestyles,bty='n')
+    
+    axis(1,c(15,25,35,45,55,65,75))
+    axis(2,seq(min(ylim),max(ylim),diff(ylim)/7))
+    
+  }
+  
+}
+
+# PRECISION ------
+
+getLocalizationVariance <- function(group, points=c(15,25,35,45,55,65,75), selectPerformance=TRUE, session='aligned') {
+  
+  df <- load.DownloadDataframe(url=localizationURLs[group],filename=sprintf('localization_%s.csv',group))
+  
+  if (selectPerformance & group=='exposure') {
+    blinks <- load.DownloadDataframe(informationURLs['blinkdetect'],'blinkdetect_exposure.csv')
+    OKparticipants <- blinks$participant[which(blinks$rotated_b == 1 & blinks$performance > 0.65)]
+    df <- df[which(df$participant %in% OKparticipants),]
+  }
+  
+  df <- aspligned(df) # subtract smooth spline fitted on aligned data only from all data
+  
+  if (session == 'aligned') {
+    df <- df[which(df$rotated_b == 0),]
+  } else if (session == 'rotated') {
+    df <- df[which(df$rotated_b == 1),]
+  }
+  
+  return(aggregate(taperror_deg ~ participant + passive_b, data=df, FUN=var))
   
 }

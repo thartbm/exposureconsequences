@@ -19,6 +19,10 @@ localizationURLs <- c('exposure'='https://osf.io/ysduw/?action=download', 'class
 # information on exposure participants:
 informationURLs <- c('blinkdetect'='https://osf.io/yrpkm/?action=download', 'demographics'='https://osf.io/7sn4b/?action=download')
 
+maximaURLs <- c('LOC_classic'='https://osf.io/rp5gm/?action=download',
+                'LOC_exposure'='https://osf.io/s987y/?action=download',
+                'RAE_classic'='https://osf.io/bm4r5/?action=download',
+                'RAE_exposure'='https://osf.io/2m8g3/?action=download')
 
 
 # we'll control the color in figures centrally from here:
@@ -102,14 +106,23 @@ load.DownloadDataframe <- function(url,filename) {
 generalizationMaximaFiles <- function(delete=FALSE, download=FALSE) {
   
   if (delete) {
-    file.remove('LOC_peakCI_classic.csv',
-                'LOC_peakCI_exposure.csv',
-                'RAE_peakCI_classic.csv',
-                'RAE_peakCI_exposure.csv')
+    filenames <-  c('maxima_LOC_classic.csv',
+                    'maxima_LOC_exposure.csv',
+                    'maxima_RAE_classic.csv',
+                    'maxima_RAE_exposure.csv')
+    file.remove(filenames[file.exists(filenames)])
   }
   
   if (download) {
-    cat('\nNOT IMPLEMENTED YET\n')
+    
+    for (dv in c('LOC','RAE')) {
+      for (group in c('classic','exposure')) {
+        df <- read.csv(url(maximaURLs[sprintf('%s_%s',dv,group)]), stringsAsFactors=F)
+      
+        write.csv(df, sprintf('maxima_%s_%s.csv',dv,group), row.names=F, quote=F)
+      }
+    }
+    
   }
   
 }
@@ -309,7 +322,7 @@ getPointLocalization <- function(group, difference=TRUE, points=c(15,25,35,45,55
     df <- df[which(df$participant %in% OKparticipants),]
   }
   
-  df <- aspligned(df)
+  df <- aspligned(df) # subtract smooth spline fitted on aligned data only from all data
   
   # we can select half the localization data... for the exposure group only
   if (group == 'exposure') {
@@ -598,6 +611,9 @@ removeOutliers <- function(df, stds=2) {
 }
 
 # CDF fits of generalization -----
+
+# these functions are not used but provide a first attempt at getting some reasonable
+# fits for normal distributions if the whole distribution is not sampled
 
 psychometricGeneralization <- function(df, makefigure=FALSE, response='RAE') {
   

@@ -236,7 +236,7 @@ plotCorrelationWithCI <- function(X,Y,colors=c('black','red'),main='main title',
 
 # Generalization -----
 
-plotGeneralization <- function(generateSVG=FALSE, selectPerformance=TRUE, remove15=FALSE) {
+plotGeneralization <- function(generateSVG=FALSE, selectPerformance=TRUE, remove15=FALSE, iterations=1000) {
   
   if (generateSVG) {
     installed.list <- rownames(installed.packages())
@@ -288,13 +288,15 @@ plotGeneralization <- function(generateSVG=FALSE, selectPerformance=TRUE, remove
                                                movementtype='active', 
                                                LRpart='all',
                                                selectPerformance=FALSE,
-                                               remove15=remove15)
+                                               remove15=remove15,
+                                               iterations=iterations)
   exp.locshift <- getPeakLocConfidenceInterval(group='exposure',
                                                CIs=c(.95), 
                                                movementtype='active', 
                                                LRpart='all', 
                                                selectPerformance=selectPerformance,
-                                               remove15=remove15)
+                                               remove15=remove15,
+                                               iterations=iterations)
   
   plot(-1000,-1000, main='localization shifts', xlab='hand angle [°]', ylab='localization shift [°]', xlim=c(10,80), ylim=c(0,-15), axes=F)
   
@@ -373,8 +375,8 @@ plotGeneralization <- function(generateSVG=FALSE, selectPerformance=TRUE, remove
   cla.fit <- getGaussianFit(x=classic$target,classic$endpoint_angle,mu=50,sigma=30,scale=50,offset=4)
   
   # get confidence intervals for the peak of the generalization curve for localization shifts:
-  cla.RAEshift <- getPeakConfidenceInterval('classic', part='all', CIs=c(.95), selectPerformance=selectPerformance)
-  exp.RAEshift <- getPeakConfidenceInterval('exposure', part='all', CIs=c(.95), selectPerformance=selectPerformance)
+  cla.RAEshift <- getPeakConfidenceInterval('classic', part='all', CIs=c(.95), selectPerformance=selectPerformance,iterations=iterations)
+  exp.RAEshift <- getPeakConfidenceInterval('exposure', part='all', CIs=c(.95), selectPerformance=selectPerformance,iterations=iterations)
   
   plot(-1000,-1000, main='reach aftereffects', xlab='target angle [°]', ylab='reach endpoint deviation [°]', xlim=c(10,80), ylim=c(0,15), axes=F)
   

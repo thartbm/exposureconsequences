@@ -40,7 +40,7 @@ plotReachAftereffects <- function(generateSVG=FALSE, selectPerformance=TRUE, add
   claY <- c(classicCI[1,],rev(classicCI[2,]))
   expY <- c(exposureCI[1,],rev(exposureCI[2,]))
   
-  plot(-1000,-1000, main='decay of reach aftereffects', xlab='target angle [°]', ylab='reach endpoint deviation [°]', xlim=c(10,80), ylim=c(0,15), axes=F)
+  plot(-1000,-1000, main='reach aftereffect decay', xlab='target angle [°]', ylab='reach endpoint deviation [°]', xlim=c(10,80), ylim=c(0,15), axes=F)
   
   mtext('A', side=3, outer=TRUE, at=c(0,1), line=-1, adj=0, padj=1)
   
@@ -413,13 +413,13 @@ plotBlinkDetection <- function(generateSVG=FALSE) {
 
 # GENERALIZATION PEAK CI -----
 
-getPeakConfidenceInterval <- function(group,validate=FALSE,part='all',CIs=c(.95), selectPerformance=selectPerformance,iterations=100000) {
+getPeakConfidenceInterval <- function(group,validate=FALSE,part='all',CIs=c(.95), selectPerformance=selectPerformance,iterations=1000) {
   
-  filename <- sprintf('RAE_peakCI_%s.csv', group)
+  filename <- sprintf('maxima_RAE_%s.csv', group)
   
   if (file.exists(filename)) {
     
-    cat(sprintf('\nloading peak RAE generalization from file for: %s\n',toupper(group)))
+    #cat(sprintf('\nloading peak RAE generalization from file for: %s\n',toupper(group)))
     
     df <- read.csv(filename, stringsAsFactors=FALSE)
     
