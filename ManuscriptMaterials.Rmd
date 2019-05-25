@@ -189,6 +189,7 @@ t.test(participants$age, mu=24)
 
 ```
 
+Apparently it is lower. We don't think it matters much though.
 
 And the distribution of sex:
 
@@ -204,6 +205,7 @@ So there are also more females now. Let's see if that is significantly different
 binom.test(x=c(13,8),p=11/21)
 ```
 
+There is no difference in sex distribution between the groups.
 
 ## Localization selection statistics
 
@@ -242,6 +244,8 @@ So we have at well over 100 data points close to every hand angle. But we want t
 kable(getLocCountTable(selectPerformance=selectPerformance),
       caption='count of participants with localization data at each hand angle')
 ```
+
+Not great, but acceptable, except for the 15 degree location. We've decided to leave that location out of the analyses on hand localization (shifts).
 
 ## No-cursor selection statistics
 
@@ -314,7 +318,7 @@ groupLocalization(model='full',
                   selectPerformance=selectPerformance)
 ```
 
-In the exposure group there is no effect of movement type, but we see one here. This could be because the effect of movement type is much larger in the classic group. This would predict an interaction between group and movement type, and we do see that (p=.035). (Including the three)
+In the exposure group there is no effect of movement type, but we see one here. This could be because the effect of movement type is much larger in the classic group. This would predict an interaction between group and movement type, and we do see that (p=.035).
 
 Perhaps hand angle factored into this somehow, so let's see what happens if we remove it:
 
@@ -336,18 +340,17 @@ classicLocalizationShift(remove15=TRUE,
 
 So there is a reliable effect of movement type in the classic group, which is in line with the interaction between group and movement type.
 
-Also note the absence of an effect of hand angle in the classic group here -- probably because we excluded the 15 degree target, but it does appear that after classic training the generalization curve for delayed localization is much flatter.
+Also note the absence of an effect of hand angle in the classic group here -- probably because we excluded the 15 degree target, but it does appear that after classic training the generalization curve for delayed localization is much flatter/wider.
 
 To sum up our findings on localization:
 
 1. Rotated exposure training leads to changes in localization responses.
-
 2. In the exposure group, we find no difference between localization responses with and without efference copies.
 3. In the classic group, the localization responses informed by efference copies, are shifted more than those with only proprioception (as found before).
 4. This predicts an interaction between movement type and group in the combined analysis, and we see that.
 
 5. The shift in localization is different across the workspace in the exposure group. I.e., there is a generalization _curve_.
-6. This effect is not present in the classic group, so that generalization can be said to be flat; there is no _curve_. **NOTE:** When we do include the 15 degree target, there is an effect of hand angle though.
+6. This effect is not present in the classic group, so that we don't see a generalization _curve_. **NOTE:** We see a curve when we include the 15 degree target though.
 
 ## Localization precision
 
@@ -357,6 +360,8 @@ Many people keep being interested in the precision of active versus passive loca
 exp_a <- getLocalizationVariance(group='exposure')
 t.test(taperror_deg ~ passive_b, data=exp_a, paired=T)
 ```
+
+See the variance is not different between the two conditions.
 
 An alternative is to see how many participants were more precise in the active versus the passive localization task, using a binomial exact test. We compare the observed data to a 50% chance which would express the hypothesis that it doesn't matter for localization precision.
 
@@ -401,7 +406,7 @@ plotReachAftereffects(selectPerformance=selectPerformance)
 Messages of the figure:
 
 - Panel A: there are substantial and persisting reach aftereffects
-- Panel B: that are somewhat lower than those in classic (but not that much? but only for some targets?)
+- Panel B: that are somewhat lower than those in classic (but not that much? or only for some targets?)
 
 These claims require analyses.
 
@@ -425,7 +430,7 @@ exposureAftereffectsPersistent(LMEmethod=LMEmethod,
                                selectPerformance=selectPerformance)
 ```
 
-There doesn't seem to be an effect of iteration, and no interaction with target. Also, looking at the figure, there would not be decay, as the reach aftereffects seem to get larger. We continue assuming there is no substantial change in the reach aftereffects between the first iteration and the average across the other four iterations. We now also see an effect of target angle: the generalization curve is not flat.
+There seems to be an effect of iteration, but no interaction with target. Looking at the figure, there would not be decay, as the reach aftereffects seem to get larger. We continue under the assumption there is **no decay** in the reach aftereffects between the first iteration and the average across the other four iterations, so we pool the data across iterations. We now also see an effect of target angle: the generalization curve is not flat.
 
 ## Are reach aftereffects comparable between classic and exposure training?
 
@@ -438,9 +443,7 @@ exposureClassicReachAftereffects(LMEmethod=LMEmethod,
 
 So there is no effect of training (overall reach aftereffect magnitudes are not very different between classic and exposure training), but there is an effect of target (there is a generalization curve, as we can clearly see in the data) and there is an interaction between training and target (the generalization curves are different between classic and exposure training). This last bit is very similar to the pattern observed in localization, but we'll get back to that later.
 
-The figure looked like there might be some difference between the two training types, mainly in where the generalization curves peak. There is no main effect of training type, so the overall magnitude of reach aftereffects is not different.
-
-However, the main take-away message from this analysis is that the motor changes measured with changes in open-loop reach direction are of similar magnitude in both types of training. That is, passive exposure training (proprioceptive recalibration) drives motor changes.
+The figure looked like there might be some difference between the two training types, mainly in where the generalization curves peak. However, the main take-away message from this analysis is that the motor changes measured with changes in open-loop reach direction are of similar magnitude in both types of training. That is, passive exposure training (proprioceptive recalibration) drives motor changes to a similar degree as classic training.
 
 To sum up:
 
@@ -455,7 +458,7 @@ Here we'll look at the differences in generalization suggested by both the LME o
 
 Since this is a very time-consuming process (more than an hour on my laptop), the results of the bootstrapping analyses are saved in files and can be downloaded from the OSF repository.
 
-Alternatively, if you want to thoroughly check the results, you can run this chunk to delete the pre-calculated results (set delete=TRUE and download=FALSE), which will force the code to re-calculate it. By default, the code here will use "only" 1000 iterations for bootstrapping, which will run 20 times faster, but also guarantees that the confidence intervals are less precise than the ones we pre-calculated.
+Alternatively, if you want to thoroughly check the results, you can run this chunk to delete the pre-calculated results (set delete=TRUE and download=FALSE), which will force the code to re-calculate it. By default, the code here will use "only" 1000 iterations for bootstrapping, which will run much faster, but also guarantees that the confidence intervals are less precise than the ones we pre-calculated.
 
 ```{r delete_download_genmaxfiles}
 # set delete=TRUE to force redoing the bootstrapping 
@@ -468,7 +471,7 @@ First, a figure:
 ```{r fig5_generalization_maxima, fig.width=7.5, fig.height=3}
 plotGeneralization(generateSVG=FALSE,
                    selectPerformance=selectPerformance,
-                   iterations=200)
+                   iterations=1000)
 ```
 
 
@@ -566,7 +569,7 @@ multipleRegressionLocalization(group='exposure',
                                selectPerformance=selectPerformance)
 ```
 
-The algorithm decides to retain active localization as predictor, but the regression model isn't very good. The problem could be that we need no-cursor data and localization data that are both recorded immediately after training. This also makes it more comparable to the classic group that had fewer blocks of data.
+The algorithm ends up with an intercept model. The problem could be that we need no-cursor data and localization data that are both recorded immediately after training. This also makes it more comparable to the classic group that had fewer blocks of data.
 
 But if we look at only the initial no-cursor block, the model doesn't change much. It still uses only active localization and the p-value goes down a bit and the R-squared goes up a bit. For the classic group...
 
@@ -589,7 +592,7 @@ multipleRegressionLocalization(group='classic',
                                LRpart='both')
 ```
 
-The step-wise multiple regression algorithm thinks an intercept-only model is best. Now is this because localization after classic training has little to no information on reach aftereffects, or is this because we have double the data in the exposure group? We can test this partially by throwing away the second half of the data for the exposure group:
+The step-wise multiple regression algorithm thinks an intercept-only model is best here too. Now is this because localization after classic training has little to no information on reach aftereffects, or is this because we have double the data in the exposure group? We can test this partially by throwing away the second half of the data for the exposure group:
 
 
 ```{r step_exposure_firsthalf}
@@ -610,7 +613,7 @@ multipleRegressionLocalization(group='classic',
                                LRpart='both')
 ```
 
-And now we get the passive localization as in the initial regressions.
+And now we get the passive localization as the only predictor.
 
 It also makes me wonder if reach aftereffects in classic can be better predicted by the online localization responses:
 
@@ -622,7 +625,7 @@ multipleRegressionLocalization(group='online',
 
 And that might be the case as one term is preserved by the model, but on the other hand, the predictions are pretty bad.
 
-What do these correlations mean? I'm not sure. There seems to be some relationship but it's not very strong. So either there are other factors playing a role, the measurements are too noisy, or we don't have enough power to detect any relationships. All of these are very likely, and then there is the other alternative that there is no relationship. So it's probably better not to include these (unplanned) analyses in the manuscript and leave this for a better dataset.
+What do these correlations mean? I'm not sure. There might be some relationship but it's not very strong. So either there are other factors playing a role, the measurements are too noisy, or we don't have enough power to detect any relationships. All of these are very likely, and then there is the other alternative that there is no relationship. So it's probably better not to include these (unplanned) analyses in the manuscript and leave this for a better dataset.
 
 # Conclusions
 

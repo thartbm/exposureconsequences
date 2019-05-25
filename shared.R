@@ -368,6 +368,7 @@ getPointLocalization <- function(group, difference=TRUE, points=c(15,25,35,45,55
       }
     }
   }
+  
   if (length(removepps) > 0) {
     participants <- participants[-which(participants %in% unique(removepps))]
     cat('\nremoved these participants:\n')
@@ -415,10 +416,17 @@ getPointLocalization <- function(group, difference=TRUE, points=c(15,25,35,45,55
   # get rotated - aligned difference, if required:
   if (difference) {
     groupdf <- aggregate(taperror_deg ~ group + participant + passive_b + handangle_deg, data=groupdf, FUN=diff, drop=FALSE)
-    groupdf$taperror_deg <- as.numeric(groupdf$taperror_deg)
+    ted <- groupdf$taperror_deg
+    ted_new <- c()
+    for (el in ted) {
+      if (is.numeric(el) & length(el) > 0) {
+        ted_new <- c(ted_new, el)
+      } else {
+        ted_new <- c(ted_new, NA)
+      }
+    }
+    groupdf$taperror_deg <- ted_new
   }
-  
-  
   
   # select only one movement type, if required:
   if (movementtype == 'active') {
@@ -429,8 +437,6 @@ getPointLocalization <- function(group, difference=TRUE, points=c(15,25,35,45,55
     groupdf <- groupdf[which(groupdf$passive_b == 1),]
     groupdf <- groupdf[,-which(names(groupdf) == c("passive_b"))]
   }
-  
-  
   
   return(groupdf)
   
