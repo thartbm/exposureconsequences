@@ -498,6 +498,7 @@ countSelectedNoCursors <- function(group, ignoreRepetitions=FALSE, selectPerform
         rotated     <- c(rotated, session)
         repetition  <- c(repetition, iter)
         trials      <- c(trials, (Ntrials/.21))
+        #trials      <- c(trials, Ntrials)
         
       }
       
